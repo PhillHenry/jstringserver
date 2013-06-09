@@ -16,17 +16,21 @@ public class Server {
     private final boolean       blocking;
     private ServerSocketChannel serverSocketChannel;
 
-    Server(String address, int port, boolean blockingServer) throws UnknownHostException {
+    public Server(String address, int port, boolean blockingServer) throws UnknownHostException {
         this.listeningAddress   = InetAddress.getByName(address);
         this.port               = port;
         this.blocking           = blockingServer;
     }
 
-    void connect() throws IOException {
+    public void connect() throws IOException {
         serverSocketChannel = ServerSocketChannel.open();
         serverSocketChannel.configureBlocking(blocking);
         SocketAddress socketAddress = new InetSocketAddress(listeningAddress, port);
         serverSocketChannel.bind(socketAddress);
+    }
+    
+    public void shutdown() throws IOException {
+        serverSocketChannel.close();
     }
 
     SocketChannel accept() throws IOException {

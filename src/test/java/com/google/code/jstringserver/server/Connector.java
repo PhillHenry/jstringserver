@@ -5,7 +5,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 
-class Connector extends Networker {
+public class Connector extends Networker {
     
     private final String address;
     private final int port;

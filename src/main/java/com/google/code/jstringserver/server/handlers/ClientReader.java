@@ -23,6 +23,7 @@ public class ClientReader {
         while (socketChannel.read(byteBuffer) != -1) {
             clientDataHandler.handle(byteBuffer);
         }
+        clientDataHandler.end();
     }
     
 }

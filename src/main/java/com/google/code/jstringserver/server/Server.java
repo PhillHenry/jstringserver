@@ -13,15 +13,18 @@ public class Server {
 
     private final InetAddress   listeningAddress;
     private final int           port;
+    private final boolean       blocking;
     private ServerSocketChannel serverSocketChannel;
 
-    Server(String address, int port) throws UnknownHostException {
-        listeningAddress = InetAddress.getByName(address);
-        this.port = port;
+    Server(String address, int port, boolean blockingServer) throws UnknownHostException {
+        this.listeningAddress   = InetAddress.getByName(address);
+        this.port               = port;
+        this.blocking           = blockingServer;
     }
 
     void connect() throws IOException {
         serverSocketChannel = ServerSocketChannel.open();
+        serverSocketChannel.configureBlocking(blocking);
         SocketAddress socketAddress = new InetSocketAddress(listeningAddress, port);
         serverSocketChannel.bind(socketAddress);
     }

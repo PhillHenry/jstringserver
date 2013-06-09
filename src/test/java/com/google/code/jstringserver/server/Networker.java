@@ -1,5 +1,8 @@
 package com.google.code.jstringserver.server;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 abstract class Networker implements Runnable {
     private volatile boolean isError;
     private volatile boolean isFinished;
@@ -31,6 +34,18 @@ abstract class Networker implements Runnable {
 
     protected void setFinished(boolean isFinished) {
         this.isFinished = isFinished;
+    }
+
+    public static void checkNotInError(Networker[] networkTasks) {
+        for (Networker task : networkTasks) {
+            assertFalse(task.isError());
+        }
+    }
+
+    public static void checkFinished(Networker[] networkTasks) {
+        for (Networker task : networkTasks) {
+            assertTrue(task.isFinished());
+        }
     }
     
 }

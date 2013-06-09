@@ -24,5 +24,13 @@ class Connector extends Networker {
         socket.connect(inetSocketAddress);
         socket.close();
     }
+
+    public static Connector[] createConnectors(int num, String address, int port) {
+        Connector[] connectors = new Connector[num];
+        for (int i = 0 ; i < connectors.length ; i++) {
+            connectors[i] = new Connector(address, port);
+        }
+        return connectors;
+    }
     
 }

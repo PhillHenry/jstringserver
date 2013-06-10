@@ -6,6 +6,8 @@ public interface ClientDataHandler {
 
     public void handle(ByteBuffer byteBuffer);
 
-    public void end();
+    public String end();
+
+    public boolean ready();
     
 }

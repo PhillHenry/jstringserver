@@ -19,11 +19,30 @@ public class ClientReader {
     }
 
     public void handle(SocketChannel socketChannel) throws IOException {
-        ByteBuffer byteBuffer = byteBufferStore.getByteBuffer();
-        while (socketChannel.read(byteBuffer) != -1) {
+        read(socketChannel);
+        write(socketChannel);
+    }
+
+    private void write(SocketChannel socketChannel) throws IOException {
+        String confirm = clientDataHandler.end();
+        ByteBuffer byteBuffer = ByteBuffer.wrap(confirm.getBytes());
+        byteBuffer.put(confirm.getBytes());
+        byteBuffer.flip();
+        socketChannel.write(byteBuffer);
+    }
+
+    private ByteBuffer read(SocketChannel socketChannel) throws IOException {
+        socketChannel.configureBlocking(true);
+        
+        ByteBuffer byteBuffer = byteBufferStore.getByteBuffer(); // java.nio.DirectByteBuffer[pos=0 lim=4096 cap=4096]
+        //byteBuffer.flip(); // java.nio.DirectByteBuffer[pos=0 lim=0 cap=4096]
+        int read = 0;
+        while (clientDataHandler.ready() && (read = socketChannel.read(byteBuffer)) != -1) {
+            byteBuffer.flip();
             clientDataHandler.handle(byteBuffer);
+            byteBuffer.flip();
         }
-        clientDataHandler.end();
+        return byteBuffer;
     }
     
 }

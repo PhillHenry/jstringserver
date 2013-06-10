@@ -32,12 +32,13 @@ public class OneThreadPerClient {
                 
                 @Override
                 public void run() {
-                    while(running) {
+                    while (running) {
                         try {
                             SocketChannel socketChannel = server.accept();
                             clientHandler.handle(socketChannel);
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            if (running)
+                                e.printStackTrace();
                         }
                     }
                 }

@@ -1,8 +1,10 @@
 package com.google.code.jstringserver.server;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.channels.SocketChannel;
 
 
 public class Connector extends Networker {
@@ -20,9 +22,16 @@ public class Connector extends Networker {
     protected void doCall() throws Exception {
         InetAddress         addr                = InetAddress.getByName(address);
         InetSocketAddress   inetSocketAddress   = new InetSocketAddress(addr, port);
-        Socket              socket              = new Socket();
-        socket.connect(inetSocketAddress);
-        socket.close();
+        
+        SocketChannel       socketChannel       = SocketChannel.open();
+        socketChannel.connect(inetSocketAddress);
+        
+        connected(socketChannel);
+        
+        socketChannel.close();
+    }
+
+    protected void connected(SocketChannel socket) throws IOException {
     }
 
     public static Connector[] createConnectors(int num, String address, int port) {

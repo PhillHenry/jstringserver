@@ -32,8 +32,6 @@ public class ClientReader {
     }
 
     private ByteBuffer read(SocketChannel socketChannel) throws IOException {
-        socketChannel.configureBlocking(true);
-        
         ByteBuffer byteBuffer = byteBufferStore.getByteBuffer(); // java.nio.DirectByteBuffer[pos=0 lim=4096 cap=4096]
         //byteBuffer.flip(); // java.nio.DirectByteBuffer[pos=0 lim=0 cap=4096]
         int read = 0;

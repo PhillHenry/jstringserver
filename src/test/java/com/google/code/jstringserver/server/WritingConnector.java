@@ -28,7 +28,6 @@ public class WritingConnector extends Connector {
 
     @Override
     protected void connected(SocketChannel socketChannel) throws IOException {
-        //socketChannel.configureBlocking(true);
         write(socketChannel);
         read(socketChannel);
     }
@@ -40,7 +39,7 @@ public class WritingConnector extends Connector {
         byteBuffer.flip();
         byte[]          bytes           = new byte[byteBuffer.limit()];
         byteBuffer.get(bytes);
-        System.out.println("Client: " + new String(bytes) + " read " + read);
+        //System.out.println("Client: " + new String(bytes) + " read " + read);
     }
 
     private void write(SocketChannel socketChannel) throws IOException {

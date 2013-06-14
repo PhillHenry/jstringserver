@@ -77,7 +77,7 @@ public class OneThreadPerClientServer {
     private boolean waitForNumberOfExpectedCalls(int expectedNumCalls, long timeoutMs, TestingClientDataHandler clientDataHandler) throws InterruptedException {
         long start = System.currentTimeMillis();
         while (clientDataHandler.numEndCalls.get() != expectedNumCalls) {
-            Thread.sleep(100);
+            Thread.sleep(10);
             if (System.currentTimeMillis() > (start + timeoutMs)) return false;
         }
         return true;
@@ -156,9 +156,9 @@ public class OneThreadPerClientServer {
 
         @Override
         public String end() {
-            numEndCalls.incrementAndGet();
             currentBatchSize.set(0);
             checkReceivedPayloadAndRest();
+            numEndCalls.incrementAndGet();
             
             return "OK";
         }
@@ -176,7 +176,7 @@ public class OneThreadPerClientServer {
 
         @Override
         public boolean ready() {
-            System.out.println("current size = " + currentBatchSize.get() + ", payload = " + payloadSize);
+            //System.out.println("current size = " + currentBatchSize.get() + ", payload = " + payloadSize);
             return currentBatchSize.get() < payloadSize;
         }
         

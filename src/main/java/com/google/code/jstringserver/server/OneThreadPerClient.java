@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.code.jstringserver.server.handlers.ClientReader;
 
-public class OneThreadPerClient {
+public class OneThreadPerClient implements ThreadStrategy {
 
     private final Server          server;
     private final ExecutorService executorService;

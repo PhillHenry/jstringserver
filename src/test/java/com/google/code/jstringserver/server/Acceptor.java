@@ -5,7 +5,7 @@ import java.nio.channels.SocketChannel;
 
 class Acceptor extends Networker {
     
-    private final Server toTest;
+    protected final Server toTest;
     
     public Acceptor(Server toTest) {
         super();
@@ -15,6 +15,11 @@ class Acceptor extends Networker {
     protected void doCall() throws IOException {
         SocketChannel socketChannel = toTest.accept();
         setError(socketChannel == null);
+        afterAccept(socketChannel);
+    }
+
+    protected void afterAccept(SocketChannel socketChannel) throws IOException {
+        // NoOp
     }
 
     public static Acceptor[] createAcceptors(int numConnectors, Server toTest) {

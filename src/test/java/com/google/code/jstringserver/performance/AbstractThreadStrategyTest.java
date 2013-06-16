@@ -24,6 +24,7 @@ import com.google.code.jstringserver.server.bytebuffers.store.ByteBufferStore;
 import com.google.code.jstringserver.server.bytebuffers.store.ThreadLocalByteBufferStore;
 import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 import com.google.code.jstringserver.server.handlers.ClientReader;
+import com.google.code.jstringserver.server.handlers.NaiveClientReader;
 
 public abstract class AbstractThreadStrategyTest<T extends ThreadStrategy> {
 
@@ -127,7 +128,7 @@ public abstract class AbstractThreadStrategyTest<T extends ThreadStrategy> {
 
     protected ClientReader createClientReader(ClientDataHandler clientDataHandler) {
         ByteBufferStore     byteBufferStore     = getByteBufferStore();
-        ClientReader        clientHandler       = new ClientReader(byteBufferStore , clientDataHandler );
+        ClientReader        clientHandler       = new NaiveClientReader(byteBufferStore , clientDataHandler );
         return clientHandler;
     }
     

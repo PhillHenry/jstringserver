@@ -25,7 +25,7 @@ import com.google.code.jstringserver.server.bytebuffers.store.ThreadLocalByteBuf
 import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 import com.google.code.jstringserver.server.handlers.ClientReader;
 
-public abstract class AbstractThreadStrategyTest {
+public abstract class AbstractThreadStrategyTest<T extends ThreadStrategy> {
 
     private final int                payloadSize = 10007;
     private String                   payload;
@@ -33,50 +33,63 @@ public abstract class AbstractThreadStrategyTest {
     private int                      port;
     private Server                   server;
     private TestingClientDataHandler clientDataHandler;
-    private ThreadStrategy           threadStrategy;
+    private T                        threadStrategy;
     private int                      numClients;
     private ThreadedTaskBuilder      threadedTaskBuilder;
     
     @Before
-    public void setUpServer() throws IOException {
+    public void setUpServer() throws IOException, InterruptedException {
         FreePortFinder  freePortFinder  = new FreePortFinder();
         port                            = freePortFinder.getFreePort();
-        server                          = new Server(address, port, true);
+        numClients                      = 100;
+        System.out.println("Server port: " + port);
+        server                          = new Server(address, port, true, numClients);
+        server.connect();
         clientDataHandler               = new TestingClientDataHandler();
         threadStrategy                  = threadingStrategy(server, clientDataHandler);
-        numClients                      = 100;
         threadedTaskBuilder             = new ThreadedTaskBuilder();
         payload                         = getPayload();
-        server.connect();
         threadStrategy.start();
     }
-
-    protected abstract ThreadStrategy threadingStrategy(Server server, ClientDataHandler clientDataHandler);
+    
+    protected abstract T threadingStrategy(Server server, ClientDataHandler clientDataHandler);
+    protected abstract void checkThreadStrategy(T threadStrategy);
+    
+    protected T getThreadStrategy() {
+        return threadStrategy;
+    }
 
     @After
     public void tearDownServer() throws InterruptedException, IOException {
+        System.out.println("Shutting down server");
         threadStrategy.shutdown();
         threadedTaskBuilder.interruptAllThreads();
         server.shutdown();
     }
     
-
-
-    
     @Test
     public void shouldProcessAllCalls() throws IOException, InterruptedException {
         runConnectors(port, address, threadStrategy);
-        waitForNumberOfExpectedCalls(20, 1000, clientDataHandler);
-
+        waitForNumberOfExpectedCalls(numExpectedCalls(), 5000, clientDataHandler);
+        checkThreadStrategy(threadStrategy);
         assertEquals("Total number of calls completed on server side", 
-                numClients, clientDataHandler.numEndCalls.get());
+                numExpectedCalls(), clientDataHandler.numEndCalls.get());
+    }
+    
+    protected int numExpectedCalls() {
+        return numClients;
     }
     
     private boolean waitForNumberOfExpectedCalls(int expectedNumCalls, long timeoutMs, TestingClientDataHandler clientDataHandler) throws InterruptedException {
         long start = System.currentTimeMillis();
-        while (clientDataHandler.numEndCalls.get() != expectedNumCalls) {
-            Thread.sleep(10);
-            if (System.currentTimeMillis() > (start + timeoutMs)) return false;
+        try {
+            while (clientDataHandler.numEndCalls.get() != expectedNumCalls) {
+                Thread.sleep(10);
+                if (System.currentTimeMillis() > (start + timeoutMs)) return false;
+            }
+        } finally {
+            System.out.println("Waiting for all threads to finish took " + (System.currentTimeMillis() - start) + "ms");
+            System.out.println(String.format("Expected number of calls %d. Actual number %d", expectedNumCalls, clientDataHandler.numEndCalls.get()));
         }
         return true;
     }
@@ -110,6 +123,12 @@ public abstract class AbstractThreadStrategyTest {
         ByteBufferFactory   byteBufferFactory   = new DirectByteBufferFactory(4096);
         ByteBufferStore     byteBufferStore     = new ThreadLocalByteBufferStore(byteBufferFactory);
         return byteBufferStore;
+    }
+
+    protected ClientReader createClientReader(ClientDataHandler clientDataHandler) {
+        ByteBufferStore     byteBufferStore     = getByteBufferStore();
+        ClientReader        clientHandler       = new ClientReader(byteBufferStore , clientDataHandler );
+        return clientHandler;
     }
     
     class TestingClientDataHandler implements ClientDataHandler {
@@ -160,8 +179,8 @@ public abstract class AbstractThreadStrategyTest {
             String received = finalPayload.toString();
             if (!payload.equals(received)) {
                 System.err.println("Didn't recieved expected payload\n" 
-                        +   "Expected: "+ payload 
-                        + "\nActual:    " + received);
+                        +   "Expected: <" + payload  + ">"
+                        + "\nActual:   <" + received + ">");
             }
             finalPayload.setLength(0);
         }

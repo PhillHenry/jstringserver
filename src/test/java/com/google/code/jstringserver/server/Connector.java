@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.StandardSocketOptions;
 import java.nio.channels.SocketChannel;
 
 
@@ -24,6 +25,8 @@ public class Connector extends Networker {
         InetSocketAddress   inetSocketAddress   = new InetSocketAddress(addr, port);
         
         SocketChannel       socketChannel       = SocketChannel.open();
+        socketChannel.configureBlocking(true);
+        socketChannel.setOption(StandardSocketOptions.SO_RCVBUF, 1000000);
         socketChannel.connect(inetSocketAddress);
         
         connected(socketChannel);
@@ -40,6 +43,11 @@ public class Connector extends Networker {
             connectors[i] = new Connector(address, port);
         }
         return connectors;
+    }
+
+    @Override
+    public String toString() {
+        return "Connector [address=" + address + ", port=" + port + ", isError()=" + isError() + ", isFinished()=" + isFinished() + "]";
     }
     
 }

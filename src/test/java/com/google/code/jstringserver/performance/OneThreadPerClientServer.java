@@ -27,7 +27,11 @@ import com.google.code.jstringserver.server.bytebuffers.store.ThreadLocalByteBuf
 import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 import com.google.code.jstringserver.server.handlers.ClientReader;
 
-public class OneThreadPerClientServer extends AbstractThreadStrategyTest {
+public class OneThreadPerClientServer extends AbstractThreadStrategyTest<OneThreadPerClient> {
+    
+    protected void checkThreadStrategy(OneThreadPerClient threadStrategy) {
+        assertEquals(numExpectedCalls(), threadStrategy.numCallsServiced());
+    }
 
     public static void main(String[] args) throws IOException, InterruptedException {
         OneThreadPerClientServer app = new OneThreadPerClientServer();
@@ -36,10 +40,10 @@ public class OneThreadPerClientServer extends AbstractThreadStrategyTest {
     }
     
     @Override
-    protected ThreadStrategy threadingStrategy(Server server, ClientDataHandler clientDataHandler) {
-        ByteBufferStore     byteBufferStore     = getByteBufferStore();
-        ClientReader        clientHandler       = new ClientReader(byteBufferStore , clientDataHandler );
+    protected OneThreadPerClient threadingStrategy(Server server, ClientDataHandler clientDataHandler) {
+        ClientReader        clientHandler       = createClientReader(clientDataHandler);
         OneThreadPerClient  oneThreadPerClient  = new OneThreadPerClient(server, 8, clientHandler);
         return oneThreadPerClient;
     }
+
 }

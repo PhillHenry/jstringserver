@@ -12,8 +12,9 @@ abstract class Networker implements Runnable {
         try {
             doCall();
         } catch (Exception e) {
-            e.printStackTrace();
             isError = true;
+            System.out.println(Thread.currentThread().getName() + " failed " + this);
+            e.printStackTrace();
         }
         isFinished = true;
     }

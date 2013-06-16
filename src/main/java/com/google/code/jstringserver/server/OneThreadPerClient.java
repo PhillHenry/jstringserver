@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.google.code.jstringserver.server.handlers.ClientReader;
 
@@ -14,8 +15,9 @@ public class OneThreadPerClient implements ThreadStrategy {
 
     private final Server          server;
     private final ExecutorService executorService;
-    private final ClientReader   clientHandler;
+    private final ClientReader    clientHandler;
     private final int             numThreads;
+    private final AtomicLong      numCalls = new AtomicLong(0);
     
     private volatile boolean      running = true;
 
@@ -35,6 +37,7 @@ public class OneThreadPerClient implements ThreadStrategy {
                     while (running) {
                         try {
                             SocketChannel socketChannel = server.accept();
+                            numCalls.incrementAndGet();
                             clientHandler.handle(socketChannel);
                         } catch (IOException e) {
                             if (running)
@@ -51,4 +54,7 @@ public class OneThreadPerClient implements ThreadStrategy {
         executorService.shutdown();
     }
     
+    public long numCallsServiced() {
+        return numCalls.get();
+    }
 }

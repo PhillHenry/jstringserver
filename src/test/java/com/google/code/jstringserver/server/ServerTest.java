@@ -20,12 +20,12 @@ public class ServerTest extends AbstractMultiThreadedTest {
     public void setupServer() throws IOException {
         port    = new FreePortFinder().getFreePort();
         assertTrue(port > 0);
-        toTest  = new Server(address, port, true);
+        toTest  = new Server(address, port, true, 100);
         toTest.connect();
     }
 
     @Test
-    public void test() throws Exception {
+    public void smokeTest() throws Exception {
         Acceptor[]  acceptors           = Acceptor.createAcceptors(2, toTest);
         Connector[] connectors          = Connector.createConnectors(2, address, port);
         Thread[]    acceptorThreads     = start(acceptors, "acceptor");

@@ -8,6 +8,9 @@ import java.net.SocketAddress;
 import java.net.SocketOption;
 import java.net.StandardSocketOptions;
 import java.net.UnknownHostException;
+import java.nio.channels.ClosedChannelException;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
@@ -41,6 +44,11 @@ public class Server {
 
     SocketChannel accept() throws IOException {
         return serverSocketChannel.accept();
+    }
+    
+    SelectionKey register(Selector selector) throws IOException {
+        serverSocketChannel.configureBlocking(false);
+        return serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
     }
 
 }

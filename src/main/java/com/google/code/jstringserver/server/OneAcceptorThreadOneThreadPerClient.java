@@ -15,15 +15,13 @@ public class OneAcceptorThreadOneThreadPerClient implements ThreadStrategy {
     private final Server          server;
     private final ExecutorService executorService;
     private final ClientReader    clientHandler;
-    private final int             numThreads;
     
     private volatile boolean      running = true;
 
     public OneAcceptorThreadOneThreadPerClient(Server server, int numThreads, ClientReader clientHandler) {
         this.clientHandler      = clientHandler;
         this.server             = server;
-        this.numThreads         = numThreads;
-        this.executorService    = new ThreadPoolExecutor(numThreads, numThreads, 0, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>());
+        this.executorService    = new ThreadPoolFactory().createThreadPoolExecutor(numThreads);
     }
 
     @Override

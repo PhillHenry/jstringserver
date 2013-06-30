@@ -2,8 +2,12 @@ package com.google.code.jstringserver.server.handlers;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channel;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.channels.WritableByteChannel;
 
+import com.google.code.jstringserver.server.bytebuffers.rw.BlockingClientInputHandler;
 import com.google.code.jstringserver.server.bytebuffers.store.ByteBufferStore;
 
 /**
@@ -12,39 +16,28 @@ import com.google.code.jstringserver.server.bytebuffers.store.ByteBufferStore;
  */
 public class NaiveClientReader implements ClientReader {
     
-    private final ByteBufferStore byteBufferStore;
-    
     private final ClientDataHandler clientDataHandler;
+    
+    private final BlockingClientInputHandler clientReader;
 
     public NaiveClientReader(ByteBufferStore byteBufferStore, ClientDataHandler clientDataHandler) {
         super();
-        this.byteBufferStore = byteBufferStore;
         this.clientDataHandler = clientDataHandler;
+        this.clientReader = new BlockingClientInputHandler(byteBufferStore, clientDataHandler);
     }
 
     @Override
-    public void handle(SocketChannel socketChannel) throws IOException {
-        read(socketChannel);
-        write(socketChannel);
+    public void handle(Channel socketChannel) throws IOException {
+        clientReader.read((ReadableByteChannel) socketChannel);
+        write((WritableByteChannel) socketChannel);
     }
 
-    private void write(SocketChannel socketChannel) throws IOException {
+    private void write(WritableByteChannel socketChannel) throws IOException {
         String confirm = clientDataHandler.end();
         ByteBuffer byteBuffer = ByteBuffer.wrap(confirm.getBytes());
         byteBuffer.put(confirm.getBytes());
         byteBuffer.flip();
         socketChannel.write(byteBuffer);
-    }
-
-    private ByteBuffer read(SocketChannel socketChannel) throws IOException {
-        ByteBuffer byteBuffer = byteBufferStore.getByteBuffer();
-        int read = 0;
-        while (clientDataHandler.ready() && (read = socketChannel.read(byteBuffer)) != -1) {
-            byteBuffer.flip();
-            clientDataHandler.handle(byteBuffer);
-            byteBuffer.flip();
-        }
-        return byteBuffer;
     }
     
 }

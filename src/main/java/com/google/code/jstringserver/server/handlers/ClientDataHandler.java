@@ -9,5 +9,7 @@ public interface ClientDataHandler {
     public String end();
 
     public boolean ready();
+
+    public abstract int getNumEndCalls();
     
 }

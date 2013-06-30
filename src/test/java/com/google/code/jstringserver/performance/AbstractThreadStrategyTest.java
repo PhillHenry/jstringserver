@@ -4,9 +4,6 @@ import static com.google.code.jstringserver.server.WritingConnector.createWritin
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.After;
 import org.junit.Before;
@@ -28,32 +25,37 @@ import com.google.code.jstringserver.server.handlers.NaiveClientReader;
 
 public abstract class AbstractThreadStrategyTest<T extends ThreadStrategy> {
 
-    private final int                payloadSize = 10007;
-    private String                   payload;
+    final int                payloadSize = 10007;
+    String                   payload;
     private String                   address = "localhost";
     private int                      port;
     private Server                   server;
-    private TestingClientDataHandler clientDataHandler;
+    private ClientDataHandler        clientDataHandler;
     private T                        threadStrategy;
     private int                      numClients;
     private ThreadedTaskBuilder      threadedTaskBuilder;
     
     @Before
-    public void setUpServer() throws IOException, InterruptedException {
+    public void setUpServer() throws Exception {
         FreePortFinder  freePortFinder  = new FreePortFinder();
         port                            = freePortFinder.getFreePort();
         numClients                      = 100;
         System.out.println("Server port: " + port);
         server                          = new Server(address, port, true, numClients);
         server.connect();
-        clientDataHandler               = new TestingClientDataHandler();
+        payload                         = getPayload();
+        clientDataHandler               = extracted();
         threadStrategy                  = threadingStrategy(server, clientDataHandler);
         threadedTaskBuilder             = new ThreadedTaskBuilder();
-        payload                         = getPayload();
         threadStrategy.start();
     }
+
+    protected ClientDataHandler extracted() {
+        return new TestingClientDataHandler(payload);
+    }
     
-    protected abstract T threadingStrategy(Server server, ClientDataHandler clientDataHandler);
+    protected abstract T threadingStrategy(Server server, ClientDataHandler clientDataHandler) throws IOException;
+    
     protected abstract void checkThreadStrategy(T threadStrategy);
     
     protected T getThreadStrategy() {
@@ -74,23 +76,23 @@ public abstract class AbstractThreadStrategyTest<T extends ThreadStrategy> {
         waitForNumberOfExpectedCalls(numExpectedCalls(), 5000, clientDataHandler);
         checkThreadStrategy(threadStrategy);
         assertEquals("Total number of calls completed on server side", 
-                numExpectedCalls(), clientDataHandler.numEndCalls.get());
+                numExpectedCalls(), clientDataHandler.getNumEndCalls());
     }
     
     protected int numExpectedCalls() {
         return numClients;
     }
     
-    private boolean waitForNumberOfExpectedCalls(int expectedNumCalls, long timeoutMs, TestingClientDataHandler clientDataHandler) throws InterruptedException {
+    private boolean waitForNumberOfExpectedCalls(int expectedNumCalls, long timeoutMs, ClientDataHandler clientDataHandler) throws InterruptedException {
         long start = System.currentTimeMillis();
         try {
-            while (clientDataHandler.numEndCalls.get() != expectedNumCalls) {
+            while (clientDataHandler.getNumEndCalls() != expectedNumCalls) {
                 Thread.sleep(10);
                 if (System.currentTimeMillis() > (start + timeoutMs)) return false;
             }
         } finally {
             System.out.println("Waiting for all threads to finish took " + (System.currentTimeMillis() - start) + "ms");
-            System.out.println(String.format("Expected number of calls %d. Actual number %d", expectedNumCalls, clientDataHandler.numEndCalls.get()));
+            System.out.println(String.format("Expected number of calls %d. Actual number %d", expectedNumCalls, clientDataHandler.getNumEndCalls()));
         }
         return true;
     }
@@ -101,8 +103,6 @@ public abstract class AbstractThreadStrategyTest<T extends ThreadStrategy> {
         long                start               = System.currentTimeMillis();
         Thread[]            threads             = threadedTaskBuilder.start(connectors, "connector");
         threadedTaskBuilder.join(threads, 10000);
-        System.out.println("Test took " + (System.currentTimeMillis() - start) + "ms");
-        
     }
 
     private String getPayload() {
@@ -130,70 +130,6 @@ public abstract class AbstractThreadStrategyTest<T extends ThreadStrategy> {
         ByteBufferStore     byteBufferStore     = getByteBufferStore();
         ClientReader        clientHandler       = new NaiveClientReader(byteBufferStore , clientDataHandler );
         return clientHandler;
-    }
-    
-    class TestingClientDataHandler implements ClientDataHandler {
-        
-        private final AtomicInteger numEndCalls = new AtomicInteger();
-        
-        private final AtomicLong numBytesData = new AtomicLong();
-        
-        private final ThreadLocal<Integer> currentBatchSize = new ThreadLocal<Integer>() {
-
-            @Override
-            protected Integer initialValue() {
-                return 0;
-            }
-            
-        };
-        
-        private final ThreadLocal<StringBuffer> receivedPayload = new ThreadLocal<StringBuffer>() {
-
-            @Override
-            protected StringBuffer initialValue() {
-                return new StringBuffer();
-            }
-            
-        };
-
-        @Override
-        public void handle(ByteBuffer byteBuffer) {
-            byte[] bytes = new byte[byteBuffer.limit()];
-            byteBuffer.get(bytes);
-            int filled = byteBuffer.limit(); //A buffer's limit is the index of the first element that should *not* be read or written - http://docs.oracle.com/javase/6/docs/api/java/nio/Buffer.html
-            numBytesData.addAndGet(filled);
-            currentBatchSize.set(currentBatchSize.get() +  filled);
-            receivedPayload.get().append(new String(bytes));
-        }
-
-        @Override
-        public String end() {
-            currentBatchSize.set(0);
-            checkReceivedPayloadAndRest();
-            numEndCalls.incrementAndGet();
-            
-            return "OK";
-        }
-
-        private void checkReceivedPayloadAndRest() {
-            StringBuffer finalPayload = receivedPayload.get();
-            String received = finalPayload.toString();
-            if (!payload.equals(received)) {
-                System.err.println("Didn't recieved expected payload\n" 
-                        +   "Expected: <" + payload  + ">"
-                        + "\nActual:   <" + received + ">");
-            }
-            finalPayload.setLength(0);
-        }
-
-        @Override
-        public boolean ready() {
-            //System.out.println("current size = " + currentBatchSize.get() + ", payload = " + payloadSize);
-            return currentBatchSize.get() < payloadSize;
-        }
-        
-        
-        
     }
 
 

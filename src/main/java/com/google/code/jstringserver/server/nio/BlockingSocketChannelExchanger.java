@@ -23,7 +23,7 @@ public class BlockingSocketChannelExchanger implements SocketChannelExchanger {
 
     @Override
     public SocketChannel consume() throws InterruptedException {
-        return blockingQueue.take();
+        return blockingQueue.poll();
     }
 
     @Override

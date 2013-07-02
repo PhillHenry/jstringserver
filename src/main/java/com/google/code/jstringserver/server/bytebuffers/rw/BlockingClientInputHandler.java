@@ -25,7 +25,7 @@ public class BlockingClientInputHandler {
         int read = 0;
         while (clientDataHandler.ready() && (read = socketChannel.read(byteBuffer)) != -1) {
             byteBuffer.flip();
-            clientDataHandler.handle(byteBuffer);
+            clientDataHandler.handle(byteBuffer, null);
             byteBuffer.flip();
         }
         return byteBuffer;

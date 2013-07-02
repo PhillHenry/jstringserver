@@ -30,7 +30,7 @@ public abstract class AbstractThreadStrategyTest<T extends ThreadStrategy> {
     private String                   address = "localhost";
     private int                      port;
     private Server                   server;
-    private ClientDataHandler        clientDataHandler;
+    protected ClientDataHandler      clientDataHandler;
     private T                        threadStrategy;
     private int                      numClients;
     private ThreadedTaskBuilder      threadedTaskBuilder;
@@ -44,14 +44,14 @@ public abstract class AbstractThreadStrategyTest<T extends ThreadStrategy> {
         server                          = new Server(address, port, true, numClients);
         server.connect();
         payload                         = getPayload();
-        clientDataHandler               = extracted();
+        clientDataHandler               = createClientDataHandler();
         threadStrategy                  = threadingStrategy(server, clientDataHandler);
         threadedTaskBuilder             = new ThreadedTaskBuilder();
         threadStrategy.start();
     }
 
-    protected ClientDataHandler extracted() {
-        return new TestingClientDataHandler(payload);
+    protected ClientDataHandler createClientDataHandler() {
+        return new ThreadLocalClientDataHandler(payload);
     }
     
     protected abstract T threadingStrategy(Server server, ClientDataHandler clientDataHandler) throws IOException;

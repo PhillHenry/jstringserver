@@ -6,15 +6,13 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 
-class TestingClientDataHandler implements ClientDataHandler {
+class ThreadLocalClientDataHandler implements ClientDataHandler {
     
     private final String payload;
 
-    private final AtomicInteger numEndCalls = new AtomicInteger();
+    private final TotalStats totalStats = new TotalStats();
     
-    private final AtomicLong numBytesData = new AtomicLong();
-    
-    public TestingClientDataHandler(String payload) {
+    public ThreadLocalClientDataHandler(String payload) {
         this.payload = payload;
     }
     
@@ -37,12 +35,11 @@ class TestingClientDataHandler implements ClientDataHandler {
     };
 
     @Override
-    public void handle(ByteBuffer byteBuffer) {
-        byte[] bytes = new byte[byteBuffer.limit()];
-        byteBuffer.get(bytes);
-        int filled = byteBuffer.limit(); //A buffer's limit is the index of the first element that should *not* be read or written - http://docs.oracle.com/javase/6/docs/api/java/nio/Buffer.html
-        numBytesData.addAndGet(filled);
-        currentBatchSize.set(currentBatchSize.get() +  filled);
+    public void handle(ByteBuffer byteBuffer, Object key) {
+        byte[] bytes = totalStats.handle(byteBuffer, key);
+        
+        // thread locals
+        currentBatchSize.set(currentBatchSize.get() +  byteBuffer.limit());
         receivedPayload.get().append(new String(bytes));
     }
 
@@ -50,7 +47,8 @@ class TestingClientDataHandler implements ClientDataHandler {
     public String end() {
         currentBatchSize.set(0);
         checkReceivedPayloadAndRest();
-        numEndCalls.incrementAndGet();
+        
+        totalStats.incrementNumOfCallsEnded();
         
         return "OK";
     }
@@ -74,7 +72,7 @@ class TestingClientDataHandler implements ClientDataHandler {
     
     @Override
     public int getNumEndCalls() {
-        return numEndCalls.get();
+        return totalStats.getNumEndCalls();
     }
     
 }

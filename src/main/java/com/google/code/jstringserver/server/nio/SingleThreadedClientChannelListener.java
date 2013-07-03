@@ -41,7 +41,7 @@ public class SingleThreadedClientChannelListener implements ClientChannelListene
                 SocketChannel socketChannel = socketChannelExchanger.consume();
                 if (socketChannel != null) {
                     socketChannel.configureBlocking(false);
-                    socketChannel.register(selector, OP_READ); // | OP_WRITE | OP_CONNECT);
+                    socketChannel.register(selector, OP_READ | OP_CONNECT  | OP_WRITE); // | OP_WRITE | OP_CONNECT);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -54,24 +54,54 @@ public class SingleThreadedClientChannelListener implements ClientChannelListene
         try {
             int selected = selector.select();// "it can return 0 if the wakeup( ) method of the selector is invoked by another thread."
             if (selected > 0) {
-                Set<SelectionKey> keys = selector.selectedKeys();
-                Iterator<SelectionKey> selectedKeysIterator = keys.iterator();
-                while (selectedKeysIterator.hasNext()) {
-                    SelectionKey key = selectedKeysIterator.next();
-                    SocketChannel selectableChannel = (SocketChannel) key.channel();
-                    if (key.isReadable()) {
-                        ByteBuffer byteBuffer = byteBufferStore.getByteBuffer();
-                        byteBuffer.clear();
-                        selectableChannel.read(byteBuffer);
-                        byteBuffer.flip();
-                        clientDataHandler.handle(byteBuffer, key);
-                    }
-                    selectedKeysIterator.remove();
-                }
-                keys.clear();
+                handleSelectionKeys();
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void handleSelectionKeys() throws IOException {
+        Set<SelectionKey> keys = selector.selectedKeys();
+        Iterator<SelectionKey> selectedKeysIterator = keys.iterator();
+        while (selectedKeysIterator.hasNext()) {
+            SelectionKey key = selectedKeysIterator.next();
+            handle(key);
+            selectedKeysIterator.remove();
+        }
+    }
+
+    private void handle(SelectionKey key) throws IOException {
+        SocketChannel selectableChannel = (SocketChannel) key.channel();
+        if (key.isConnectable()) {
+            selectableChannel.finishConnect();
+        }
+        if (key.isReadable()) {
+            read(key, selectableChannel);
+        }    
+        if (key.isWritable()) {
+            write(key, selectableChannel);
+        }
+        if (!key.isValid()) {
+            key.cancel();
+        }
+    }
+
+    private void read(SelectionKey key, SocketChannel selectableChannel) throws IOException {
+        ByteBuffer byteBuffer = byteBufferStore.getByteBuffer();
+        byteBuffer.clear();
+        selectableChannel.read(byteBuffer);
+        byteBuffer.flip();
+        clientDataHandler.handle(byteBuffer, key);
+    }
+
+    private void write(SelectionKey key, SocketChannel selectableChannel) throws IOException {
+        String messageBack = clientDataHandler.end(key);
+        if (messageBack != null) {
+            System.out.println(messageBack);
+            ByteBuffer buffer = ByteBuffer.wrap(messageBack.getBytes()); // TODO optimize
+            selectableChannel.write(buffer);
+            key.cancel();
         }
     }
 

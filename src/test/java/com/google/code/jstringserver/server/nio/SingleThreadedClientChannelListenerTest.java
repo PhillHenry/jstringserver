@@ -108,7 +108,7 @@ public class SingleThreadedClientChannelListenerTest {
                 serverSocketChannel = ServerSocketChannel.open();
                 serverSocketChannel.bind(createLocalAddress(port));
                 SocketChannel socketChannel = serverSocketChannel.accept();
-                socketChannel.finishConnect();
+                //socketChannel.finishConnect();
                 socketChannelExchanger.ready(socketChannel);
             } catch (IOException e) {
                 e.printStackTrace();

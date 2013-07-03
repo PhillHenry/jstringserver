@@ -33,9 +33,13 @@ public class AsynchClientDataHandler implements ClientDataHandler {
     private void updateCurrentStats(CurrentStats attachment, byte[] bytes) {
         attachment.read.append(new String(bytes));
         attachment.bytesRead.addAndGet(bytes.length);
-        if (attachment.bytesRead.get() == payload.length()) {
+        if (receivedAll(attachment)) {
             totalStats.incrementNumOfCallsEnded();
         }
+    }
+
+    private boolean receivedAll(CurrentStats attachment) {
+        return attachment != null && attachment.bytesRead.get() == payload.length();
     }
 
     private CurrentStats getAttachment(SelectionKey selectionKey) {
@@ -48,8 +52,12 @@ public class AsynchClientDataHandler implements ClientDataHandler {
     }
 
     @Override
-    public String end() {
-        throw new UnsupportedOperationException("TODO");
+    public String end(Object key) {
+        SelectionKey selectionKey = (SelectionKey)key;
+        if (receivedAll((CurrentStats)selectionKey.attachment())) {
+            return "OK";
+        }
+        return null;
     }
 
     @Override

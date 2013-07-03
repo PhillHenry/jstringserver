@@ -33,7 +33,7 @@ public class NaiveClientReader implements ClientReader {
     }
 
     private void write(WritableByteChannel socketChannel) throws IOException {
-        String confirm = clientDataHandler.end();
+        String confirm = clientDataHandler.end(null);
         ByteBuffer byteBuffer = ByteBuffer.wrap(confirm.getBytes());
         byteBuffer.put(confirm.getBytes());
         byteBuffer.flip();

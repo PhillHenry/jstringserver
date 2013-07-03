@@ -14,7 +14,6 @@ import com.google.code.jstringserver.server.nio.ClientChannelListener;
 import com.google.code.jstringserver.server.nio.SingleThreadedClientChannelListener;
 import com.google.code.jstringserver.server.wait.SleepWaitStrategy;
 
-@Ignore
 public class SelectorStrategyTest extends AbstractThreadStrategyTest<SelectorStrategy> {
 
     @Override

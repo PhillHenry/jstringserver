@@ -11,7 +11,7 @@ import java.util.Set;
 import com.google.code.jstringserver.server.Server;
 import com.google.code.jstringserver.server.wait.WaitStrategy;
 
-public class SelectAcceptor implements Runnable {
+public class AcceptorDispatcher implements Runnable {
 
     private final Selector                  serverSelector;
     private final SocketChannelExchanger    socketChannelExchanger;
@@ -19,7 +19,7 @@ public class SelectAcceptor implements Runnable {
     private final Server                    server;
     private volatile boolean                isRunning = true;
 
-    public SelectAcceptor(Server server,
+    public AcceptorDispatcher(Server server,
                           Selector serverSelector,
                           SocketChannelExchanger socketChannelExchanger,
                           WaitStrategy waitStrategy) {
@@ -34,7 +34,7 @@ public class SelectAcceptor implements Runnable {
                 ServerSocketChannel serverSocketChannel = (ServerSocketChannel) key.channel();
                 SocketChannel socketChannel = serverSocketChannel.accept();
                 while (socketChannel != null) {
-                    SelectAcceptor.this.socketChannelExchanger.ready(socketChannel);
+                    AcceptorDispatcher.this.socketChannelExchanger.ready(socketChannel);
                     socketChannel = serverSocketChannel.accept();
                 }
             }

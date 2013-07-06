@@ -11,7 +11,7 @@ import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 import com.google.code.jstringserver.server.handlers.ClientReader;
 import com.google.code.jstringserver.server.nio.BlockingSocketChannelExchanger;
 import com.google.code.jstringserver.server.nio.ClientChannelListener;
-import com.google.code.jstringserver.server.nio.SingleThreadedClientChannelListener;
+import com.google.code.jstringserver.server.nio.ReadWriteDispatcher;
 import com.google.code.jstringserver.server.wait.SleepWaitStrategy;
 
 public class SelectorStrategyTest extends AbstractThreadStrategyTest<SelectorStrategy> {
@@ -24,7 +24,7 @@ public class SelectorStrategyTest extends AbstractThreadStrategyTest<SelectorStr
     @Override
     protected SelectorStrategy threadingStrategy(Server server, ClientDataHandler clientDataHandler) throws IOException {
         BlockingSocketChannelExchanger socketChannelExchanger = new BlockingSocketChannelExchanger();
-        ClientChannelListener clientChannelListener = new SingleThreadedClientChannelListener(clientDataHandler,
+        ClientChannelListener clientChannelListener = new ReadWriteDispatcher(clientDataHandler,
                                                                                               getByteBufferStore(),
                                                                                               socketChannelExchanger);
         return new SelectorStrategy(server, 8, socketChannelExchanger, new SleepWaitStrategy(10), clientChannelListener);

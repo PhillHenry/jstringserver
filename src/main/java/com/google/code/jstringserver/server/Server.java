@@ -46,7 +46,7 @@ public class Server {
         return serverSocketChannel.accept();
     }
     
-    SelectionKey register(Selector selector) throws IOException {
+    public SelectionKey register(Selector selector) throws IOException {
         serverSocketChannel.configureBlocking(false);
         return serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
     }

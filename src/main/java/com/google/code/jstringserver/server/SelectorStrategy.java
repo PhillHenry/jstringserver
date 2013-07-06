@@ -74,8 +74,7 @@ public class SelectorStrategy implements ThreadStrategy {
 
     private void startAcceptorThread() throws IOException {
         Selector serverSelector = Selector.open();
-        server.register(serverSelector);
-        selectorAcceptor = new SelectAcceptor(serverSelector, socketChannelExchanger, waitStrategy);
+        selectorAcceptor = new SelectAcceptor(server, serverSelector, socketChannelExchanger, waitStrategy);
         Thread acceptorThread = new Thread(selectorAcceptor, "acceptor thread");
         acceptorThread.start();
     }

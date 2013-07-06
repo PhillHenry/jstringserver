@@ -8,25 +8,27 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
 
+import com.google.code.jstringserver.server.Server;
 import com.google.code.jstringserver.server.wait.WaitStrategy;
 
 public class SelectAcceptor implements Runnable {
 
     private final Selector                  serverSelector;
     private final SocketChannelExchanger    socketChannelExchanger;
-    private final WaitStrategy              waitStrategy;
     private final AbstractSelectionStrategy selectionStrategy;
+    private final Server                    server;
     private volatile boolean                isRunning = true;
 
-    public SelectAcceptor(Selector serverSelector,
+    public SelectAcceptor(Server server,
+                          Selector serverSelector,
                           SocketChannelExchanger socketChannelExchanger,
                           WaitStrategy waitStrategy) {
         super();
+        this.server = server;
         this.serverSelector = serverSelector;
         this.socketChannelExchanger = socketChannelExchanger;
-        this.waitStrategy = waitStrategy;
         this.selectionStrategy = new AbstractSelectionStrategy(waitStrategy, serverSelector) {
-            
+
             @Override
             protected void handle(SelectionKey key) throws IOException {
                 ServerSocketChannel serverSocketChannel = (ServerSocketChannel) key.channel();
@@ -41,6 +43,12 @@ public class SelectAcceptor implements Runnable {
 
     @Override
     public void run() {
+        try {
+            server.register(serverSelector);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
         while (isRunning) {
             accept();
         }

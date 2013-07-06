@@ -74,7 +74,7 @@ public class SingleThreadedClientChannelListener implements ClientChannelListene
     private void handle(SelectionKey key) throws IOException {
         SocketChannel selectableChannel = (SocketChannel) key.channel();
         if (key.isConnectable()) {
-            selectableChannel.finishConnect();
+            selectableChannel.finishConnect(); // is this necessary?
         }
         if (key.isReadable()) {
             read(key, selectableChannel);

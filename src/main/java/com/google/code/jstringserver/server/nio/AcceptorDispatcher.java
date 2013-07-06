@@ -33,9 +33,8 @@ public class AcceptorDispatcher implements Runnable {
             protected void handle(SelectionKey key) throws IOException {
                 ServerSocketChannel serverSocketChannel = (ServerSocketChannel) key.channel();
                 SocketChannel socketChannel = serverSocketChannel.accept();
-                while (socketChannel != null) {
+                if (socketChannel != null) {
                     AcceptorDispatcher.this.socketChannelExchanger.ready(socketChannel);
-                    socketChannel = serverSocketChannel.accept();
                 }
             }
         };

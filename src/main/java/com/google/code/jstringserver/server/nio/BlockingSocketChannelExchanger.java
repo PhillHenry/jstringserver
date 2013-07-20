@@ -4,21 +4,12 @@ import java.nio.channels.SocketChannel;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class BlockingSocketChannelExchanger implements SocketChannelExchanger {
+public class BlockingSocketChannelExchanger extends AbstractSocketChannelExchanger {
     
     private final BlockingQueue<SocketChannel> blockingQueue;
-    private volatile ReadyCallback readyCallback;
 
     public BlockingSocketChannelExchanger() {
         blockingQueue = new LinkedBlockingQueue<>();
-    }
-
-    @Override
-    public void ready(SocketChannel socketChannel) {
-        blockingQueue.add(socketChannel);
-        if (readyCallback != null) {
-            readyCallback.ready();
-        }
     }
 
     @Override
@@ -27,8 +18,8 @@ public class BlockingSocketChannelExchanger implements SocketChannelExchanger {
     }
 
     @Override
-    public void setReadyCallback(ReadyCallback readyCallback) {
-        this.readyCallback = readyCallback;
+    protected void add(SocketChannel socketChannel) {
+        blockingQueue.add(socketChannel);
     }
 
 }

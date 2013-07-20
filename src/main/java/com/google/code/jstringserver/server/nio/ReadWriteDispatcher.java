@@ -50,7 +50,7 @@ public class ReadWriteDispatcher implements ClientChannelListener {
                 if (!key.isValid()) {
                     selectableChannel.close();
                     key.cancel();
-                }
+                } 
             }
         };
     }
@@ -60,7 +60,9 @@ public class ReadWriteDispatcher implements ClientChannelListener {
         while (isRunning) {
             try {
                 SocketChannel socketChannel = socketChannelExchanger.consume();
-                register(socketChannel);
+                if (socketChannel != null) {
+                    register(socketChannel);
+                }
                 checkIncoming();
             } catch (Exception e) {
                 e.printStackTrace();

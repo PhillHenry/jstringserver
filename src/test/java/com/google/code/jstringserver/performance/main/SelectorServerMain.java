@@ -15,7 +15,9 @@ import com.google.code.jstringserver.server.bytebuffers.store.ThreadLocalByteBuf
 import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 import com.google.code.jstringserver.server.nio.BlockingSocketChannelExchanger;
 import com.google.code.jstringserver.server.nio.ClientChannelListener;
+import com.google.code.jstringserver.server.nio.NonBlockingSocketChannelExchanger;
 import com.google.code.jstringserver.server.nio.ReadWriteDispatcher;
+import com.google.code.jstringserver.server.nio.SocketChannelExchanger;
 import com.google.code.jstringserver.server.wait.SleepWaitStrategy;
 
 public class SelectorServerMain {
@@ -24,15 +26,15 @@ public class SelectorServerMain {
     public static final String  EXPECTED_PAYLOAD    = getPayload();
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        Server                          server                  = getConnectedServer();
-        BlockingSocketChannelExchanger  socketChannelExchanger  = new BlockingSocketChannelExchanger();
-        ClientDataHandler               clientDataHandler       = new AsynchClientDataHandler(EXPECTED_PAYLOAD);
-        ByteBufferStore                 byteBufferStore         = createByteBufferStore();
+        Server                  server                  = getConnectedServer();
+        SocketChannelExchanger  socketChannelExchanger  = new NonBlockingSocketChannelExchanger();
+        ClientDataHandler       clientDataHandler       = new AsynchClientDataHandler(EXPECTED_PAYLOAD);
+        ByteBufferStore         byteBufferStore         = createByteBufferStore();
         
-        ClientChannelListener           clientChannelListener   = new ReadWriteDispatcher(clientDataHandler ,
+        ClientChannelListener   clientChannelListener   = new ReadWriteDispatcher(clientDataHandler ,
                 byteBufferStore,
                 socketChannelExchanger);
-        SelectorStrategy                selectorStrategy        = new SelectorStrategy(
+        SelectorStrategy        selectorStrategy        = new SelectorStrategy(
                 server, 
                 Runtime.getRuntime().availableProcessors(), 
                 socketChannelExchanger, 
@@ -49,7 +51,7 @@ public class SelectorServerMain {
 
     private static Server getConnectedServer() throws UnknownHostException, IOException {
         int backlog = 100;
-        Server server = new Server("localhost", PORT, true, backlog);
+        Server server = new Server("192.168.1.79", PORT, true, backlog);
         server.connect();
         return server;
     }

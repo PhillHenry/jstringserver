@@ -48,12 +48,10 @@ public class AcceptorDispatcher implements Runnable {
             e.printStackTrace();
             return;
         }
-        while (isRunning) {
-            accept();
-        }
+        doAccept();
     }
 
-    private void accept() {
+    private void doAccept() {
         try {
             while (isRunning) {
                 selectionStrategy.select();

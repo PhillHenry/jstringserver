@@ -1,5 +1,8 @@
 package com.google.code.jstringserver.performance.main;
 
+import static com.google.code.jstringserver.client.ConstantWritingConnector.getTotalCallTime;
+import static com.google.code.jstringserver.client.ConstantWritingConnector.getTotalCalls;
+import static com.google.code.jstringserver.client.ConstantWritingConnector.getTotalErrors;
 import static com.google.code.jstringserver.performance.main.SelectorServerMain.EXPECTED_PAYLOAD;
 import static com.google.code.jstringserver.performance.main.SelectorServerMain.PORT;
 
@@ -29,23 +32,28 @@ public class ConstantClientsMain {
     }
 
     private static int getNumberOfThreads(String[] args) {
-        return args.length < 1
+        int numThreads = args.length < 1
             ? Runtime.getRuntime().availableProcessors()
             : Integer.parseInt(args[0]);
+        System.out.println("Number of threads = " + numThreads);
+        return numThreads;
     }
 
     private static String getAddress(String[] args) {
-        return args.length < 2 ? "localhost" : args[1];
+        String host = args.length < 2 ? "localhost" : args[1];
+        System.out.println("Host = " + host);
+        return host;
     }
 
     private static void doMetrics() throws InterruptedException {
         int oldTotalCalls = 0;
         int sleepTime = 1000;
         while (true) {
-            int totalCalls = ConstantWritingConnector.getTotalCalls();
+            int totalCalls = getTotalCalls();
             System.out.println("Initiated " + totalCalls + 
                 " calls. Calls per second = " + ((totalCalls - oldTotalCalls) * 1000) / sleepTime +
-                ". number of errors at client side = " + ConstantWritingConnector.getTotalErrors());
+                ". number of errors at client side = " + getTotalErrors() + 
+                ". Average call time = " + getTotalCallTime() / totalCalls + "ms");
             
             Thread.sleep(sleepTime);
             oldTotalCalls = totalCalls;

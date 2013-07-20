@@ -26,7 +26,8 @@ public class SelectorServerMain {
     public static final String  EXPECTED_PAYLOAD    = getPayload();
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        Server                  server                  = getConnectedServer();
+        String                  ipInterface             = args.length < 1 ? "localhost" : args[0];
+        Server                  server                  = getConnectedServer(ipInterface);
         SocketChannelExchanger  socketChannelExchanger  = new NonBlockingSocketChannelExchanger();
         ClientDataHandler       clientDataHandler       = new AsynchClientDataHandler(EXPECTED_PAYLOAD);
         ByteBufferStore         byteBufferStore         = createByteBufferStore();
@@ -49,9 +50,9 @@ public class SelectorServerMain {
         return byteBufferStore;
     }
 
-    private static Server getConnectedServer() throws UnknownHostException, IOException {
+    private static Server getConnectedServer(String ipInterface) throws UnknownHostException, IOException {
         int backlog = 100;
-        Server server = new Server("192.168.1.79", PORT, true, backlog);
+        Server server = new Server(ipInterface, PORT, true, backlog);
         server.connect();
         return server;
     }

@@ -1,11 +1,11 @@
-package com.google.code.jstringserver.server;
+package com.google.code.jstringserver.client;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 
-abstract class Networker implements Runnable {
+abstract public class Networker implements Runnable {
     private volatile boolean isError;
     private volatile boolean isFinished;
     private volatile Exception exception;

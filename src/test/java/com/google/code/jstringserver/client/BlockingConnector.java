@@ -1,8 +1,9 @@
-package com.google.code.jstringserver.server;
+package com.google.code.jstringserver.client;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.nio.channels.SocketChannel;
+
 
 public class BlockingConnector extends Connector {
 

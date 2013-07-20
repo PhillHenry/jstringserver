@@ -48,6 +48,7 @@ public class ReadWriteDispatcher implements ClientChannelListener {
                     write(key, selectableChannel);
                 }
                 if (!key.isValid()) {
+                    selectableChannel.close();
                     key.cancel();
                 }
             }

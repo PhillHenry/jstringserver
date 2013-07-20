@@ -1,6 +1,6 @@
 package com.google.code.jstringserver.performance;
 
-import static com.google.code.jstringserver.server.WritingConnector.createWritingConnectors;
+import static com.google.code.jstringserver.client.WritingConnector.createWritingConnectors;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
@@ -9,12 +9,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.code.jstringserver.client.WritingConnector;
 import com.google.code.jstringserver.server.FreePortFinder;
 import com.google.code.jstringserver.server.OneThreadPerClient;
 import com.google.code.jstringserver.server.Server;
 import com.google.code.jstringserver.server.ThreadStrategy;
 import com.google.code.jstringserver.server.ThreadedTaskBuilder;
-import com.google.code.jstringserver.server.WritingConnector;
 import com.google.code.jstringserver.server.bytebuffers.factories.ByteBufferFactory;
 import com.google.code.jstringserver.server.bytebuffers.factories.DirectByteBufferFactory;
 import com.google.code.jstringserver.server.bytebuffers.store.ByteBufferStore;
@@ -25,8 +25,8 @@ import com.google.code.jstringserver.server.handlers.NaiveClientReader;
 
 public abstract class AbstractThreadStrategyTest<T extends ThreadStrategy> {
 
-    final int                payloadSize = 10007;
-    String                   payload;
+    public static final int          payloadSize = 10007;
+    String                           payload;
     private String                   address = "localhost";
     private int                      port;
     private Server                   server;
@@ -105,7 +105,7 @@ public abstract class AbstractThreadStrategyTest<T extends ThreadStrategy> {
         threadedTaskBuilder.join(threads, 10000);
     }
 
-    private String getPayload() {
+    public static String getPayload() {
         StringBuffer stringBuffer = new StringBuffer();
         int padSize = 10;
         int i = 0;

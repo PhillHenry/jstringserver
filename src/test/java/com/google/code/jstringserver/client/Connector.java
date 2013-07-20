@@ -1,4 +1,4 @@
-package com.google.code.jstringserver.server;
+package com.google.code.jstringserver.client;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -6,6 +6,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.StandardSocketOptions;
 import java.nio.channels.SocketChannel;
+
 
 
 public class Connector extends Networker {
@@ -25,13 +26,24 @@ public class Connector extends Networker {
         InetSocketAddress   inetSocketAddress   = new InetSocketAddress(addr, port);
         
         SocketChannel       socketChannel       = SocketChannel.open();
+        try {
+            configure(
+                inetSocketAddress,
+                socketChannel);
+            connected(socketChannel);
+        } finally {
+            socketChannel.close();
+        }
+    }
+
+    protected void configure(
+        InetSocketAddress   inetSocketAddress,
+        SocketChannel       socketChannel) throws IOException {
         socketChannel.configureBlocking(true);
-        socketChannel.setOption(StandardSocketOptions.SO_RCVBUF, 1000000);
+        socketChannel.setOption(
+            StandardSocketOptions.SO_RCVBUF,
+            1000000);
         socketChannel.connect(inetSocketAddress);
-        
-        connected(socketChannel);
-        
-        socketChannel.close();
     }
 
     protected void connected(SocketChannel socket) throws IOException {

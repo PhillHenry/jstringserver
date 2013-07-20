@@ -1,10 +1,10 @@
 package com.google.code.jstringserver.server;
 
+import static com.google.code.jstringserver.client.Connector.createConnectors;
+import static com.google.code.jstringserver.client.Networker.checkFinished;
+import static com.google.code.jstringserver.client.Networker.checkInError;
+import static com.google.code.jstringserver.client.Networker.checkNotInError;
 import static com.google.code.jstringserver.server.Acceptor.createAcceptors;
-import static com.google.code.jstringserver.server.Connector.createConnectors;
-import static com.google.code.jstringserver.server.Networker.checkFinished;
-import static com.google.code.jstringserver.server.Networker.checkInError;
-import static com.google.code.jstringserver.server.Networker.checkNotInError;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -14,6 +14,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import com.google.code.jstringserver.client.BlockingConnector;
+import com.google.code.jstringserver.client.Connector;
 
 public class ServerTest extends AbstractMultiThreadedTest {
 

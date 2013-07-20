@@ -3,6 +3,8 @@ package com.google.code.jstringserver.server;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 
+import com.google.code.jstringserver.client.Networker;
+
 class Acceptor extends Networker {
     
     protected final Server toTest;

@@ -1,4 +1,4 @@
-package com.google.code.jstringserver.server;
+package com.google.code.jstringserver.client;
 
 import java.io.IOException;
 import java.net.Socket;

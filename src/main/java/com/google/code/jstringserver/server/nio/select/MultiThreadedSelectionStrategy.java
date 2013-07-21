@@ -23,17 +23,11 @@ public class MultiThreadedSelectionStrategy extends AbstractSelectionStrategy {
         Selector        serverSelector,
         NioWriter       writer, 
         NioReader       reader,
-        int             poolSize) {
+        ExecutorService executorService) {
         super(waitStrategy, serverSelector);
         this.writer = writer;
         this.reader = reader;
-        executorService = new ThreadPoolExecutor(
-            poolSize, 
-            poolSize, 
-            Long.MAX_VALUE, 
-            TimeUnit.SECONDS, 
-            new LinkedBlockingQueue<Runnable>(Integer.MAX_VALUE),
-            new NamedThreadFactory(this.getClass().getSimpleName()));
+        this.executorService = executorService;
     }
 
     @Override
@@ -43,16 +37,6 @@ public class MultiThreadedSelectionStrategy extends AbstractSelectionStrategy {
                 new CancelTask(key)
                 );
         } else {
-//            if (key.isConnectable()) {
-//                executorService.submit(
-//                    new ConnectableTask(key)
-//                    );
-//            }
-//            if (key.isReadable()) {
-//                executorService.submit(
-//                    new ReaderTask(key)
-//                    );
-//            }
             if (key.isReadable() || key.isWritable()) {
                 executorService.submit(new ReadWriterTask(key));
             }

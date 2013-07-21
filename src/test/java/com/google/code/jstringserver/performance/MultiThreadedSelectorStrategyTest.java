@@ -1,5 +1,14 @@
 package com.google.code.jstringserver.performance;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 
 import com.google.code.jstringserver.server.handlers.ClientDataHandler;
@@ -8,18 +17,33 @@ import com.google.code.jstringserver.server.nio.select.MultiThreadedSelectionStr
 import com.google.code.jstringserver.server.nio.select.NioReader;
 import com.google.code.jstringserver.server.nio.select.NioReaderLooping;
 import com.google.code.jstringserver.server.nio.select.NioWriter;
+import com.google.code.jstringserver.server.threads.NamedThreadFactory;
 
 public class MultiThreadedSelectorStrategyTest extends SelectorStrategyTest {
+    
+    private static ExecutorService executorService;
 
+    @BeforeClass
+    public static void startExecutor() {
+        int poolSize = Runtime.getRuntime().availableProcessors();
+        executorService = new ThreadPoolExecutor(
+            poolSize, 
+            poolSize, 
+            Long.MAX_VALUE, 
+            TimeUnit.SECONDS, 
+            new LinkedBlockingQueue<Runnable>(Integer.MAX_VALUE),
+            new NamedThreadFactory(MultiThreadedSelectionStrategy.class.getSimpleName()));
+    }
+    
+    @AfterClass
+    public static void stopExecutor() {
+        executorService.shutdownNow();
+    }
+    
     @Override
     protected AbstractSelectionStrategy createSelectionStrategy(NioWriter writer, NioReader reader) {
-        return new MultiThreadedSelectionStrategy(null, null, writer, reader, Runtime.getRuntime().availableProcessors());
+        return new MultiThreadedSelectionStrategy(null, null, writer, reader, executorService);
     }
-
-//    @Override
-//    protected int getNumberOfClients() {
-//        return 1;
-//    }
 
     @Override
     protected NioReader createNioReader(ClientDataHandler clientDataHandler) {

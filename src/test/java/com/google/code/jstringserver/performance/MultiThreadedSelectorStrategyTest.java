@@ -12,11 +12,11 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 
 import com.google.code.jstringserver.server.handlers.ClientDataHandler;
+import com.google.code.jstringserver.server.nio.select.AbstractNioReader;
+import com.google.code.jstringserver.server.nio.select.AbstractNioWriter;
 import com.google.code.jstringserver.server.nio.select.AbstractSelectionStrategy;
 import com.google.code.jstringserver.server.nio.select.MultiThreadedSelectionStrategy;
-import com.google.code.jstringserver.server.nio.select.NioReader;
 import com.google.code.jstringserver.server.nio.select.NioReaderLooping;
-import com.google.code.jstringserver.server.nio.select.NioWriter;
 import com.google.code.jstringserver.server.threads.NamedThreadFactory;
 
 public class MultiThreadedSelectorStrategyTest extends SelectorStrategyTest {
@@ -41,12 +41,12 @@ public class MultiThreadedSelectorStrategyTest extends SelectorStrategyTest {
     }
     
     @Override
-    protected AbstractSelectionStrategy createSelectionStrategy(NioWriter writer, NioReader reader) {
+    protected AbstractSelectionStrategy createSelectionStrategy(AbstractNioWriter writer, AbstractNioReader reader) {
         return new MultiThreadedSelectionStrategy(null, null, writer, reader, executorService);
     }
 
     @Override
-    protected NioReader createNioReader(ClientDataHandler clientDataHandler) {
+    protected AbstractNioReader createNioReader(ClientDataHandler clientDataHandler) {
         return new NioReaderLooping(clientDataHandler, getByteBufferStore());
     }
 

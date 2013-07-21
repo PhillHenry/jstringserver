@@ -12,6 +12,8 @@ import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 import com.google.code.jstringserver.server.handlers.ClientReader;
 import com.google.code.jstringserver.server.nio.ClientChannelListener;
 import com.google.code.jstringserver.server.nio.ReadWriteDispatcher;
+import com.google.code.jstringserver.server.nio.select.AbstractNioReader;
+import com.google.code.jstringserver.server.nio.select.AbstractNioWriter;
 import com.google.code.jstringserver.server.nio.select.AbstractSelectionStrategy;
 import com.google.code.jstringserver.server.nio.select.NioReader;
 import com.google.code.jstringserver.server.nio.select.NioWriter;
@@ -34,16 +36,16 @@ public class SelectorStrategyTest extends AbstractThreadStrategyTest<SelectorStr
     }
 
     protected AbstractSelectionStrategy createSelectionStrategy(ClientDataHandler clientDataHandler) {
-        NioWriter writer = new NioWriter(clientDataHandler);
-        NioReader reader = createNioReader(clientDataHandler);
+        AbstractNioWriter writer = new NioWriter(clientDataHandler);
+        AbstractNioReader reader = createNioReader(clientDataHandler);
         return createSelectionStrategy(writer, reader);
     }
 
-    protected NioReader createNioReader(ClientDataHandler clientDataHandler) {
+    protected AbstractNioReader createNioReader(ClientDataHandler clientDataHandler) {
         return new NioReader(clientDataHandler, getByteBufferStore());
     }
 
-    protected AbstractSelectionStrategy createSelectionStrategy(NioWriter writer, NioReader reader) {
+    protected AbstractSelectionStrategy createSelectionStrategy(AbstractNioWriter writer, AbstractNioReader reader) {
         return new SingleThreadedSelectionStrategy(
             null, 
             null, 

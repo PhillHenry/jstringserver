@@ -16,7 +16,7 @@ public class NioReaderLooping extends NioReader {
     }
 
     @Override
-    int read(SelectionKey key, SocketChannel selectableChannel) throws IOException {
+    public int read(SelectionKey key, SocketChannel selectableChannel) throws IOException {
         int read = 0;
         do {
             read = super.read(key, selectableChannel);

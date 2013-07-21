@@ -15,15 +15,15 @@ import com.google.code.jstringserver.server.wait.WaitStrategy;
 public class MultiThreadedSelectionStrategy extends AbstractSelectionStrategy {
 
     private final ExecutorService executorService;
-    private final NioWriter writer;
-    private final NioReader reader;
+    private final AbstractNioWriter writer;
+    private final AbstractNioReader reader;
 
     public MultiThreadedSelectionStrategy(
-        WaitStrategy    waitStrategy,
-        Selector        serverSelector,
-        NioWriter       writer, 
-        NioReader       reader,
-        ExecutorService executorService) {
+        WaitStrategy        waitStrategy,
+        Selector            serverSelector,
+        AbstractNioWriter   writer, 
+        AbstractNioReader   reader,
+        ExecutorService     executorService) {
         super(waitStrategy, serverSelector);
         this.writer = writer;
         this.reader = reader;

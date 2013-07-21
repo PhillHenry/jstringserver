@@ -8,8 +8,8 @@ import org.mockito.Mockito;
 
 public class MultiThreadedSelectionStrategyTest extends AbstractThreadedSelectionStrategyTest {
 
-    private NioWriter       writer          = mock(NioWriter.class);
-    private NioReader       reader          = mock(NioReader.class);
+    private AbstractNioWriter       writer          = mock(NioWriter.class);
+    private AbstractNioReader       reader          = mock(NioReader.class);
     private ExecutorService executorService = mock(ExecutorService.class);
    
     protected void postTestChecks() {

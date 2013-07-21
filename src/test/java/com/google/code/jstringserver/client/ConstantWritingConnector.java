@@ -1,5 +1,7 @@
 package com.google.code.jstringserver.client;
 
+import java.io.IOException;
+import java.nio.channels.SocketChannel;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -54,6 +56,13 @@ public class ConstantWritingConnector extends WritingConnector {
                 totalErrors.incrementAndGet();
             }
         }
+    }
+
+    @Override
+    protected void connected(SocketChannel socketChannel) throws IOException {
+        socketChannel.socket().setSoTimeout(10000);
+        socketChannel.socket().setSoLinger(false, 10000);
+        super.connected(socketChannel);
     }
 
 }

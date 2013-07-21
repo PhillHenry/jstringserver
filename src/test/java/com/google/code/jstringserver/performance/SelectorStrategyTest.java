@@ -9,9 +9,13 @@ import com.google.code.jstringserver.server.Server;
 import com.google.code.jstringserver.server.bytebuffers.store.ThreadLocalByteBufferStore;
 import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 import com.google.code.jstringserver.server.handlers.ClientReader;
+import com.google.code.jstringserver.server.nio.AbstractSelectionStrategy;
 import com.google.code.jstringserver.server.nio.BlockingSocketChannelExchanger;
 import com.google.code.jstringserver.server.nio.ClientChannelListener;
+import com.google.code.jstringserver.server.nio.NioReader;
+import com.google.code.jstringserver.server.nio.NioWriter;
 import com.google.code.jstringserver.server.nio.ReadWriteDispatcher;
+import com.google.code.jstringserver.server.nio.SingleThreadedSelectionStrategy;
 import com.google.code.jstringserver.server.wait.SleepWaitStrategy;
 
 public class SelectorStrategyTest extends AbstractThreadStrategyTest<SelectorStrategy> {
@@ -24,9 +28,12 @@ public class SelectorStrategyTest extends AbstractThreadStrategyTest<SelectorStr
     @Override
     protected SelectorStrategy threadingStrategy(Server server, ClientDataHandler clientDataHandler) throws IOException {
         BlockingSocketChannelExchanger socketChannelExchanger = new BlockingSocketChannelExchanger();
-        ClientChannelListener clientChannelListener = new ReadWriteDispatcher(clientDataHandler,
-                                                                                              getByteBufferStore(),
-                                                                                              socketChannelExchanger);
+        AbstractSelectionStrategy selectionStrategy = new SingleThreadedSelectionStrategy(
+                                                                                          null, 
+                                                                                          null, 
+                                                                                          new NioWriter(clientDataHandler), 
+                                                                                          new NioReader(clientDataHandler, getByteBufferStore()));
+        ClientChannelListener clientChannelListener = new ReadWriteDispatcher(socketChannelExchanger, selectionStrategy);
         return new SelectorStrategy(server, 8, socketChannelExchanger, new SleepWaitStrategy(10), clientChannelListener);
     }
 

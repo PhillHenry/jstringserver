@@ -46,7 +46,7 @@ public class Connector extends Networker {
         socketChannel.connect(inetSocketAddress);
     }
 
-    protected void connected(SocketChannel socket) throws IOException {
+    protected void connected(SocketChannel socketChannel) throws IOException {
     }
 
     public static Connector[] createConnectors(int num, String address, int port) {

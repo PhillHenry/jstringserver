@@ -25,6 +25,7 @@ public class NioReaderLooping extends NioReader {
                     Thread.currentThread().sleep(1);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
+                    break;
                 }
             }
         } while (read != -1 && !finished(key));

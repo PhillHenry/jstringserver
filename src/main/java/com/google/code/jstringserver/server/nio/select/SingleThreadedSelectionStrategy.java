@@ -11,9 +11,9 @@ public class SingleThreadedSelectionStrategy extends AbstractSelectionStrategy {
     private final NioWriter                 writer;
     private final NioReader                 reader;
     public SingleThreadedSelectionStrategy(WaitStrategy waitStrategy,
-                                            Selector serverSelector, 
-                                            NioWriter writer, 
-                                            NioReader reader) {
+                                           Selector serverSelector, 
+                                           NioWriter writer, 
+                                           NioReader reader) {
         super(waitStrategy, serverSelector);
         this.writer = writer;
         this.reader = reader;

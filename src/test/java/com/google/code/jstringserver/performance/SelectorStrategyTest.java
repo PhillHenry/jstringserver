@@ -27,14 +27,28 @@ public class SelectorStrategyTest extends AbstractThreadStrategyTest<SelectorStr
 
     @Override
     protected SelectorStrategy threadingStrategy(Server server, ClientDataHandler clientDataHandler) throws IOException {
-        BlockingSocketChannelExchanger socketChannelExchanger = new BlockingSocketChannelExchanger();
-        AbstractSelectionStrategy selectionStrategy = new SingleThreadedSelectionStrategy(
-                                                                                          null, 
-                                                                                          null, 
-                                                                                          new NioWriter(clientDataHandler), 
-                                                                                          new NioReader(clientDataHandler, getByteBufferStore()));
-        ClientChannelListener clientChannelListener = new ReadWriteDispatcher(socketChannelExchanger, selectionStrategy);
+        BlockingSocketChannelExchanger  socketChannelExchanger  = new BlockingSocketChannelExchanger();
+        AbstractSelectionStrategy       selectionStrategy       = createSelectionStrategy(clientDataHandler);
+        ClientChannelListener           clientChannelListener   = new ReadWriteDispatcher(socketChannelExchanger, selectionStrategy);
         return new SelectorStrategy(server, 8, socketChannelExchanger, new SleepWaitStrategy(10), clientChannelListener);
+    }
+
+    protected AbstractSelectionStrategy createSelectionStrategy(ClientDataHandler clientDataHandler) {
+        NioWriter writer = new NioWriter(clientDataHandler);
+        NioReader reader = createNioReader(clientDataHandler);
+        return createSelectionStrategy(writer, reader);
+    }
+
+    protected NioReader createNioReader(ClientDataHandler clientDataHandler) {
+        return new NioReader(clientDataHandler, getByteBufferStore());
+    }
+
+    protected AbstractSelectionStrategy createSelectionStrategy(NioWriter writer, NioReader reader) {
+        return new SingleThreadedSelectionStrategy(
+            null, 
+            null, 
+            writer, 
+            reader);
     }
 
     @Override

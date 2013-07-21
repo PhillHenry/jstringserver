@@ -4,11 +4,11 @@ import java.nio.ByteBuffer;
 
 public interface ClientDataHandler {
 
-    public void handle(ByteBuffer byteBuffer, Object key);
+    public int handle(ByteBuffer byteBuffer, Object key);
 
     public String end(Object key);
 
-    public boolean ready();
+    public boolean isNotComplete(Object key);
 
     public abstract int getNumEndCalls();
     

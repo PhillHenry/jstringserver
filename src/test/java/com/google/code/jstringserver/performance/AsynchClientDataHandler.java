@@ -23,11 +23,15 @@ public class AsynchClientDataHandler implements ClientDataHandler {
     }
 
     @Override
-    public void handle(ByteBuffer byteBuffer, Object key) {
+    public int handle(ByteBuffer byteBuffer, Object key) {
         SelectionKey selectionKey = (SelectionKey)key;
         CurrentStats attachment = getAttachment(selectionKey);
-        byte[] bytes = totalStats.handle(byteBuffer, selectionKey);
-        updateCurrentStats(attachment, bytes);
+        byte[] bytes = new byte[byteBuffer.limit()];
+        int filled = totalStats.handle(byteBuffer, selectionKey, bytes);
+        if (filled > 0) {
+            updateCurrentStats(attachment, bytes);
+        }
+        return filled;
     }
 
     private void updateCurrentStats(CurrentStats attachment, byte[] bytes) {
@@ -61,8 +65,9 @@ public class AsynchClientDataHandler implements ClientDataHandler {
     }
 
     @Override
-    public boolean ready() {
-        throw new UnsupportedOperationException("TODO");
+    public boolean isNotComplete(Object key) {
+        SelectionKey selectionKey = (SelectionKey)key;
+        return !receivedAll((CurrentStats)selectionKey.attachment());
     }
 
     @Override

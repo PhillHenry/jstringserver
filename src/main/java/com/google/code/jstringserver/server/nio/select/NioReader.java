@@ -19,11 +19,16 @@ public class NioReader {
         this.byteBufferStore = byteBufferStore;
     }
 
-    void read(SelectionKey key, SocketChannel selectableChannel) throws IOException {
+    int read(SelectionKey key, SocketChannel selectableChannel) throws IOException {
         ByteBuffer byteBuffer = byteBufferStore.getByteBuffer();
         byteBuffer.clear();
-        selectableChannel.read(byteBuffer);
+        int read = selectableChannel.read(byteBuffer);
         byteBuffer.flip();
         clientDataHandler.handle(byteBuffer, key);
+        return read;
+    }
+    
+    protected boolean finished(SelectionKey key) {
+        return !clientDataHandler.isNotComplete(key);
     }
 }

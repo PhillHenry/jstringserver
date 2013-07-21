@@ -39,7 +39,7 @@ public abstract class AbstractThreadStrategyTest<T extends ThreadStrategy> {
     public void setUpServer() throws Exception {
         FreePortFinder  freePortFinder  = new FreePortFinder();
         port                            = freePortFinder.getFreePort();
-        numClients                      = 100;
+        numClients                      = getNumberOfClients();
         System.out.println("Server port: " + port);
         server                          = new Server(address, port, true, numClients);
         server.connect();
@@ -48,6 +48,10 @@ public abstract class AbstractThreadStrategyTest<T extends ThreadStrategy> {
         threadStrategy                  = threadingStrategy(server, clientDataHandler);
         threadedTaskBuilder             = new ThreadedTaskBuilder();
         threadStrategy.start();
+    }
+
+    protected int getNumberOfClients() {
+        return 100;
     }
 
     protected ClientDataHandler createClientDataHandler() {

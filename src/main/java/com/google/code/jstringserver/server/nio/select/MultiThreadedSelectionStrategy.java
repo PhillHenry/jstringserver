@@ -40,11 +40,6 @@ public class MultiThreadedSelectionStrategy extends AbstractSelectionStrategy {
             if (key.isReadable() || key.isWritable()) {
                 executorService.submit(new ReadWriterTask(key));
             }
-            if (key.isWritable()) {
-                executorService.submit(
-                    new WriterTask(key)
-                    );
-            }
         }
         key.cancel();
     }

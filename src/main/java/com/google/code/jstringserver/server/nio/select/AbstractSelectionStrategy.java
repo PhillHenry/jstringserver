@@ -22,7 +22,7 @@ public abstract class AbstractSelectionStrategy {
 
     public void select() throws IOException {
         // see http://people.freebsd.org/~jlemon/papers/kqueue.pdf
-        // "Kevent - structue which delivers event to user. poll/select does not scale well"
+        // "Kevent - structue which delivers event to user. poll/select does not scale well". Mac only.
         // - http://people.freebsd.org/~jlemon/kqueue_slides/sld006.htm
         int selected = selector.select(); // sun.nio.ch.KQueueSelectorImpl
         if (selected > 0) {

@@ -5,16 +5,11 @@ import static java.nio.channels.SelectionKey.OP_READ;
 import static java.nio.channels.SelectionKey.OP_WRITE;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.Iterator;
-import java.util.Set;
 
-import com.google.code.jstringserver.server.bytebuffers.store.ByteBufferStore;
 import com.google.code.jstringserver.server.exchange.SocketChannelExchanger;
-import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 import com.google.code.jstringserver.server.nio.select.AbstractSelectionStrategy;
 
 public class ReadWriteDispatcher implements ClientChannelListener {

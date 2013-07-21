@@ -13,6 +13,7 @@ import com.google.code.jstringserver.client.WritingConnector;
 import com.google.code.jstringserver.server.FreePortFinder;
 import com.google.code.jstringserver.server.OneThreadPerClient;
 import com.google.code.jstringserver.server.Server;
+import com.google.code.jstringserver.server.ServerBuilder;
 import com.google.code.jstringserver.server.ThreadStrategy;
 import com.google.code.jstringserver.server.ThreadedTaskBuilder;
 import com.google.code.jstringserver.server.bytebuffers.factories.ByteBufferFactory;
@@ -27,25 +28,20 @@ public abstract class AbstractThreadStrategyTest<T extends ThreadStrategy> {
 
     public static final int          payloadSize = 10007;
     String                           payload;
-    private String                   address = "localhost";
-    private int                      port;
-    private Server                   server;
+
     protected ClientDataHandler      clientDataHandler;
     private T                        threadStrategy;
     private int                      numClients;
     private ThreadedTaskBuilder      threadedTaskBuilder;
+    private ServerBuilder            serverBuilder;
     
     @Before
     public void setUpServer() throws Exception {
-        FreePortFinder  freePortFinder  = new FreePortFinder();
-        port                            = freePortFinder.getFreePort();
         numClients                      = getNumberOfClients();
-        System.out.println("Server port: " + port);
-        server                          = new Server(address, port, true, numClients);
-        server.connect();
+        serverBuilder                   = new ServerBuilder(numClients);
         payload                         = getPayload();
         clientDataHandler               = createClientDataHandler();
-        threadStrategy                  = threadingStrategy(server, clientDataHandler);
+        threadStrategy                  = threadingStrategy(serverBuilder.getServer(), clientDataHandler);
         threadedTaskBuilder             = new ThreadedTaskBuilder();
         threadStrategy.start();
     }
@@ -71,12 +67,12 @@ public abstract class AbstractThreadStrategyTest<T extends ThreadStrategy> {
         System.out.println("Shutting down server");
         threadStrategy.shutdown();
         threadedTaskBuilder.interruptAllThreads();
-        server.shutdown();
+        serverBuilder.getServer().shutdown();
     }
     
     @Test
     public void shouldProcessAllCalls() throws IOException, InterruptedException {
-        runConnectors(port, address, threadStrategy);
+        runConnectors(serverBuilder.getPort(), serverBuilder.getAddress(), threadStrategy);
         waitForNumberOfExpectedCalls(numExpectedCalls(), 5000, clientDataHandler);
         checkThreadStrategy(threadStrategy);
         assertEquals("Total number of calls completed on server side", 

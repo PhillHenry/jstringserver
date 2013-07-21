@@ -18,6 +18,7 @@ import com.google.code.jstringserver.server.nio.select.AbstractSelectionStrategy
 import com.google.code.jstringserver.server.nio.select.MultiThreadedSelectionStrategy;
 import com.google.code.jstringserver.server.nio.select.NioReaderLooping;
 import com.google.code.jstringserver.server.threads.NamedThreadFactory;
+import com.google.code.jstringserver.server.wait.SleepWaitStrategy;
 
 public class MultiThreadedSelectorStrategyTest extends SelectorStrategyTest {
     
@@ -47,7 +48,7 @@ public class MultiThreadedSelectorStrategyTest extends SelectorStrategyTest {
 
     @Override
     protected AbstractNioReader createNioReader(ClientDataHandler clientDataHandler) {
-        return new NioReaderLooping(clientDataHandler, getByteBufferStore());
+        return new NioReaderLooping(clientDataHandler, getByteBufferStore(), 10000L, new SleepWaitStrategy(1));
     }
 
     

@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import com.google.code.jstringserver.server.Server;
+import com.google.code.jstringserver.server.exchange.SocketChannelExchanger;
 import com.google.code.jstringserver.server.nio.select.AbstractSelectionStrategy;
 import com.google.code.jstringserver.server.wait.WaitStrategy;
 

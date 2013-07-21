@@ -1,6 +1,8 @@
-package com.google.code.jstringserver.server.nio;
+package com.google.code.jstringserver.server.exchange;
 
 import java.nio.channels.SocketChannel;
+
+import com.google.code.jstringserver.server.exchange.SocketChannelExchanger.ReadyCallback;
 
 public abstract class AbstractSocketChannelExchanger implements SocketChannelExchanger {
 

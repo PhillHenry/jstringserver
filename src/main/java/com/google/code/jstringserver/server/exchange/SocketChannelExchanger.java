@@ -1,4 +1,4 @@
-package com.google.code.jstringserver.server.nio;
+package com.google.code.jstringserver.server.exchange;
 
 import java.nio.channels.SocketChannel;
 

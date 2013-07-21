@@ -21,8 +21,9 @@ import org.mockito.Mockito;
 
 import com.google.code.jstringserver.server.FreePortFinder;
 import com.google.code.jstringserver.server.bytebuffers.store.ByteBufferStore;
+import com.google.code.jstringserver.server.exchange.BlockingSocketChannelExchanger;
+import com.google.code.jstringserver.server.exchange.SocketChannelExchanger.ReadyCallback;
 import com.google.code.jstringserver.server.handlers.ClientDataHandler;
-import com.google.code.jstringserver.server.nio.SocketChannelExchanger.ReadyCallback;
 import com.google.code.jstringserver.server.nio.select.AbstractSelectionStrategy;
 import com.google.code.jstringserver.server.nio.select.NioReader;
 import com.google.code.jstringserver.server.nio.select.NioWriter;

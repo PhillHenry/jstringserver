@@ -15,11 +15,11 @@ import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import com.google.code.jstringserver.server.bytebuffers.store.ByteBufferStore;
+import com.google.code.jstringserver.server.exchange.SocketChannelExchanger;
 import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 import com.google.code.jstringserver.server.nio.ClientChannelListener;
 import com.google.code.jstringserver.server.nio.ReadWriteDispatcher;
 import com.google.code.jstringserver.server.nio.AcceptorDispatcher;
-import com.google.code.jstringserver.server.nio.SocketChannelExchanger;
 import com.google.code.jstringserver.server.wait.WaitStrategy;
 
 public class SelectorStrategy implements ThreadStrategy {

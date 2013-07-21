@@ -12,12 +12,12 @@ import com.google.code.jstringserver.server.bytebuffers.factories.ByteBufferFact
 import com.google.code.jstringserver.server.bytebuffers.factories.DirectByteBufferFactory;
 import com.google.code.jstringserver.server.bytebuffers.store.ByteBufferStore;
 import com.google.code.jstringserver.server.bytebuffers.store.ThreadLocalByteBufferStore;
+import com.google.code.jstringserver.server.exchange.BlockingSocketChannelExchanger;
+import com.google.code.jstringserver.server.exchange.NonBlockingSocketChannelExchanger;
+import com.google.code.jstringserver.server.exchange.SocketChannelExchanger;
 import com.google.code.jstringserver.server.handlers.ClientDataHandler;
-import com.google.code.jstringserver.server.nio.BlockingSocketChannelExchanger;
 import com.google.code.jstringserver.server.nio.ClientChannelListener;
-import com.google.code.jstringserver.server.nio.NonBlockingSocketChannelExchanger;
 import com.google.code.jstringserver.server.nio.ReadWriteDispatcher;
-import com.google.code.jstringserver.server.nio.SocketChannelExchanger;
 import com.google.code.jstringserver.server.nio.select.AbstractSelectionStrategy;
 import com.google.code.jstringserver.server.nio.select.NioReader;
 import com.google.code.jstringserver.server.nio.select.NioWriter;

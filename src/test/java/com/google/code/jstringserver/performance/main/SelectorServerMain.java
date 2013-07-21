@@ -13,15 +13,15 @@ import com.google.code.jstringserver.server.bytebuffers.factories.DirectByteBuff
 import com.google.code.jstringserver.server.bytebuffers.store.ByteBufferStore;
 import com.google.code.jstringserver.server.bytebuffers.store.ThreadLocalByteBufferStore;
 import com.google.code.jstringserver.server.handlers.ClientDataHandler;
-import com.google.code.jstringserver.server.nio.AbstractSelectionStrategy;
 import com.google.code.jstringserver.server.nio.BlockingSocketChannelExchanger;
 import com.google.code.jstringserver.server.nio.ClientChannelListener;
-import com.google.code.jstringserver.server.nio.NioReader;
-import com.google.code.jstringserver.server.nio.NioWriter;
 import com.google.code.jstringserver.server.nio.NonBlockingSocketChannelExchanger;
 import com.google.code.jstringserver.server.nio.ReadWriteDispatcher;
-import com.google.code.jstringserver.server.nio.SingleThreadedSelectionStrategy;
 import com.google.code.jstringserver.server.nio.SocketChannelExchanger;
+import com.google.code.jstringserver.server.nio.select.AbstractSelectionStrategy;
+import com.google.code.jstringserver.server.nio.select.NioReader;
+import com.google.code.jstringserver.server.nio.select.NioWriter;
+import com.google.code.jstringserver.server.nio.select.SingleThreadedSelectionStrategy;
 import com.google.code.jstringserver.server.wait.SleepWaitStrategy;
 
 public class SelectorServerMain {
@@ -30,13 +30,18 @@ public class SelectorServerMain {
     public static final String  EXPECTED_PAYLOAD    = getPayload();
 
     public static void main(String[] args) throws IOException, InterruptedException {
+        SelectorServerMain app = new SelectorServerMain();
+        app.start(args);
+    }
+    
+    private void start(String[] args) throws UnknownHostException, IOException {
         String                  ipInterface             = args.length < 1 ? "localhost" : args[0];
         Server                  server                  = getConnectedServer(ipInterface);
         SocketChannelExchanger  socketChannelExchanger  = new NonBlockingSocketChannelExchanger();
         ClientDataHandler       clientDataHandler       = new AsynchClientDataHandler(EXPECTED_PAYLOAD);
         ByteBufferStore         byteBufferStore         = createByteBufferStore();
         
-        AbstractSelectionStrategy selectionStrategy = new SingleThreadedSelectionStrategy(
+        AbstractSelectionStrategy selectionStrategy     = new SingleThreadedSelectionStrategy(
                 null, 
                 null, 
                 new NioWriter(clientDataHandler), 
@@ -51,13 +56,13 @@ public class SelectorServerMain {
         selectorStrategy.start();
     }
 
-    private static ByteBufferStore createByteBufferStore() {
+    private ByteBufferStore createByteBufferStore() {
         ByteBufferFactory   byteBufferFactory   = new DirectByteBufferFactory(4096);
         ByteBufferStore     byteBufferStore     = new ThreadLocalByteBufferStore(byteBufferFactory);
         return byteBufferStore;
     }
 
-    private static Server getConnectedServer(String ipInterface) throws UnknownHostException, IOException {
+    private Server getConnectedServer(String ipInterface) throws UnknownHostException, IOException {
         int backlog = 100;
         Server server = new Server(ipInterface, PORT, true, backlog);
         server.connect();

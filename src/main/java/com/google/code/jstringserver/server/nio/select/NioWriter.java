@@ -1,4 +1,4 @@
-package com.google.code.jstringserver.server.nio;
+package com.google.code.jstringserver.server.nio.select;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

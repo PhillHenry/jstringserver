@@ -24,36 +24,44 @@ import com.google.code.jstringserver.server.nio.select.NioWriter;
 import com.google.code.jstringserver.server.nio.select.SingleThreadedSelectionStrategy;
 import com.google.code.jstringserver.server.wait.SleepWaitStrategy;
 
-public class SelectorServerMain {
+public class SingleThreadedSelectorServerMain {
 
     public static final int     PORT                = 8888;
     public static final String  EXPECTED_PAYLOAD    = getPayload();
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        SelectorServerMain app = new SelectorServerMain();
+        SingleThreadedSelectorServerMain app = new SingleThreadedSelectorServerMain();
         app.start(args);
     }
     
-    private void start(String[] args) throws UnknownHostException, IOException {
+    protected void start(String[] args) throws UnknownHostException, IOException {
         String                  ipInterface             = args.length < 1 ? "localhost" : args[0];
         Server                  server                  = getConnectedServer(ipInterface);
         SocketChannelExchanger  socketChannelExchanger  = new NonBlockingSocketChannelExchanger();
         ClientDataHandler       clientDataHandler       = new AsynchClientDataHandler(EXPECTED_PAYLOAD);
         ByteBufferStore         byteBufferStore         = createByteBufferStore();
         
-        AbstractSelectionStrategy selectionStrategy     = new SingleThreadedSelectionStrategy(
-                null, 
-                null, 
-                new NioWriter(clientDataHandler), 
-                new NioReader(clientDataHandler, byteBufferStore));
+        AbstractSelectionStrategy selectionStrategy     = createSelectionStrategy(clientDataHandler, byteBufferStore);
         ClientChannelListener   clientChannelListener   = new ReadWriteDispatcher(socketChannelExchanger, selectionStrategy);
         SelectorStrategy        selectorStrategy        = new SelectorStrategy(
                 server, 
-                Runtime.getRuntime().availableProcessors(), 
+                availableProcessors(), 
                 socketChannelExchanger, 
                 new SleepWaitStrategy(10), 
                 clientChannelListener);
         selectorStrategy.start();
+    }
+
+    protected int availableProcessors() {
+        return Runtime.getRuntime().availableProcessors();
+    }
+
+    protected AbstractSelectionStrategy createSelectionStrategy(ClientDataHandler clientDataHandler, ByteBufferStore byteBufferStore) {
+        return new SingleThreadedSelectionStrategy(
+                null, 
+                null, 
+                new NioWriter(clientDataHandler), 
+                new NioReader(clientDataHandler, byteBufferStore));
     }
 
     private ByteBufferStore createByteBufferStore() {

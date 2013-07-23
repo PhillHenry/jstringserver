@@ -3,8 +3,8 @@ package com.google.code.jstringserver.performance.main;
 import static com.google.code.jstringserver.client.ConstantWritingConnector.getTotalCallTime;
 import static com.google.code.jstringserver.client.ConstantWritingConnector.getTotalCalls;
 import static com.google.code.jstringserver.client.ConstantWritingConnector.getTotalErrors;
-import static com.google.code.jstringserver.performance.main.SelectorServerMain.EXPECTED_PAYLOAD;
-import static com.google.code.jstringserver.performance.main.SelectorServerMain.PORT;
+import static com.google.code.jstringserver.performance.main.SingleThreadedSelectorServerMain.EXPECTED_PAYLOAD;
+import static com.google.code.jstringserver.performance.main.SingleThreadedSelectorServerMain.PORT;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -53,7 +53,7 @@ public class ConstantClientsMain {
             System.out.println("Initiated " + totalCalls + 
                 " calls. Calls per second = " + ((totalCalls - oldTotalCalls) * 1000) / sleepTime +
                 ". number of errors at client side = " + getTotalErrors() + 
-                ". Average call time = " + getTotalCallTime() / totalCalls + "ms");
+                ". Average call time = " + (totalCalls != 0 ? ("" + getTotalCallTime() / totalCalls) : "NA") + "ms");
             
             Thread.sleep(sleepTime);
             oldTotalCalls = totalCalls;

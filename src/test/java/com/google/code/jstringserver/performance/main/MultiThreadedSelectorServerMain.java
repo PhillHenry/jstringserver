@@ -1,0 +1,40 @@
+package com.google.code.jstringserver.performance.main;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
+
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import com.google.code.jstringserver.server.bytebuffers.store.ByteBufferStore;
+import com.google.code.jstringserver.server.handlers.ClientDataHandler;
+import com.google.code.jstringserver.server.nio.select.AbstractSelectionStrategy;
+import com.google.code.jstringserver.server.nio.select.MultiThreadedSelectionStrategy;
+import com.google.code.jstringserver.server.nio.select.NioReaderLooping;
+import com.google.code.jstringserver.server.nio.select.NioWriter;
+import com.google.code.jstringserver.server.wait.SleepWaitStrategy;
+
+public class MultiThreadedSelectorServerMain extends SingleThreadedSelectorServerMain {
+
+    public static void main(String[] args) throws UnknownHostException, IOException {
+        MultiThreadedSelectorServerMain app = new MultiThreadedSelectorServerMain();
+        app.start(args);
+    }
+
+    @Override
+    protected AbstractSelectionStrategy createSelectionStrategy(ClientDataHandler clientDataHandler, ByteBufferStore byteBufferStore) {
+        return new MultiThreadedSelectionStrategy(
+            null, 
+            null, 
+            new NioWriter(clientDataHandler), 
+            new NioReaderLooping(clientDataHandler, byteBufferStore, 10000L, new SleepWaitStrategy(1)), 
+            createThreadPool());
+    }
+
+    private ThreadPoolExecutor createThreadPool() {
+        return new ThreadPoolExecutor(availableProcessors(), availableProcessors(), Long.MAX_VALUE, SECONDS, new LinkedBlockingQueue<Runnable>());
+    }
+
+}

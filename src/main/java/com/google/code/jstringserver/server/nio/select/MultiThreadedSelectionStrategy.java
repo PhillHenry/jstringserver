@@ -79,8 +79,13 @@ public class MultiThreadedSelectionStrategy extends AbstractSelectionStrategy {
 
         @Override
         protected void doWork(SelectionKey key) throws IOException {
-            reader.read(key, getChannel());
-            writer.write(key, getChannel());
+            try {
+                reader.read(key, getChannel());
+                writer.write(key, getChannel());
+            } finally {
+                getChannel().socket().close();
+                getChannel().close();
+            }
         }
         
     }
@@ -119,6 +124,7 @@ public class MultiThreadedSelectionStrategy extends AbstractSelectionStrategy {
 
         @Override
         protected void doWork(SelectionKey key) throws IOException {
+            getChannel().socket().close();
             getChannel().close();
             key.cancel();
         }

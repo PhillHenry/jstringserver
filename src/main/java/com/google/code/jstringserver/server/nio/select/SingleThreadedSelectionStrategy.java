@@ -8,8 +8,8 @@ import java.nio.channels.SocketChannel;
 import com.google.code.jstringserver.server.wait.WaitStrategy;
 
 public class SingleThreadedSelectionStrategy extends AbstractSelectionStrategy {
-    private final AbstractNioWriter                 writer;
-    private final AbstractNioReader                 reader;
+    private final AbstractNioWriter writer;
+    private final AbstractNioReader reader;
     public SingleThreadedSelectionStrategy(WaitStrategy waitStrategy,
                                            Selector serverSelector, 
                                            AbstractNioWriter writer, 

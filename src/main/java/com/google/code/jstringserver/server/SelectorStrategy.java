@@ -12,8 +12,6 @@ import com.google.code.jstringserver.server.wait.WaitStrategy;
 
 public class SelectorStrategy implements ThreadStrategy {
 
-    private final Selector               selector;
-
     private final Server                 server;
     private final ThreadPoolExecutor     threadPoolExecutor;
     private final int                    numThreads;
@@ -36,9 +34,7 @@ public class SelectorStrategy implements ThreadStrategy {
         this.waitStrategy = waitStrategy;
         this.clientChannelListener = clientChannelListener;
         this.acceptorStrategy = acceptorStrategy;
-        this.selector = Selector.open();
         this.server = server;
-        clientChannelListener.setSelector(selector);
         configCallback();
         threadPoolExecutor = new ThreadPoolFactory().createThreadPoolExecutor(1);
     }
@@ -47,7 +43,7 @@ public class SelectorStrategy implements ThreadStrategy {
         this.socketChannelExchanger.setReadyCallback(new SocketChannelExchanger.ReadyCallback() {
             @Override
             public void ready() {
-                selector.wakeup();
+                clientChannelListener.getSelector().wakeup();
             }
         });
     }
@@ -80,7 +76,7 @@ public class SelectorStrategy implements ThreadStrategy {
 
     private void shutdownSelector() {
         try {
-            selector.close();
+            clientChannelListener.getSelector().close();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -33,15 +33,16 @@ public class SelectorStrategyTest extends AbstractThreadStrategyTest<SelectorStr
     protected SelectorStrategy threadingStrategy(Server server, ClientDataHandler clientDataHandler) throws IOException {
         BlockingSocketChannelExchanger  socketChannelExchanger  = new BlockingSocketChannelExchanger();
         AbstractSelectionStrategy       selectionStrategy       = createSelectionStrategy(clientDataHandler);
-        ClientChannelListener           clientChannelListener   = new ReadWriteDispatcher(socketChannelExchanger, selectionStrategy);
+        ClientChannelListener           clientChannelListener   = new ReadWriteDispatcher(socketChannelExchanger, selectionStrategy, clientSelector);
         AbstractSelectionStrategy       acceptorStrategy        = createAcceptorStrategy(socketChannelExchanger);
+        
         return new SelectorStrategy(server, 8, socketChannelExchanger, new SleepWaitStrategy(10), clientChannelListener, acceptorStrategy);
     }
 
     protected ServerSocketDispatchingSelectionStrategy createAcceptorStrategy(BlockingSocketChannelExchanger socketChannelExchanger) throws IOException {
         return new ServerSocketDispatchingSelectionStrategy(
             null, 
-            Selector.open(), 
+            serverSelector, 
             socketChannelExchanger);
     }
 
@@ -58,7 +59,7 @@ public class SelectorStrategyTest extends AbstractThreadStrategyTest<SelectorStr
     protected AbstractSelectionStrategy createSelectionStrategy(AbstractNioWriter writer, AbstractNioReader reader) {
         return new SingleThreadedReadingSelectionStrategy(
             null, 
-            null, 
+            clientSelector, 
             writer, 
             reader);
     }

@@ -43,7 +43,7 @@ public class MultiThreadedSelectorStrategyTest extends SelectorStrategyTest {
     
     @Override
     protected AbstractSelectionStrategy createSelectionStrategy(AbstractNioWriter writer, AbstractNioReader reader) {
-        return new MultiThreadedReadingSelectionStrategy(null, null, writer, reader, executorService);
+        return new MultiThreadedReadingSelectionStrategy(null, clientSelector, writer, reader, executorService);
     }
 
     @Override

@@ -4,5 +4,5 @@ import java.nio.channels.Selector;
 
 public interface ClientChannelListener extends Runnable {
     public void shutdown();
-    public void setSelector(Selector selector);
+    public Selector getSelector();
 }

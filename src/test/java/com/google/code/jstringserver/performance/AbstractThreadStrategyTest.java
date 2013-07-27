@@ -4,6 +4,7 @@ import static com.google.code.jstringserver.client.WritingConnector.createWritin
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.nio.channels.Selector;
 
 import org.junit.After;
 import org.junit.Before;
@@ -30,6 +31,8 @@ public abstract class AbstractThreadStrategyTest<T extends ThreadStrategy> {
     String                           payload;
 
     protected ClientDataHandler      clientDataHandler;
+    protected Selector               clientSelector;
+    protected Selector               serverSelector;
     private T                        threadStrategy;
     private int                      numClients;
     private ThreadedTaskBuilder      threadedTaskBuilder;
@@ -37,6 +40,8 @@ public abstract class AbstractThreadStrategyTest<T extends ThreadStrategy> {
     
     @Before
     public void setUpServer() throws Exception {
+        clientSelector                  = Selector.open();
+        serverSelector                  = Selector.open();
         numClients                      = getNumberOfClients();
         serverBuilder                   = new ServerBuilder(numClients);
         payload                         = getPayload();

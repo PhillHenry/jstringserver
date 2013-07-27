@@ -10,14 +10,17 @@ import com.google.code.jstringserver.server.wait.WaitStrategy;
 
 public abstract class AbstractSelectionStrategy {
 
-    private final WaitStrategy waitStrategy;
-    private volatile Selector  selector;
+    private final WaitStrategy  waitStrategy;
+    private final Selector      selector;
 
-    public AbstractSelectionStrategy(WaitStrategy waitStrategy,
-                                     Selector serverSelector) {
+    public AbstractSelectionStrategy(WaitStrategy   waitStrategy,
+                                     Selector       selector) {
         super();
         this.waitStrategy = waitStrategy;
-        this.selector = serverSelector;
+        if (selector == null) {
+            throw new RuntimeException();
+        }
+        this.selector = selector;
     }
 
     public void select() throws IOException {
@@ -42,10 +45,6 @@ public abstract class AbstractSelectionStrategy {
             handle(key);
             keyIter.remove();
         }
-    }
-    
-    public void setSelector(Selector selector) {
-        this.selector = selector;
     }
     
     public Selector getSelector() {

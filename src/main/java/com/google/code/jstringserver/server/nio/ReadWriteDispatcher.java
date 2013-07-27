@@ -16,15 +16,17 @@ public class ReadWriteDispatcher implements ClientChannelListener {
 
     private final SocketChannelExchanger    socketChannelExchanger;
     private final AbstractSelectionStrategy selectionStrategy;
-
-    private volatile Selector               selector;
+    private final Selector                  selector;
+    
     private volatile boolean                isRunning = true;
 
     public ReadWriteDispatcher(SocketChannelExchanger socketChannelExchanger, 
-                               AbstractSelectionStrategy selectionStrategy) {
+                               AbstractSelectionStrategy selectionStrategy, 
+                               Selector selector) {
         super();
         this.socketChannelExchanger = socketChannelExchanger;
         this.selectionStrategy = selectionStrategy;
+        this.selector = selector;
     }
 
     @Override
@@ -57,9 +59,9 @@ public class ReadWriteDispatcher implements ClientChannelListener {
         isRunning = false;
     }
 
-    public void setSelector(Selector selector) {
-        this.selector = selector;
-        selectionStrategy.setSelector(selector);
+    @Override
+    public Selector getSelector() {
+        return selector;
     }
 
 }

@@ -47,19 +47,18 @@ public class SingleThreadedClientChannelListenerTest {
     public void setUp() throws IOException, InterruptedException {
         byteBuffer = ByteBuffer.allocate(1024);
         when(mockByteBufferStore.getByteBuffer()).thenReturn(byteBuffer);
+        final Selector            clientSelector    = Selector.open();
         AbstractSelectionStrategy selectionStrategy = new SingleThreadedReadingSelectionStrategy(
                                                                                           null, 
-                                                                                          null, 
+                                                                                          clientSelector, 
                                                                                           new NioWriter(mockClientDataHandler), 
                                                                                           new NioReader(mockClientDataHandler, mockByteBufferStore));
-        toTest = new ReadWriteDispatcher(socketChannelExchanger, selectionStrategy);
-        final Selector selector = Selector.open();
-        toTest.setSelector(selector);
+        toTest = new ReadWriteDispatcher(socketChannelExchanger, selectionStrategy, clientSelector);
         socketChannelExchanger.setReadyCallback(new ReadyCallback() {
             
             @Override
             public void ready() {
-                selector.wakeup();
+                clientSelector.wakeup();
             }
         });
         thread = new Thread(toTest);

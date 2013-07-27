@@ -44,13 +44,10 @@ public class SingleThreadedSelectorServerMain {
         ByteBufferStore         byteBufferStore         = createByteBufferStore();
         
         AbstractSelectionStrategy   selectionStrategy       = createSelectionStrategy(clientDataHandler, byteBufferStore);
-        ClientChannelListener       clientChannelListener   = new ReadWriteDispatcher(socketChannelExchanger, selectionStrategy);
+        ClientChannelListener       clientChannelListener   = createClientListener(socketChannelExchanger, selectionStrategy);
         SleepWaitStrategy           waitStrategy            = new SleepWaitStrategy(10);
-        AbstractSelectionStrategy   acceptorStrategy        = new ServerSocketDispatchingSelectionStrategy(
-            waitStrategy, 
-            Selector.open(), 
-            socketChannelExchanger);
-        SelectorStrategy        selectorStrategy        = new SelectorStrategy(
+        AbstractSelectionStrategy   acceptorStrategy        = createAcceptorStrategy(socketChannelExchanger, waitStrategy);
+        SelectorStrategy            selectorStrategy        = new SelectorStrategy(
                 server, 
                 availableProcessors(), 
                 socketChannelExchanger, 
@@ -58,6 +55,24 @@ public class SingleThreadedSelectorServerMain {
                 clientChannelListener,
                 acceptorStrategy);
         selectorStrategy.start();
+    }
+
+    private ReadWriteDispatcher createClientListener(
+        SocketChannelExchanger socketChannelExchanger, 
+        AbstractSelectionStrategy selectionStrategy)
+        throws IOException {
+        Selector clientSelector = Selector.open();
+        return new ReadWriteDispatcher(socketChannelExchanger, selectionStrategy, clientSelector);
+    }
+
+    protected AbstractSelectionStrategy createAcceptorStrategy(
+        SocketChannelExchanger socketChannelExchanger, 
+        SleepWaitStrategy waitStrategy) throws IOException {
+        Selector serverSelector = Selector.open();
+        return new ServerSocketDispatchingSelectionStrategy(
+            waitStrategy, 
+            serverSelector, 
+            socketChannelExchanger);
     }
 
     protected int availableProcessors() {

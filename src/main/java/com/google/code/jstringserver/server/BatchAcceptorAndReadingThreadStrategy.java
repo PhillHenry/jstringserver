@@ -5,6 +5,7 @@ import java.nio.channels.Selector;
 import java.util.concurrent.ExecutorService;
 
 import com.google.code.jstringserver.server.nio.select.AbstractNioReader;
+import com.google.code.jstringserver.server.nio.select.AbstractNioWriter;
 import com.google.code.jstringserver.server.nio.select.BatchServerAndReadingSelectionStrategy;
 
 public class BatchAcceptorAndReadingThreadStrategy implements ThreadStrategy {
@@ -13,15 +14,22 @@ public class BatchAcceptorAndReadingThreadStrategy implements ThreadStrategy {
     private final ExecutorService                           executor;
     private final int                                       numThreads;
     
-    private volatile boolean isRunning;
+    private volatile boolean isRunning = true;
 
     public BatchAcceptorAndReadingThreadStrategy(
+        Server            server,
         AbstractNioReader reader, 
-        ThreadPoolFactory threadPoolFactory) throws IOException {
+        ThreadPoolFactory threadPoolFactory, 
+        AbstractNioWriter writer) throws IOException {
         super();
-        Selector selector           = Selector.open();
         executor                    = threadPoolFactory.createThreadPoolExecutor();
-        batchSelectionStrategy      = new BatchServerAndReadingSelectionStrategy(null, selector, reader);
+        Selector selector           = Selector.open();
+        server.register(selector);
+        batchSelectionStrategy      = new BatchServerAndReadingSelectionStrategy(
+            null, 
+            selector, 
+            reader, 
+            writer);
         numThreads                  = threadPoolFactory.getNumThreads();
     }
 

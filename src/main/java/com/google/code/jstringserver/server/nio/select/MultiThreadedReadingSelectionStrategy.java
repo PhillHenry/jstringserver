@@ -5,11 +5,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
-import com.google.code.jstringserver.server.threads.NamedThreadFactory;
 import com.google.code.jstringserver.server.wait.WaitStrategy;
 
 public class MultiThreadedReadingSelectionStrategy extends AbstractSelectionStrategy {
@@ -38,7 +34,7 @@ public class MultiThreadedReadingSelectionStrategy extends AbstractSelectionStra
                 );
         } else {
             if (key.isReadable() || key.isWritable()) {
-                executorService.submit(new ReadWriterTask(key));
+                executorService.submit(new ReadWriterTask(key, reader, writer));
             }
         }
         key.cancel();
@@ -71,21 +67,19 @@ public class MultiThreadedReadingSelectionStrategy extends AbstractSelectionStra
     }
     
     class ReadWriterTask extends AbstractTask {
+        private final ReaderWriter readThenWriteJob;
 
         public ReadWriterTask(
-            SelectionKey key) {
+            SelectionKey key, 
+            AbstractNioReader reader,
+            AbstractNioWriter writer) {
             super(key);
+            this.readThenWriteJob = new ReaderWriter(reader, writer);
         }
 
         @Override
         protected void doWork(SelectionKey key) throws IOException {
-            try {
-                reader.read(key, getChannel());
-                writer.write(key, getChannel());
-            } finally {
-                getChannel().socket().close();
-                getChannel().close();
-            }
+            readThenWriteJob.doWork(key);
         }
         
     }

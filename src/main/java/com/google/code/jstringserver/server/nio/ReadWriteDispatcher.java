@@ -17,6 +17,7 @@ public class ReadWriteDispatcher implements ClientChannelListener {
     private final SocketChannelExchanger    socketChannelExchanger;
     private final AbstractSelectionStrategy selectionStrategy;
     private final Selector                  selector;
+    private final ClientConfigurer          clientConfigurer;
     
     private volatile boolean                isRunning = true;
 
@@ -27,6 +28,7 @@ public class ReadWriteDispatcher implements ClientChannelListener {
         this.socketChannelExchanger = socketChannelExchanger;
         this.selectionStrategy = selectionStrategy;
         this.selector = selector;
+        this.clientConfigurer = new ClientConfigurer(selector);
     }
 
     @Override
@@ -35,7 +37,7 @@ public class ReadWriteDispatcher implements ClientChannelListener {
             try {
                 SocketChannel socketChannel = socketChannelExchanger.consume();
                 if (socketChannel != null) {
-                    register(socketChannel);
+                    clientConfigurer.register(socketChannel);
                 }
                 checkIncoming();
             } catch (Exception e) {
@@ -44,12 +46,7 @@ public class ReadWriteDispatcher implements ClientChannelListener {
         }
     }
 
-    private void register(SocketChannel socketChannel) throws IOException, ClosedChannelException {
-        if (socketChannel != null) {
-            socketChannel.configureBlocking(false);
-            socketChannel.register(selector, OP_READ | OP_CONNECT | OP_WRITE); 
-        }
-    }
+
 
     private void checkIncoming() throws IOException {
         selectionStrategy.select();

@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import com.google.code.jstringserver.server.nio.ClientConfigurer;
 import com.google.code.jstringserver.server.wait.WaitStrategy;
 
 public class BatchServerAndReadingSelectionStrategy extends AbstractSelectionStrategy {
@@ -21,19 +23,23 @@ public class BatchServerAndReadingSelectionStrategy extends AbstractSelectionStr
         }
         
     };
-    private final AbstractNioReader reader;
+    private final ReaderWriter      readThenWriteJob;
+    private final ClientConfigurer  clientConfigurer;
 
     public BatchServerAndReadingSelectionStrategy(
         WaitStrategy        waitStrategy,
         Selector            selector,
-        AbstractNioReader   reader) {
+        AbstractNioReader   reader, 
+        AbstractNioWriter   writer) {
         super(waitStrategy, selector);
-        this.reader = reader;
+        this.readThenWriteJob = new ReaderWriter(reader, writer);
+        this.clientConfigurer = new ClientConfigurer(selector);
     }
 
     @Override
     protected void handleSelectionKeys() throws IOException {
         handleSelectionKeysWithLock();
+        getSelector().wakeup();
         Set<SelectionKey>       keys        = selectionKeys.get();
         Iterator<SelectionKey>  keyIterator = keys.iterator();
         while (keyIterator.hasNext()) {
@@ -44,8 +50,14 @@ public class BatchServerAndReadingSelectionStrategy extends AbstractSelectionStr
     }
 
     private void handleClient(SelectionKey key) throws IOException {
-        SelectableChannel clientChannel = key.channel();
-        reader.read(key, (SocketChannel) clientChannel);
+        SelectableChannel channel = key.channel();
+        if (channel instanceof ServerSocketChannel) {
+            ServerSocketChannel serverSocketChannel = (ServerSocketChannel) channel;
+            SocketChannel       clientChannel       = serverSocketChannel.accept();
+            clientConfigurer.register(clientChannel);
+        } else {
+            readThenWriteJob.doWork(key);
+        }
     }
     
     private synchronized void handleSelectionKeysWithLock() throws IOException {

@@ -1,0 +1,29 @@
+package com.google.code.jstringserver.server.nio.select;
+
+import java.io.IOException;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.SocketChannel;
+
+public class ReaderWriter {
+    private final AbstractNioWriter writer;
+    private final AbstractNioReader reader;
+
+    public ReaderWriter(
+        AbstractNioReader reader,
+        AbstractNioWriter writer) {
+        this.reader = reader;
+        this.writer = writer;
+    }
+
+    protected void doWork(SelectionKey key) throws IOException {
+        SocketChannel channel = (SocketChannel) key.channel();
+        try {
+            reader.read(key, channel);
+            writer.write(key, channel);
+        } finally {
+            channel.socket().close();
+            channel.close();
+        }
+    }
+
+}

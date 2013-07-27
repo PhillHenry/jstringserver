@@ -16,13 +16,19 @@ import com.google.code.jstringserver.server.wait.WaitStrategy;
 public class BatchServerAndReadingSelectionStrategy extends AbstractSelectionStrategy {
     
     private final ThreadLocal<Set<SelectionKey>> selectionKeys = new ThreadLocal<Set<SelectionKey>>() {
-
         @Override
         protected Set<SelectionKey> initialValue() {
             return new HashSet<>();
         }
-        
     };
+    
+    private final ThreadLocal<Set<SelectionKey>> clientSelectionKeys = new ThreadLocal<Set<SelectionKey>>() {
+        @Override
+        protected Set<SelectionKey> initialValue() {
+            return new HashSet<>();
+        }
+    };
+    
     private final ReaderWriter      readThenWriteJob;
     private final ClientConfigurer  clientConfigurer;
 
@@ -37,18 +43,22 @@ public class BatchServerAndReadingSelectionStrategy extends AbstractSelectionStr
     }
 
     @Override
-    protected synchronized void handleSelectionKeys() throws IOException {
+    protected void handleSelectionKeys() throws IOException {
         handleSelectionKeysWithLock();
-        Set<SelectionKey>       keys        = selectionKeys.get();
+        handleClients();
+    }
+
+    private void handleClients() throws IOException {
+        Set<SelectionKey>       keys        = clientSelectionKeys.get();
         Iterator<SelectionKey>  keyIterator = keys.iterator();
         while (keyIterator.hasNext()) {
             SelectionKey key = keyIterator.next();
+            readThenWriteJob.doWork(key);
             keyIterator.remove();
-            handleClient(key);
         }
     }
 
-    private void handleClient(SelectionKey key) throws IOException {
+    private void differentiate(SelectionKey key) throws IOException {
         SelectableChannel channel = key.channel();
         if (channel instanceof ServerSocketChannel) {
             ServerSocketChannel serverSocketChannel = (ServerSocketChannel) channel;
@@ -56,17 +66,27 @@ public class BatchServerAndReadingSelectionStrategy extends AbstractSelectionStr
             clientConfigurer.register(clientChannel);
         } else {
             key.cancel();
-            readThenWriteJob.doWork(key);
+            clientSelectionKeys.get().add(key);
         }
     }
     
     private synchronized void handleSelectionKeysWithLock() throws IOException {
         super.handleSelectionKeys();
+        Set<SelectionKey>       keys        = selectionKeys.get();
+        Iterator<SelectionKey>  keyIterator = keys.iterator();
+        while (keyIterator.hasNext()) {
+            SelectionKey key = keyIterator.next();
+            keyIterator.remove();
+            differentiate(key);
+        }
     }
 
     @Override
     protected void handle(SelectionKey key) throws IOException {
         selectionKeys.get().add(key);
+        if (!(key.channel() instanceof ServerSocketChannel)) {
+            key.cancel(); // don't want to process this key again.
+        }
     }
 
 }

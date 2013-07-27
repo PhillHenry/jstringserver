@@ -16,7 +16,7 @@ import com.google.code.jstringserver.server.nio.select.NioReaderLooping;
 import com.google.code.jstringserver.server.nio.select.NioWriter;
 import com.google.code.jstringserver.server.wait.SleepWaitStrategy;
 
-public class MultiThreadedSelectorServerMain extends SingleThreadedSelectorServerMain {
+public class MultiThreadedSelectorServerMain extends AbstractServerMain {
 
     public static void main(String[] args) throws UnknownHostException, IOException {
         MultiThreadedSelectorServerMain app = new MultiThreadedSelectorServerMain();

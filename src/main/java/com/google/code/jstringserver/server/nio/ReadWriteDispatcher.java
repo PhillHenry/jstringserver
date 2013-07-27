@@ -57,6 +57,11 @@ public class ReadWriteDispatcher implements ClientChannelListener {
 
     public void shutdown() {
         isRunning = false;
+        try {
+            selector.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

@@ -48,8 +48,12 @@ public class AcceptorDispatcher implements Runnable {
         }
     }
 
-    public void shutdown() throws IOException {
+    public void shutdown() {
         isRunning = false;
-        selectionStrategy.getSelector().close();
+        try {
+            selectionStrategy.getSelector().close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

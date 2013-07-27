@@ -7,7 +7,7 @@ import java.net.UnknownHostException;
 import java.nio.channels.Selector;
 
 import com.google.code.jstringserver.performance.AsynchClientDataHandler;
-import com.google.code.jstringserver.server.PluggableThreadStrategy;
+import com.google.code.jstringserver.server.ExchangingThreadStrategy;
 import com.google.code.jstringserver.server.Server;
 import com.google.code.jstringserver.server.bytebuffers.factories.ByteBufferFactory;
 import com.google.code.jstringserver.server.bytebuffers.factories.DirectByteBufferFactory;
@@ -47,7 +47,7 @@ public class SingleThreadedSelectorServerMain {
         ClientChannelListener       clientChannelListener   = createClientListener(socketChannelExchanger, selectionStrategy);
         SleepWaitStrategy           waitStrategy            = new SleepWaitStrategy(10);
         AbstractSelectionStrategy   acceptorStrategy        = createAcceptorStrategy(socketChannelExchanger, waitStrategy);
-        PluggableThreadStrategy            selectorStrategy        = new PluggableThreadStrategy(
+        ExchangingThreadStrategy            selectorStrategy        = new ExchangingThreadStrategy(
                 server, 
                 socketChannelExchanger, 
                 waitStrategy, 

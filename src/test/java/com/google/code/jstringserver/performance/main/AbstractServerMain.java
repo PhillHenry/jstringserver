@@ -39,7 +39,7 @@ public abstract class AbstractServerMain {
         ClientChannelListener       clientChannelListener   = createClientListener(socketChannelExchanger, selectionStrategy);
         SleepWaitStrategy           waitStrategy            = new SleepWaitStrategy(10);
         AbstractSelectionStrategy   acceptorStrategy        = createAcceptorStrategy(socketChannelExchanger, waitStrategy);
-        ExchangingThreadStrategy            selectorStrategy        = new ExchangingThreadStrategy(
+        ExchangingThreadStrategy    selectorStrategy        = new ExchangingThreadStrategy(
                 server, 
                 socketChannelExchanger, 
                 waitStrategy, 

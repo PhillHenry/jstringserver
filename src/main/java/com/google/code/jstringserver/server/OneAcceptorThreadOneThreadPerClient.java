@@ -21,7 +21,7 @@ public class OneAcceptorThreadOneThreadPerClient implements ThreadStrategy {
     public OneAcceptorThreadOneThreadPerClient(Server server, int numThreads, ClientReader clientHandler) {
         this.clientHandler      = clientHandler;
         this.server             = server;
-        this.executorService    = new ThreadPoolFactory().createThreadPoolExecutor(numThreads);
+        this.executorService    = new ThreadPoolFactory(numThreads).createThreadPoolExecutor();
     }
 
     @Override

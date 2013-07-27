@@ -26,7 +26,7 @@ public class MultiThreadedSelectorStrategyTest extends SelectorStrategyTest {
 
     @BeforeClass
     public static void startExecutor() {
-        int poolSize = Runtime.getRuntime().availableProcessors();
+        int poolSize = availableProcessors();
         executorService = new ThreadPoolExecutor(
             poolSize, 
             poolSize, 
@@ -35,7 +35,7 @@ public class MultiThreadedSelectorStrategyTest extends SelectorStrategyTest {
             new LinkedBlockingQueue<Runnable>(Integer.MAX_VALUE),
             new NamedThreadFactory(MultiThreadedReadingSelectionStrategy.class.getSimpleName()));
     }
-    
+
     @AfterClass
     public static void stopExecutor() {
         executorService.shutdownNow();

@@ -55,6 +55,10 @@ public abstract class AbstractThreadStrategyTest<T extends ThreadStrategy> {
         return 100;
     }
 
+    protected static int availableProcessors() {
+        return Runtime.getRuntime().availableProcessors();
+    }
+    
     protected ClientDataHandler createClientDataHandler() {
         return new ThreadLocalClientDataHandler(payload);
     }

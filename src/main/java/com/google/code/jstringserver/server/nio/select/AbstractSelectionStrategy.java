@@ -37,8 +37,16 @@ public abstract class AbstractSelectionStrategy {
         }
     }
 
-    private void handleSelectionKeys() throws IOException {
-        Set<SelectionKey> keys = selector.selectedKeys();
+    protected void handleSelectionKeys() throws IOException {
+        Set<SelectionKey> keys = selectedKeys();
+        handleSelectionKeys(keys);
+    }
+
+    protected Set<SelectionKey> selectedKeys() {
+        return selector.selectedKeys();
+    }
+
+    protected void handleSelectionKeys(Set<SelectionKey> keys) throws IOException {
         Iterator<SelectionKey> keyIter = keys.iterator();
         while (keyIter.hasNext()) {
             SelectionKey key = keyIter.next();

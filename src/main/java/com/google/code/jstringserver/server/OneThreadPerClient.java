@@ -25,7 +25,7 @@ public class OneThreadPerClient implements ThreadStrategy {
         this.clientHandler      = clientHandler;
         this.server             = server;
         this.numThreads         = numThreads;
-        this.executorService    = new ThreadPoolFactory().createThreadPoolExecutor(numThreads);
+        this.executorService    = new ThreadPoolFactory(numThreads).createThreadPoolExecutor();
     }
 
     public void start() {

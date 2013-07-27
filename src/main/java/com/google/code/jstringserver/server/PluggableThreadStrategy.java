@@ -10,11 +10,10 @@ import com.google.code.jstringserver.server.nio.ClientChannelListener;
 import com.google.code.jstringserver.server.nio.select.AbstractSelectionStrategy;
 import com.google.code.jstringserver.server.wait.WaitStrategy;
 
-public class SelectorStrategy implements ThreadStrategy {
+public class PluggableThreadStrategy implements ThreadStrategy {
 
     private final Server                 server;
     private final ThreadPoolExecutor     threadPoolExecutor;
-    private final int                    numThreads;
     private final SocketChannelExchanger socketChannelExchanger;
     private final WaitStrategy           waitStrategy;
     private final ClientChannelListener  clientChannelListener;
@@ -23,18 +22,17 @@ public class SelectorStrategy implements ThreadStrategy {
     private AcceptorDispatcher               selectorAcceptor;
 
 
-    public SelectorStrategy(Server server,
-                            int numThreads,
-                            SocketChannelExchanger socketChannelExchanger,
-                            WaitStrategy waitStrategy,
-                            ClientChannelListener  clientChannelListener, 
-                            AbstractSelectionStrategy acceptorStrategy) throws IOException {
-        this.numThreads = numThreads;
+    public PluggableThreadStrategy(
+                            Server                      server,
+                            SocketChannelExchanger      socketChannelExchanger,
+                            WaitStrategy                waitStrategy,
+                            ClientChannelListener       clientChannelListener, 
+                            AbstractSelectionStrategy   acceptorStrategy) throws IOException {
         this.socketChannelExchanger = socketChannelExchanger;
-        this.waitStrategy = waitStrategy;
-        this.clientChannelListener = clientChannelListener;
-        this.acceptorStrategy = acceptorStrategy;
-        this.server = server;
+        this.waitStrategy           = waitStrategy;
+        this.clientChannelListener  = clientChannelListener;
+        this.acceptorStrategy       = acceptorStrategy;
+        this.server                 = server;
         configCallback();
         threadPoolExecutor = new ThreadPoolFactory().createThreadPoolExecutor(1);
     }
@@ -55,9 +53,7 @@ public class SelectorStrategy implements ThreadStrategy {
     }
 
     private void startListenerThreads() {
-        for (int i = 0; i < numThreads; i++) {
-            threadPoolExecutor.execute(clientChannelListener);
-        }
+        threadPoolExecutor.execute(clientChannelListener);
     }
 
     private void startAcceptorThread() throws IOException {

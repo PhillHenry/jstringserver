@@ -7,10 +7,10 @@ import java.nio.channels.SocketChannel;
 
 import com.google.code.jstringserver.server.wait.WaitStrategy;
 
-public class SingleThreadedSelectionStrategy extends AbstractSelectionStrategy {
+public class SingleThreadedReadingSelectionStrategy extends AbstractSelectionStrategy {
     private final AbstractNioWriter writer;
     private final AbstractNioReader reader;
-    public SingleThreadedSelectionStrategy(WaitStrategy waitStrategy,
+    public SingleThreadedReadingSelectionStrategy(WaitStrategy waitStrategy,
                                            Selector serverSelector, 
                                            AbstractNioWriter writer, 
                                            AbstractNioReader reader) {

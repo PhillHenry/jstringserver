@@ -17,7 +17,7 @@ public class MultiThreadedSelectionStrategyTest extends AbstractThreadedSelectio
     }
 
     protected AbstractSelectionStrategy strategyToTest() {
-        return new MultiThreadedSelectionStrategy(null, serverSelector, writer, reader, executorService);
+        return new MultiThreadedReadingSelectionStrategy(null, serverSelector, writer, reader, executorService);
     }
 
 }

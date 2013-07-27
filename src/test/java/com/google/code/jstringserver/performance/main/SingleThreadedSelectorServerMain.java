@@ -4,6 +4,7 @@ import static com.google.code.jstringserver.performance.AbstractThreadStrategyTe
 
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.nio.channels.Selector;
 
 import com.google.code.jstringserver.performance.AsynchClientDataHandler;
 import com.google.code.jstringserver.server.SelectorStrategy;
@@ -17,11 +18,12 @@ import com.google.code.jstringserver.server.exchange.NonBlockingSocketChannelExc
 import com.google.code.jstringserver.server.exchange.SocketChannelExchanger;
 import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 import com.google.code.jstringserver.server.nio.ClientChannelListener;
+import com.google.code.jstringserver.server.nio.ServerSocketDispatchingSelectionStrategy;
 import com.google.code.jstringserver.server.nio.ReadWriteDispatcher;
 import com.google.code.jstringserver.server.nio.select.AbstractSelectionStrategy;
 import com.google.code.jstringserver.server.nio.select.NioReader;
 import com.google.code.jstringserver.server.nio.select.NioWriter;
-import com.google.code.jstringserver.server.nio.select.SingleThreadedSelectionStrategy;
+import com.google.code.jstringserver.server.nio.select.SingleThreadedReadingSelectionStrategy;
 import com.google.code.jstringserver.server.wait.SleepWaitStrategy;
 
 public class SingleThreadedSelectorServerMain {
@@ -41,14 +43,20 @@ public class SingleThreadedSelectorServerMain {
         ClientDataHandler       clientDataHandler       = new AsynchClientDataHandler(EXPECTED_PAYLOAD);
         ByteBufferStore         byteBufferStore         = createByteBufferStore();
         
-        AbstractSelectionStrategy selectionStrategy     = createSelectionStrategy(clientDataHandler, byteBufferStore);
-        ClientChannelListener   clientChannelListener   = new ReadWriteDispatcher(socketChannelExchanger, selectionStrategy);
+        AbstractSelectionStrategy   selectionStrategy       = createSelectionStrategy(clientDataHandler, byteBufferStore);
+        ClientChannelListener       clientChannelListener   = new ReadWriteDispatcher(socketChannelExchanger, selectionStrategy);
+        SleepWaitStrategy           waitStrategy            = new SleepWaitStrategy(10);
+        AbstractSelectionStrategy   acceptorStrategy        = new ServerSocketDispatchingSelectionStrategy(
+            waitStrategy, 
+            Selector.open(), 
+            socketChannelExchanger);
         SelectorStrategy        selectorStrategy        = new SelectorStrategy(
                 server, 
                 availableProcessors(), 
                 socketChannelExchanger, 
-                new SleepWaitStrategy(10), 
-                clientChannelListener);
+                waitStrategy, 
+                clientChannelListener,
+                acceptorStrategy);
         selectorStrategy.start();
     }
 
@@ -57,7 +65,7 @@ public class SingleThreadedSelectorServerMain {
     }
 
     protected AbstractSelectionStrategy createSelectionStrategy(ClientDataHandler clientDataHandler, ByteBufferStore byteBufferStore) {
-        return new SingleThreadedSelectionStrategy(
+        return new SingleThreadedReadingSelectionStrategy(
                 null, 
                 null, 
                 new NioWriter(clientDataHandler), 

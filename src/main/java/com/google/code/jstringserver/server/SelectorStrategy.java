@@ -7,6 +7,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import com.google.code.jstringserver.server.exchange.SocketChannelExchanger;
 import com.google.code.jstringserver.server.nio.AcceptorDispatcher;
 import com.google.code.jstringserver.server.nio.ClientChannelListener;
+import com.google.code.jstringserver.server.nio.select.AbstractSelectionStrategy;
 import com.google.code.jstringserver.server.wait.WaitStrategy;
 
 public class SelectorStrategy implements ThreadStrategy {
@@ -19,18 +20,22 @@ public class SelectorStrategy implements ThreadStrategy {
     private final SocketChannelExchanger socketChannelExchanger;
     private final WaitStrategy           waitStrategy;
     private final ClientChannelListener  clientChannelListener;
+    private final AbstractSelectionStrategy acceptorStrategy;
 
     private AcceptorDispatcher               selectorAcceptor;
+
 
     public SelectorStrategy(Server server,
                             int numThreads,
                             SocketChannelExchanger socketChannelExchanger,
                             WaitStrategy waitStrategy,
-                            ClientChannelListener  clientChannelListener) throws IOException {
+                            ClientChannelListener  clientChannelListener, 
+                            AbstractSelectionStrategy acceptorStrategy) throws IOException {
         this.numThreads = numThreads;
         this.socketChannelExchanger = socketChannelExchanger;
         this.waitStrategy = waitStrategy;
         this.clientChannelListener = clientChannelListener;
+        this.acceptorStrategy = acceptorStrategy;
         this.selector = Selector.open();
         this.server = server;
         clientChannelListener.setSelector(selector);
@@ -60,8 +65,7 @@ public class SelectorStrategy implements ThreadStrategy {
     }
 
     private void startAcceptorThread() throws IOException {
-        Selector serverSelector = Selector.open();
-        selectorAcceptor = new AcceptorDispatcher(server, serverSelector, socketChannelExchanger, waitStrategy);
+        selectorAcceptor = new AcceptorDispatcher(server, socketChannelExchanger, waitStrategy, acceptorStrategy);
         Thread acceptorThread = new Thread(selectorAcceptor, "acceptor thread");
         acceptorThread.start();
     }

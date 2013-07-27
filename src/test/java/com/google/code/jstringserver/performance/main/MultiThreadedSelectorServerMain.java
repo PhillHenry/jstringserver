@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 import com.google.code.jstringserver.server.bytebuffers.store.ByteBufferStore;
 import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 import com.google.code.jstringserver.server.nio.select.AbstractSelectionStrategy;
-import com.google.code.jstringserver.server.nio.select.MultiThreadedSelectionStrategy;
+import com.google.code.jstringserver.server.nio.select.MultiThreadedReadingSelectionStrategy;
 import com.google.code.jstringserver.server.nio.select.NioReaderLooping;
 import com.google.code.jstringserver.server.nio.select.NioWriter;
 import com.google.code.jstringserver.server.wait.SleepWaitStrategy;
@@ -25,7 +25,7 @@ public class MultiThreadedSelectorServerMain extends SingleThreadedSelectorServe
 
     @Override
     protected AbstractSelectionStrategy createSelectionStrategy(ClientDataHandler clientDataHandler, ByteBufferStore byteBufferStore) {
-        return new MultiThreadedSelectionStrategy(
+        return new MultiThreadedReadingSelectionStrategy(
             null, 
             null, 
             new NioWriter(clientDataHandler), 

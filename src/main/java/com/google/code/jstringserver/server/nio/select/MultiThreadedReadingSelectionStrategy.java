@@ -12,13 +12,13 @@ import java.util.concurrent.TimeUnit;
 import com.google.code.jstringserver.server.threads.NamedThreadFactory;
 import com.google.code.jstringserver.server.wait.WaitStrategy;
 
-public class MultiThreadedSelectionStrategy extends AbstractSelectionStrategy {
+public class MultiThreadedReadingSelectionStrategy extends AbstractSelectionStrategy {
 
     private final ExecutorService executorService;
     private final AbstractNioWriter writer;
     private final AbstractNioReader reader;
 
-    public MultiThreadedSelectionStrategy(
+    public MultiThreadedReadingSelectionStrategy(
         WaitStrategy        waitStrategy,
         Selector            serverSelector,
         AbstractNioWriter   writer, 

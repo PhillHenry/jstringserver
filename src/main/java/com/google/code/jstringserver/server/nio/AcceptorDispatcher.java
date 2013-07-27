@@ -1,10 +1,7 @@
 package com.google.code.jstringserver.server.nio;
 
 import java.io.IOException;
-import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -15,37 +12,25 @@ import com.google.code.jstringserver.server.wait.WaitStrategy;
 
 public class AcceptorDispatcher implements Runnable {
 
-    private final Selector                  serverSelector;
-    private final SocketChannelExchanger    socketChannelExchanger;
     private final AbstractSelectionStrategy selectionStrategy;
     private final Server                    server;
+
     private volatile boolean                isRunning = true;
 
-    public AcceptorDispatcher(Server server,
-                          Selector serverSelector,
-                          SocketChannelExchanger socketChannelExchanger,
-                          WaitStrategy waitStrategy) {
+    public AcceptorDispatcher(
+        Server                      server,
+        SocketChannelExchanger      socketChannelExchanger,
+        WaitStrategy                waitStrategy,
+        AbstractSelectionStrategy   selectionStrategy) {
         super();
-        this.server = server;
-        this.serverSelector = serverSelector;
-        this.socketChannelExchanger = socketChannelExchanger;
-        this.selectionStrategy = new AbstractSelectionStrategy(waitStrategy, serverSelector) {
-
-            @Override
-            protected void handle(SelectionKey key) throws IOException {
-                ServerSocketChannel serverSocketChannel = (ServerSocketChannel) key.channel();
-                SocketChannel socketChannel = serverSocketChannel.accept();
-                if (socketChannel != null) {
-                    AcceptorDispatcher.this.socketChannelExchanger.ready(socketChannel);
-                }
-            }
-        };
+        this.server             = server;
+        this.selectionStrategy  = selectionStrategy;
     }
 
     @Override
     public void run() {
         try {
-            server.register(serverSelector);
+            server.register(selectionStrategy.getSelector());
         } catch (IOException e) {
             e.printStackTrace();
             return;
@@ -65,6 +50,6 @@ public class AcceptorDispatcher implements Runnable {
 
     public void shutdown() throws IOException {
         isRunning = false;
-        serverSelector.close();
+        selectionStrategy.getSelector().close();
     }
 }

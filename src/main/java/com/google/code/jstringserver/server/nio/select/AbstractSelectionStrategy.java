@@ -47,6 +47,10 @@ public abstract class AbstractSelectionStrategy {
     public void setSelector(Selector selector) {
         this.selector = selector;
     }
+    
+    public Selector getSelector() {
+        return this.selector;
+    }
 
     protected abstract void handle(SelectionKey key) throws IOException;
 }

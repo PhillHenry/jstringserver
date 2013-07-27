@@ -37,9 +37,8 @@ public class BatchServerAndReadingSelectionStrategy extends AbstractSelectionStr
     }
 
     @Override
-    protected void handleSelectionKeys() throws IOException {
+    protected synchronized void handleSelectionKeys() throws IOException {
         handleSelectionKeysWithLock();
-        getSelector().wakeup();
         Set<SelectionKey>       keys        = selectionKeys.get();
         Iterator<SelectionKey>  keyIterator = keys.iterator();
         while (keyIterator.hasNext()) {
@@ -56,6 +55,7 @@ public class BatchServerAndReadingSelectionStrategy extends AbstractSelectionStr
             SocketChannel       clientChannel       = serverSocketChannel.accept();
             clientConfigurer.register(clientChannel);
         } else {
+            key.cancel();
             readThenWriteJob.doWork(key);
         }
     }
@@ -67,7 +67,6 @@ public class BatchServerAndReadingSelectionStrategy extends AbstractSelectionStr
     @Override
     protected void handle(SelectionKey key) throws IOException {
         selectionKeys.get().add(key);
-        key.cancel();
     }
 
 }

@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 import com.google.code.jstringserver.server.nio.select.AbstractNioReader;
 import com.google.code.jstringserver.server.nio.select.AbstractNioWriter;
 import com.google.code.jstringserver.server.nio.select.BatchServerAndReadingSelectionStrategy;
+import com.google.code.jstringserver.server.wait.WaitStrategy;
 
 public class BatchAcceptorAndReadingThreadStrategy implements ThreadStrategy {
     
@@ -23,10 +24,18 @@ public class BatchAcceptorAndReadingThreadStrategy implements ThreadStrategy {
         AbstractNioWriter writer) throws IOException {
         super();
         executor                    = threadPoolFactory.createThreadPoolExecutor();
-        Selector selector           = Selector.open();
+        final Selector selector           = Selector.open();
         server.register(selector);
+        WaitStrategy waitStrategy = new WaitStrategy() {
+            
+            @Override
+            public boolean pause() {
+                selector.wakeup();
+                return true;
+            }
+        };
         batchSelectionStrategy      = new BatchServerAndReadingSelectionStrategy(
-            null, 
+            waitStrategy, 
             selector, 
             reader, 
             writer);

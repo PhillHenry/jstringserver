@@ -21,7 +21,7 @@ public class ClientConfigurer {
     public void register(SocketChannel socketChannel) throws IOException, ClosedChannelException {
         if (socketChannel != null) {
             socketChannel.configureBlocking(false);
-            socketChannel.register(selector, OP_READ | OP_CONNECT | OP_WRITE); 
+            socketChannel.register(selector, OP_READ | OP_CONNECT | OP_WRITE); // can block if other threads are selecting. see http://stackoverflow.com/questions/1057224/thread-is-stuck-while-registering-channel-with-selector-in-java-nio-server
         }
     }
 

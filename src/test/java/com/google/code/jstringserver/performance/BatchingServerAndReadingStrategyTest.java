@@ -14,7 +14,6 @@ import com.google.code.jstringserver.server.nio.select.NioReaderLooping;
 import com.google.code.jstringserver.server.nio.select.NioWriter;
 import com.google.code.jstringserver.server.wait.SleepWaitStrategy;
 
-@Ignore
 public class BatchingServerAndReadingStrategyTest extends AbstractThreadStrategyTest<BatchAcceptorAndReadingThreadStrategy> {
 
     @Override

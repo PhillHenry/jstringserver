@@ -11,7 +11,6 @@ import com.google.code.jstringserver.server.wait.WaitStrategy;
 
 public class ExchangingThreadStrategy implements ThreadStrategy {
 
-    private final ThreadPoolExecutor     threadPoolExecutor;
     private final SocketChannelExchanger socketChannelExchanger;
     private final ClientChannelListener  clientChannelListener;
     private final AcceptorDispatcher     selectorAcceptor;
@@ -25,7 +24,6 @@ public class ExchangingThreadStrategy implements ThreadStrategy {
         this.socketChannelExchanger = socketChannelExchanger;
         this.clientChannelListener  = clientChannelListener;
         selectorAcceptor            = new AcceptorDispatcher(server, socketChannelExchanger, waitStrategy, acceptorStrategy);
-        threadPoolExecutor          = new ThreadPoolFactory().createThreadPoolExecutor(1);
         configCallback();
     }
 
@@ -45,7 +43,8 @@ public class ExchangingThreadStrategy implements ThreadStrategy {
     }
 
     private void startListenerThreads() {
-        threadPoolExecutor.execute(clientChannelListener);
+        Thread clientHandlingThread = new Thread(clientChannelListener);
+        clientHandlingThread.start();
     }
 
     private void startAcceptorThread() throws IOException {
@@ -56,7 +55,6 @@ public class ExchangingThreadStrategy implements ThreadStrategy {
     @Override
     public void shutdown() {
         clientChannelListener.shutdown();
-        threadPoolExecutor.shutdown();
         selectorAcceptor.shutdown();
     }
 

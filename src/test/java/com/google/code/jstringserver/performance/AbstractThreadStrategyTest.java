@@ -11,8 +11,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.google.code.jstringserver.client.WritingConnector;
-import com.google.code.jstringserver.server.FreePortFinder;
-import com.google.code.jstringserver.server.OneThreadPerClient;
 import com.google.code.jstringserver.server.Server;
 import com.google.code.jstringserver.server.ServerBuilder;
 import com.google.code.jstringserver.server.ThreadStrategy;

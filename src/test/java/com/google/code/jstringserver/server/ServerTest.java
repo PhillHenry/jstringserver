@@ -2,15 +2,13 @@ package com.google.code.jstringserver.server;
 
 import static com.google.code.jstringserver.client.Connector.createConnectors;
 import static com.google.code.jstringserver.client.Networker.checkFinished;
-import static com.google.code.jstringserver.client.Networker.checkInError;
 import static com.google.code.jstringserver.client.Networker.checkNotInError;
 import static com.google.code.jstringserver.server.Acceptor.createAcceptors;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;

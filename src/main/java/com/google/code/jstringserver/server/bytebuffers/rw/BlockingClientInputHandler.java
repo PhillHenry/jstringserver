@@ -3,7 +3,6 @@ package com.google.code.jstringserver.server.bytebuffers.rw;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.SocketChannel;
 
 import com.google.code.jstringserver.server.bytebuffers.store.ByteBufferStore;
 import com.google.code.jstringserver.server.handlers.ClientDataHandler;

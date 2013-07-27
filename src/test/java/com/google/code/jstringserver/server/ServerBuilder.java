@@ -3,8 +3,6 @@ package com.google.code.jstringserver.server;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 
-import com.google.code.jstringserver.server.Server;
-
 public class ServerBuilder {
     private final String                   address = "localhost";
     private final int                      port;

@@ -1,7 +1,6 @@
 package com.google.code.jstringserver.server;
 
 import java.io.IOException;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import com.google.code.jstringserver.server.exchange.SocketChannelExchanger;
 import com.google.code.jstringserver.server.nio.AcceptorDispatcher;

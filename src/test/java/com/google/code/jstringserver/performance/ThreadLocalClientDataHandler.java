@@ -1,8 +1,6 @@
 package com.google.code.jstringserver.performance;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 

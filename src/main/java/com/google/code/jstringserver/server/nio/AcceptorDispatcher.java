@@ -1,9 +1,6 @@
 package com.google.code.jstringserver.server.nio;
 
 import java.io.IOException;
-import java.nio.channels.Selector;
-import java.util.Iterator;
-import java.util.Set;
 
 import com.google.code.jstringserver.server.Server;
 import com.google.code.jstringserver.server.exchange.SocketChannelExchanger;

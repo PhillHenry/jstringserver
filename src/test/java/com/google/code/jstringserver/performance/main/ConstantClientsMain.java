@@ -3,8 +3,8 @@ package com.google.code.jstringserver.performance.main;
 import static com.google.code.jstringserver.client.ConstantWritingConnector.getTotalCallTime;
 import static com.google.code.jstringserver.client.ConstantWritingConnector.getTotalCalls;
 import static com.google.code.jstringserver.client.ConstantWritingConnector.getTotalErrors;
-import static com.google.code.jstringserver.performance.main.SingleThreadedSelectorServerMain.EXPECTED_PAYLOAD;
-import static com.google.code.jstringserver.performance.main.SingleThreadedSelectorServerMain.PORT;
+import static com.google.code.jstringserver.performance.main.AbstractServerMain.EXPECTED_PAYLOAD;
+import static com.google.code.jstringserver.performance.main.AbstractServerMain.PORT;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;

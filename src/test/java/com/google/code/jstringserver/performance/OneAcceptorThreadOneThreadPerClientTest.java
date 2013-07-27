@@ -2,7 +2,6 @@ package com.google.code.jstringserver.performance;
 
 import com.google.code.jstringserver.server.OneAcceptorThreadOneThreadPerClient;
 import com.google.code.jstringserver.server.Server;
-import com.google.code.jstringserver.server.ThreadStrategy;
 import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 import com.google.code.jstringserver.server.handlers.ClientReader;
 

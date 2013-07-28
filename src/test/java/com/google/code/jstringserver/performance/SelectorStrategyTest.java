@@ -14,6 +14,7 @@ import com.google.code.jstringserver.server.nio.select.AbstractNioWriter;
 import com.google.code.jstringserver.server.nio.select.AbstractSelectionStrategy;
 import com.google.code.jstringserver.server.nio.select.NioReader;
 import com.google.code.jstringserver.server.nio.select.NioWriter;
+import com.google.code.jstringserver.server.nio.select.SelectionStrategy;
 import com.google.code.jstringserver.server.nio.select.SingleThreadedReadingSelectionStrategy;
 import com.google.code.jstringserver.server.wait.SleepWaitStrategy;
 
@@ -27,7 +28,7 @@ public class SelectorStrategyTest extends AbstractThreadStrategyTest<ExchangingT
     @Override
     protected ExchangingThreadStrategy threadingStrategy(Server server, ClientDataHandler clientDataHandler) throws IOException {
         BlockingSocketChannelExchanger  socketChannelExchanger  = new BlockingSocketChannelExchanger();
-        AbstractSelectionStrategy       selectionStrategy       = createSelectionStrategy(clientDataHandler);
+        SelectionStrategy       selectionStrategy       = createSelectionStrategy(clientDataHandler);
         ClientChannelListener           clientChannelListener   = new ReadWriteDispatcher(socketChannelExchanger, selectionStrategy, clientSelector);
         AbstractSelectionStrategy       acceptorStrategy        = createAcceptorStrategy(socketChannelExchanger);
         
@@ -41,7 +42,7 @@ public class SelectorStrategyTest extends AbstractThreadStrategyTest<ExchangingT
             socketChannelExchanger);
     }
 
-    protected AbstractSelectionStrategy createSelectionStrategy(ClientDataHandler clientDataHandler) {
+    protected SelectionStrategy createSelectionStrategy(ClientDataHandler clientDataHandler) {
         AbstractNioWriter writer = new NioWriter(clientDataHandler);
         AbstractNioReader reader = createNioReader(clientDataHandler);
         return createSelectionStrategy(writer, reader);
@@ -51,7 +52,7 @@ public class SelectorStrategyTest extends AbstractThreadStrategyTest<ExchangingT
         return new NioReader(clientDataHandler, getByteBufferStore());
     }
 
-    protected AbstractSelectionStrategy createSelectionStrategy(AbstractNioWriter writer, AbstractNioReader reader) {
+    protected SelectionStrategy createSelectionStrategy(AbstractNioWriter writer, AbstractNioReader reader) {
         return new SingleThreadedReadingSelectionStrategy(
             null, 
             clientSelector, 

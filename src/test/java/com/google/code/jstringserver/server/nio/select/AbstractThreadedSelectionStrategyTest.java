@@ -25,7 +25,7 @@ public abstract class AbstractThreadedSelectionStrategyTest {
     private     ServerBuilder   serverBuilder;
     protected   Selector        serverSelector;
 
-    private AbstractSelectionStrategy toTest;
+    private SelectionStrategy toTest;
 
     @Before
     public void startServer() throws IOException {
@@ -34,7 +34,7 @@ public abstract class AbstractThreadedSelectionStrategyTest {
         toTest = strategyToTest();
     }
 
-    protected abstract AbstractSelectionStrategy strategyToTest();
+    protected abstract SelectionStrategy strategyToTest();
 
     @After
     public void shutdownServer() throws IOException {

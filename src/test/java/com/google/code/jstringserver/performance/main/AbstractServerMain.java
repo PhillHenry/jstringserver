@@ -20,6 +20,7 @@ import com.google.code.jstringserver.server.nio.ClientChannelListener;
 import com.google.code.jstringserver.server.nio.ReadWriteDispatcher;
 import com.google.code.jstringserver.server.nio.ServerSocketDispatchingSelectionStrategy;
 import com.google.code.jstringserver.server.nio.select.AbstractSelectionStrategy;
+import com.google.code.jstringserver.server.nio.select.SelectionStrategy;
 import com.google.code.jstringserver.server.wait.SleepWaitStrategy;
 
 public abstract class AbstractServerMain {
@@ -35,7 +36,7 @@ public abstract class AbstractServerMain {
         ClientDataHandler       clientDataHandler       = new AsynchClientDataHandler(EXPECTED_PAYLOAD);
         ByteBufferStore         byteBufferStore         = createByteBufferStore();
         
-        AbstractSelectionStrategy   selectionStrategy       = createSelectionStrategy(clientDataHandler, byteBufferStore);
+        SelectionStrategy   selectionStrategy       = createSelectionStrategy(clientDataHandler, byteBufferStore);
         ClientChannelListener       clientChannelListener   = createClientListener(socketChannelExchanger, selectionStrategy);
         SleepWaitStrategy           waitStrategy            = new SleepWaitStrategy(10);
         AbstractSelectionStrategy   acceptorStrategy        = createAcceptorStrategy(socketChannelExchanger, waitStrategy);
@@ -48,11 +49,11 @@ public abstract class AbstractServerMain {
         selectorStrategy.start();
     }
 
-    protected abstract AbstractSelectionStrategy createSelectionStrategy(ClientDataHandler clientDataHandler, ByteBufferStore byteBufferStore); 
+    protected abstract SelectionStrategy createSelectionStrategy(ClientDataHandler clientDataHandler, ByteBufferStore byteBufferStore); 
     
     private ReadWriteDispatcher createClientListener(
         SocketChannelExchanger socketChannelExchanger, 
-        AbstractSelectionStrategy selectionStrategy)
+        SelectionStrategy selectionStrategy)
         throws IOException {
         Selector clientSelector = Selector.open();
         return new ReadWriteDispatcher(socketChannelExchanger, selectionStrategy, clientSelector);

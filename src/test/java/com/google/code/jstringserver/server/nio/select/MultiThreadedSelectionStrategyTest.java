@@ -16,7 +16,7 @@ public class MultiThreadedSelectionStrategyTest extends AbstractThreadedSelectio
         Mockito.verify(executorService).submit(Mockito.any(Runnable.class));
     }
 
-    protected AbstractSelectionStrategy strategyToTest() {
+    protected SelectionStrategy strategyToTest() {
         return new MultiThreadedReadingSelectionStrategy(null, serverSelector, writer, reader, executorService);
     }
 

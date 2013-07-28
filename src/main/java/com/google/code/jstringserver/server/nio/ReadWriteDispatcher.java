@@ -5,19 +5,19 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
 import com.google.code.jstringserver.server.exchange.SocketChannelExchanger;
-import com.google.code.jstringserver.server.nio.select.AbstractSelectionStrategy;
+import com.google.code.jstringserver.server.nio.select.SelectionStrategy;
 
 public class ReadWriteDispatcher implements ClientChannelListener {
 
     private final SocketChannelExchanger    socketChannelExchanger;
-    private final AbstractSelectionStrategy selectionStrategy;
+    private final SelectionStrategy selectionStrategy;
     private final Selector                  selector;
     private final ClientConfigurer          clientConfigurer;
     
     private volatile boolean                isRunning = true;
 
     public ReadWriteDispatcher(SocketChannelExchanger socketChannelExchanger, 
-                               AbstractSelectionStrategy selectionStrategy, 
+                               SelectionStrategy selectionStrategy, 
                                Selector selector) {
         super();
         this.socketChannelExchanger = socketChannelExchanger;

@@ -13,7 +13,7 @@ import java.util.Set;
 import com.google.code.jstringserver.server.nio.ClientConfigurer;
 import com.google.code.jstringserver.server.wait.WaitStrategy;
 
-public class BatchServerAndReadingSelectionStrategy extends AbstractSelectionStrategy {
+public class BatchServerAndReadingSelectionStrategy implements SelectionStrategy {
     
     private final ThreadLocal<Set<SelectionKey>> selectionKeys = new ThreadLocal<Set<SelectionKey>>() {
         @Override
@@ -31,18 +31,32 @@ public class BatchServerAndReadingSelectionStrategy extends AbstractSelectionStr
     
     private final ReaderWriter      readThenWriteJob;
     private final ClientConfigurer  clientConfigurer;
+    private final WaitStrategy waitStrategy;
+    private final Selector selector;
 
     public BatchServerAndReadingSelectionStrategy(
         WaitStrategy        waitStrategy,
         Selector            selector,
         AbstractNioReader   reader, 
         AbstractNioWriter   writer) {
-        super(waitStrategy, selector);
-        this.readThenWriteJob = new ReaderWriter(reader, writer);
-        this.clientConfigurer = new ClientConfigurer(selector);
+        this.waitStrategy       = waitStrategy;
+        this.selector           = selector;
+        this.readThenWriteJob   = new ReaderWriter(reader, writer);
+        this.clientConfigurer   = new ClientConfigurer(selector);
+    }
+    
+    @Override
+    public synchronized void select() throws IOException {
+        int selected = selector.select(); 
+        if (selected > 0) {
+            handleSelectionKeys();
+        } else {
+            if (waitStrategy != null) {
+                waitStrategy.pause();
+            }
+        }
     }
 
-    @Override
     protected void handleSelectionKeys() throws IOException {
         handleSelectionKeysWithLock();
         handleClients();
@@ -53,6 +67,8 @@ public class BatchServerAndReadingSelectionStrategy extends AbstractSelectionStr
         Iterator<SelectionKey>  keyIterator = keys.iterator();
         while (keyIterator.hasNext()) {
             SelectionKey key = keyIterator.next();
+            SocketChannel clientChannel = (SocketChannel) key.channel();
+            clientChannel.finishConnect();
             readThenWriteJob.doWork(key);
             keyIterator.remove();
         }
@@ -71,8 +87,7 @@ public class BatchServerAndReadingSelectionStrategy extends AbstractSelectionStr
     }
     
     private synchronized void handleSelectionKeysWithLock() throws IOException {
-        super.handleSelectionKeys();
-        Set<SelectionKey>       keys        = selectionKeys.get();
+        Set<SelectionKey>       keys        = selector.selectedKeys();
         Iterator<SelectionKey>  keyIterator = keys.iterator();
         while (keyIterator.hasNext()) {
             SelectionKey key = keyIterator.next();
@@ -80,13 +95,5 @@ public class BatchServerAndReadingSelectionStrategy extends AbstractSelectionStr
             differentiate(key);
         }
     }
-
-    @Override
-    protected void handle(SelectionKey key) throws IOException {
-        selectionKeys.get().add(key);
-        if (!(key.channel() instanceof ServerSocketChannel)) {
-            key.cancel(); // don't want to process this key again.
-        }
-    }
-
+    
 }

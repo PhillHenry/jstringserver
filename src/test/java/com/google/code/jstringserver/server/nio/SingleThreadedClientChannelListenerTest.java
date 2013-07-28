@@ -22,9 +22,9 @@ import com.google.code.jstringserver.server.bytebuffers.store.ByteBufferStore;
 import com.google.code.jstringserver.server.exchange.BlockingSocketChannelExchanger;
 import com.google.code.jstringserver.server.exchange.SocketChannelExchanger.ReadyCallback;
 import com.google.code.jstringserver.server.handlers.ClientDataHandler;
-import com.google.code.jstringserver.server.nio.select.AbstractSelectionStrategy;
 import com.google.code.jstringserver.server.nio.select.NioReader;
 import com.google.code.jstringserver.server.nio.select.NioWriter;
+import com.google.code.jstringserver.server.nio.select.SelectionStrategy;
 import com.google.code.jstringserver.server.nio.select.SingleThreadedReadingSelectionStrategy;
 
 public class SingleThreadedClientChannelListenerTest {
@@ -46,7 +46,7 @@ public class SingleThreadedClientChannelListenerTest {
         byteBuffer = ByteBuffer.allocate(1024);
         when(mockByteBufferStore.getByteBuffer()).thenReturn(byteBuffer);
         final Selector            clientSelector    = Selector.open();
-        AbstractSelectionStrategy selectionStrategy = new SingleThreadedReadingSelectionStrategy(
+        SelectionStrategy selectionStrategy = new SingleThreadedReadingSelectionStrategy(
                                                                                           null, 
                                                                                           clientSelector, 
                                                                                           new NioWriter(mockClientDataHandler), 

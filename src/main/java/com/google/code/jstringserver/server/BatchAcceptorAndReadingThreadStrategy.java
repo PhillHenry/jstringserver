@@ -24,7 +24,7 @@ public class BatchAcceptorAndReadingThreadStrategy implements ThreadStrategy {
         AbstractNioWriter writer) throws IOException {
         super();
         executor                    = threadPoolFactory.createThreadPoolExecutor();
-        final Selector selector           = Selector.open();
+        final Selector selector     = Selector.open();
         server.register(selector);
         WaitStrategy waitStrategy = new WaitStrategy() {
             

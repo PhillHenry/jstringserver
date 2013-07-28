@@ -11,9 +11,9 @@ import org.junit.BeforeClass;
 import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 import com.google.code.jstringserver.server.nio.select.AbstractNioReader;
 import com.google.code.jstringserver.server.nio.select.AbstractNioWriter;
-import com.google.code.jstringserver.server.nio.select.AbstractSelectionStrategy;
 import com.google.code.jstringserver.server.nio.select.MultiThreadedReadingSelectionStrategy;
 import com.google.code.jstringserver.server.nio.select.NioReaderLooping;
+import com.google.code.jstringserver.server.nio.select.SelectionStrategy;
 import com.google.code.jstringserver.server.threads.NamedThreadFactory;
 import com.google.code.jstringserver.server.wait.SleepWaitStrategy;
 
@@ -39,7 +39,7 @@ public class MultiThreadedSelectorStrategyTest extends SelectorStrategyTest {
     }
     
     @Override
-    protected AbstractSelectionStrategy createSelectionStrategy(AbstractNioWriter writer, AbstractNioReader reader) {
+    protected SelectionStrategy createSelectionStrategy(AbstractNioWriter writer, AbstractNioReader reader) {
         return new MultiThreadedReadingSelectionStrategy(null, clientSelector, writer, reader, executorService);
     }
 

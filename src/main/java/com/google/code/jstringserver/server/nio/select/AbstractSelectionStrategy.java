@@ -8,7 +8,7 @@ import java.util.Set;
 
 import com.google.code.jstringserver.server.wait.WaitStrategy;
 
-public abstract class AbstractSelectionStrategy {
+public abstract class AbstractSelectionStrategy implements SelectionStrategy {
 
     private final WaitStrategy  waitStrategy;
     private final Selector      selector;
@@ -23,6 +23,7 @@ public abstract class AbstractSelectionStrategy {
         this.selector = selector;
     }
 
+    @Override
     public void select() throws IOException {
         // see http://people.freebsd.org/~jlemon/papers/kqueue.pdf
         // "Kevent - structue which delivers event to user. poll/select does not scale well". Mac only.

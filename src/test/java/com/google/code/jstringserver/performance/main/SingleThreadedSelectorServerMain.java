@@ -4,9 +4,9 @@ import java.io.IOException;
 
 import com.google.code.jstringserver.server.bytebuffers.store.ByteBufferStore;
 import com.google.code.jstringserver.server.handlers.ClientDataHandler;
-import com.google.code.jstringserver.server.nio.select.AbstractSelectionStrategy;
 import com.google.code.jstringserver.server.nio.select.NioReader;
 import com.google.code.jstringserver.server.nio.select.NioWriter;
+import com.google.code.jstringserver.server.nio.select.SelectionStrategy;
 import com.google.code.jstringserver.server.nio.select.SingleThreadedReadingSelectionStrategy;
 
 public class SingleThreadedSelectorServerMain extends AbstractServerMain {
@@ -16,7 +16,7 @@ public class SingleThreadedSelectorServerMain extends AbstractServerMain {
         app.start(args);
     }
     
-    protected AbstractSelectionStrategy createSelectionStrategy(ClientDataHandler clientDataHandler, ByteBufferStore byteBufferStore) {
+    protected SelectionStrategy createSelectionStrategy(ClientDataHandler clientDataHandler, ByteBufferStore byteBufferStore) {
         return new SingleThreadedReadingSelectionStrategy(
             null, 
             null, 

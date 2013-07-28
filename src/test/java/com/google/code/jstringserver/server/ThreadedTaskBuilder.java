@@ -8,8 +8,18 @@ public class ThreadedTaskBuilder {
 private final Set<Thread> createdThreads = new HashSet<Thread>();;
     
     public void join(Thread[] threads, long timeout) throws InterruptedException {
+        long start = System.currentTimeMillis();
         for (int i = 0 ; i < threads.length ; i++) {
             threads[i].join(timeout);
+            if (System.currentTimeMillis() > (start + timeout)) {
+                cancelAll(threads);
+            }
+        }
+    }
+
+    private void cancelAll(Thread[] threads) {
+        for (Thread thread : threads) {
+            thread.interrupt();
         }
     }
 

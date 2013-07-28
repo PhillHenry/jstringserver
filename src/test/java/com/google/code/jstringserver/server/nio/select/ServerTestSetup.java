@@ -1,11 +1,18 @@
 package com.google.code.jstringserver.server.nio.select;
 
+import static org.junit.Assert.fail;
+
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.util.Set;
 
 import com.google.code.jstringserver.server.FreePortFinder;
 import com.google.code.jstringserver.server.Server;
+import com.google.code.jstringserver.server.nio.ClientConfigurer;
 
 public class ServerTestSetup {
     
@@ -49,4 +56,19 @@ public class ServerTestSetup {
         return port;
     }
 
+    public void accept(Selector clientSelector) throws IOException {
+        int select = selector.select(1000);
+        if (select == 0) {
+            fail("Was expecting at least one connection");
+        } else {
+            Set<SelectionKey> selectedKeys = selector.selectedKeys();
+            for (SelectionKey key : selectedKeys) {
+                ServerSocketChannel selectableChannel = (ServerSocketChannel) key.channel();
+                SocketChannel clientChannel = selectableChannel.accept();
+                ClientConfigurer clientConfigurer = new ClientConfigurer(clientSelector);
+                clientConfigurer.register(clientChannel);
+            }
+        }
+    }
+    
 }

@@ -4,8 +4,11 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
+import java.nio.channels.SelectionKey;
+import java.util.Set;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -42,6 +45,13 @@ public class BatchServerAndReadingSelectionStrategyTest extends AbstractMultiThr
         toTest.select();
         toTest.select();
         mocks.checkReadAndWrite(1);
+        
+        everythingProcessed();
+    }
+
+    private void everythingProcessed() throws IOException {
+        Set<SelectionKey> keys = toTest.selected();
+        assertEquals(0, keys.size());
     }
 
 }

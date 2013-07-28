@@ -40,19 +40,19 @@ public class BatchServerAndReadingSelectionStrategy implements SelectionStrategy
     
     @Override
     public synchronized void select() throws IOException {
+        selectWithLock();
+        handleClients();
+    }
+
+    private synchronized void selectWithLock() throws IOException {
         int selected = selector.select(); 
         if (selected > 0) {
-            handleSelectionKeys();
+            differentiateKeys();
         } else {
             if (waitStrategy != null) {
                 waitStrategy.pause();
             }
         }
-    }
-
-    protected void handleSelectionKeys() throws IOException {
-        handleSelectionKeysWithLock();
-        handleClients();
     }
 
     private void handleClients() throws IOException {
@@ -79,14 +79,19 @@ public class BatchServerAndReadingSelectionStrategy implements SelectionStrategy
         }
     }
     
-    private synchronized void handleSelectionKeysWithLock() throws IOException {
-        Set<SelectionKey>       keys        = selector.selectedKeys();
+    private Set<SelectionKey> differentiateKeys() throws IOException {
+        Set<SelectionKey>       keys        = selected();
         Iterator<SelectionKey>  keyIterator = keys.iterator();
         while (keyIterator.hasNext()) {
             SelectionKey key = keyIterator.next();
             keyIterator.remove();
             differentiate(key);
         }
+        return keys;
+    }
+
+    Set<SelectionKey> selected() {
+        return selector.selectedKeys();
     }
     
 }

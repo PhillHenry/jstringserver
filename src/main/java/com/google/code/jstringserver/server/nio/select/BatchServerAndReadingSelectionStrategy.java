@@ -15,13 +15,6 @@ import com.google.code.jstringserver.server.wait.WaitStrategy;
 
 public class BatchServerAndReadingSelectionStrategy implements SelectionStrategy {
     
-    private final ThreadLocal<Set<SelectionKey>> selectionKeys = new ThreadLocal<Set<SelectionKey>>() {
-        @Override
-        protected Set<SelectionKey> initialValue() {
-            return new HashSet<>();
-        }
-    };
-    
     private final ThreadLocal<Set<SelectionKey>> clientSelectionKeys = new ThreadLocal<Set<SelectionKey>>() {
         @Override
         protected Set<SelectionKey> initialValue() {

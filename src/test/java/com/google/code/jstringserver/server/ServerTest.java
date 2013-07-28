@@ -9,6 +9,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -30,6 +31,11 @@ public class ServerTest extends AbstractMultiThreadedTest {
         toTest  = new Server(address, port, true, 100);
         toTest.connect();
     }
+    
+    @After
+    public void shutdown() throws IOException {
+        toTest.shutdown();
+    }
 
     @Test
     public void smokeTest() throws Exception {
@@ -38,6 +44,7 @@ public class ServerTest extends AbstractMultiThreadedTest {
         Thread[]    acceptorThreads     = start(acceptors, "acceptor");
         Thread[]    connectorThreads    = start(connectors, "connector");
         join(acceptorThreads, 1000L);
+        join(connectorThreads, 1000L);
         checkFinished(connectors);
         checkNotInError(connectors);
         checkNotInError(acceptors);

@@ -28,11 +28,20 @@ public class SelectorStrategyTest extends AbstractThreadStrategyTest<ExchangingT
     @Override
     protected ExchangingThreadStrategy threadingStrategy(Server server, ClientDataHandler clientDataHandler) throws IOException {
         BlockingSocketChannelExchanger  socketChannelExchanger  = new BlockingSocketChannelExchanger();
-        SelectionStrategy       selectionStrategy       = createSelectionStrategy(clientDataHandler);
-        ClientChannelListener           clientChannelListener   = new ReadWriteDispatcher(socketChannelExchanger, selectionStrategy, clientSelector);
+        SelectionStrategy               selectionStrategy       = createSelectionStrategy(clientDataHandler);
+        ClientChannelListener           clientChannelListener   = new ReadWriteDispatcher(
+            socketChannelExchanger, 
+            selectionStrategy, 
+            clientSelector);
+        
         AbstractSelectionStrategy       acceptorStrategy        = createAcceptorStrategy(socketChannelExchanger);
         
-        return new ExchangingThreadStrategy(server, socketChannelExchanger, new SleepWaitStrategy(10), clientChannelListener, acceptorStrategy);
+        return new ExchangingThreadStrategy(
+            server, 
+            socketChannelExchanger, 
+            new SleepWaitStrategy(10), 
+            clientChannelListener, 
+            acceptorStrategy);
     }
 
     protected ServerSocketDispatchingSelectionStrategy createAcceptorStrategy(BlockingSocketChannelExchanger socketChannelExchanger) throws IOException {

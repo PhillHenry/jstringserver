@@ -5,7 +5,7 @@ import java.util.Set;
 
 public class ThreadedTaskBuilder {
 
-private final Set<Thread> createdThreads = new HashSet<Thread>();;
+    private final Set<Thread> createdThreads = new HashSet<Thread>();;
     
     public void join(Thread[] threads, long timeout) throws InterruptedException {
         long start = System.currentTimeMillis();

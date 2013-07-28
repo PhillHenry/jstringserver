@@ -6,7 +6,6 @@ public abstract class AbstractMultiThreadedTest {
     
     private final ThreadedTaskBuilder threadedTaskBuilder = new ThreadedTaskBuilder();
     
-    
     protected void join(Thread[] threads, long timeout) throws InterruptedException {
         threadedTaskBuilder.join(threads, timeout);
     }

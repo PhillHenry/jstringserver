@@ -34,12 +34,12 @@ public class BatchServerAndReadingSelectionStrategyTest extends AbstractMultiThr
     }
 
     @Test
-    @Ignore // fix me
     public void lifecycle() throws IOException, InterruptedException {
         ClientTestSetup clientTestSetup = new ClientTestSetup(serverTestSetup, 1);
         start(clientTestSetup.createLatchedClients(), "rw");
         clientTestSetup.awaitPostRead();
         clientTestSetup.awaitPreWrite();
+        toTest.select();
         toTest.select();
         mocks.checkReadAndWrite(1);
     }

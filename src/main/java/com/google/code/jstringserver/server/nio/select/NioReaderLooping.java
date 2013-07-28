@@ -39,7 +39,15 @@ public class NioReaderLooping implements AbstractNioReader {
                 }
             }
         } while (read != -1 && !nioReader.finished(key));
+        if (read == -1) {
+            close(key, selectableChannel);
+        }
         return read;
+    }
+
+    private void close(SelectionKey key, SocketChannel selectableChannel) throws IOException {
+        key.cancel();
+        selectableChannel.close();
     }
 
     protected long now() {

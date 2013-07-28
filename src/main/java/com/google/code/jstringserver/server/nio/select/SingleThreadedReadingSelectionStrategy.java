@@ -25,15 +25,20 @@ public class SingleThreadedReadingSelectionStrategy extends AbstractSelectionStr
         if (key.isConnectable()) {
             selectableChannel.finishConnect(); // is this necessary?
         }
+        readAndWrite(key);
+        if (!key.isValid()) {
+            selectableChannel.close();
+            key.cancel();
+        } 
+    }
+
+    private void readAndWrite(SelectionKey key) throws IOException {
+        SocketChannel selectableChannel = (SocketChannel) key.channel();
         if (key.isReadable()) {
             reader.read(key, selectableChannel);
         }
         if (key.isWritable()) {
             writer.write(key, selectableChannel);
         }
-        if (!key.isValid()) {
-            selectableChannel.close();
-            key.cancel();
-        } 
     }
 }

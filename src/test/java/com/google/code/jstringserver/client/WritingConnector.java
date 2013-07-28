@@ -31,7 +31,7 @@ public class WritingConnector extends Connector {
         read(socketChannel);
     }
 
-    private void read(SocketChannel socketChannel) throws IOException {
+    protected void read(SocketChannel socketChannel) throws IOException {
         ByteBuffer      byteBuffer      = byteBufferStore.getByteBuffer();
         byteBuffer.clear();
         int read = socketChannel.read(byteBuffer);
@@ -41,7 +41,7 @@ public class WritingConnector extends Connector {
         //System.out.println("Client: " + new String(bytes) + " read " + read);
     }
 
-    private void write(SocketChannel socketChannel) throws IOException {
+    protected void write(SocketChannel socketChannel) throws IOException {
         ByteBuffer      byteBuffer      = byteBufferStore.getByteBuffer();
         int             blockSize       = byteBuffer.capacity();
         byte[]          bytes           = payload.getBytes();

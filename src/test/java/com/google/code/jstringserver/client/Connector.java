@@ -1,5 +1,7 @@
 package com.google.code.jstringserver.client;
 
+import static java.net.StandardSocketOptions.SO_RCVBUF;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -23,7 +25,6 @@ public class Connector extends Networker {
     protected void doCall() throws Exception {
         InetAddress         addr                = InetAddress.getByName(address);
         InetSocketAddress   inetSocketAddress   = new InetSocketAddress(addr, port);
-        
         SocketChannel       socketChannel       = SocketChannel.open();
         try {
             configure(
@@ -31,8 +32,12 @@ public class Connector extends Networker {
                 socketChannel);
             connected(socketChannel);
         } finally {
-            socketChannel.close();
+            close(socketChannel);
         }
+    }
+
+    protected void close(SocketChannel socketChannel) throws IOException {
+        socketChannel.close();
     }
 
     protected void configure(
@@ -40,7 +45,7 @@ public class Connector extends Networker {
         SocketChannel       socketChannel) throws IOException {
         socketChannel.configureBlocking(true);
         socketChannel.setOption(
-            StandardSocketOptions.SO_RCVBUF,
+            SO_RCVBUF,
             1000000);
         socketChannel.connect(inetSocketAddress);
     }

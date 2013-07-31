@@ -7,16 +7,20 @@ import java.nio.channels.SocketChannel;
 
 import com.google.code.jstringserver.server.bytebuffers.store.ByteBufferStore;
 import com.google.code.jstringserver.server.handlers.ClientDataHandler;
+import com.google.code.jstringserver.stats.Stopwatch;
 
 public class NioReader implements AbstractNioReader {
     private final ClientDataHandler         clientDataHandler;
     private final ByteBufferStore           byteBufferStore;
+    private final Stopwatch stopwatch;
+    
 
     public NioReader(ClientDataHandler clientDataHandler,
-                     ByteBufferStore byteBufferStore) {
+                     ByteBufferStore byteBufferStore, Stopwatch stopwatch) {
         super();
         this.clientDataHandler = clientDataHandler;
         this.byteBufferStore = byteBufferStore;
+        this.stopwatch = stopwatch;
     }
 
     /* (non-Javadoc)

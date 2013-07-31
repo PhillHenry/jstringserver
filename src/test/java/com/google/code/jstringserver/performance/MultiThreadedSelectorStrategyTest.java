@@ -45,7 +45,7 @@ public class MultiThreadedSelectorStrategyTest extends SelectorStrategyTest {
 
     @Override
     protected AbstractNioReader createNioReader(ClientDataHandler clientDataHandler) {
-        return new NioReaderLooping(clientDataHandler, getByteBufferStore(), 10000L, new SleepWaitStrategy(1));
+        return new NioReaderLooping(clientDataHandler, getByteBufferStore(), 10000L, new SleepWaitStrategy(1), null);
     }
     
 }

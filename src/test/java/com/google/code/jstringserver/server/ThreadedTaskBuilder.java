@@ -15,6 +15,7 @@ public class ThreadedTaskBuilder {
                 cancelAll(threads);
             }
         }
+        System.out.println("Took " + (System.currentTimeMillis() - start) + "ms for all threads to complete");
     }
 
     private void cancelAll(Thread[] threads) {

@@ -52,13 +52,13 @@ public class SelectorStrategyTest extends AbstractThreadStrategyTest<ExchangingT
     }
 
     protected SelectionStrategy createSelectionStrategy(ClientDataHandler clientDataHandler) {
-        AbstractNioWriter writer = new NioWriter(clientDataHandler);
+        AbstractNioWriter writer = new NioWriter(clientDataHandler, null);
         AbstractNioReader reader = createNioReader(clientDataHandler);
         return createSelectionStrategy(writer, reader);
     }
 
     protected AbstractNioReader createNioReader(ClientDataHandler clientDataHandler) {
-        return new NioReader(clientDataHandler, getByteBufferStore());
+        return new NioReader(clientDataHandler, getByteBufferStore(), null);
     }
 
     protected SelectionStrategy createSelectionStrategy(AbstractNioWriter writer, AbstractNioReader reader) {

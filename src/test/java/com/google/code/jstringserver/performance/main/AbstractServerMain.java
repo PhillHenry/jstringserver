@@ -25,7 +25,6 @@ import com.google.code.jstringserver.server.wait.SleepWaitStrategy;
 
 public abstract class AbstractServerMain {
 
-
     public static final int     PORT                = 8888;
     public static final String  EXPECTED_PAYLOAD    = getPayload();
     

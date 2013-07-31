@@ -98,7 +98,6 @@ public abstract class AbstractThreadStrategyTest<T extends ThreadStrategy> {
                 if (System.currentTimeMillis() > (start + timeoutMs)) return false;
             }
         } finally {
-            System.out.println("Waiting for all threads to finish took " + (System.currentTimeMillis() - start) + "ms");
             System.out.println(String.format("Expected number of calls %d. Actual number %d", expectedNumCalls, clientDataHandler.getNumEndCalls()));
         }
         return true;
@@ -107,7 +106,6 @@ public abstract class AbstractThreadStrategyTest<T extends ThreadStrategy> {
     private void runConnectors(int port, String address, ThreadStrategy threadStrategy2) throws InterruptedException {
         WritingConnector[]  connectors          = createWritingConnectors(numClients, address, port, payload, getByteBufferStore());
         System.out.println("Starting threads");
-        long                start               = System.currentTimeMillis();
         Thread[]            threads             = threadedTaskBuilder.start(connectors, "connector");
         threadedTaskBuilder.join(threads, 10000);
     }

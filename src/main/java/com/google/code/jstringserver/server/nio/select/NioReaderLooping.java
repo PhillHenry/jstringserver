@@ -7,25 +7,38 @@ import java.nio.channels.SocketChannel;
 import com.google.code.jstringserver.server.bytebuffers.store.ByteBufferStore;
 import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 import com.google.code.jstringserver.server.wait.WaitStrategy;
+import com.google.code.jstringserver.stats.Stopwatch;
 
 public class NioReaderLooping implements AbstractNioReader {
     
     private final NioReader nioReader;
     private final WaitStrategy waitStrategy;
     private final long timeoutMs;
+    private final Stopwatch stopwatch;
 
     public NioReaderLooping(
         ClientDataHandler clientDataHandler,
         ByteBufferStore byteBufferStore,
         long timeoutMs, 
-        WaitStrategy waitStrategy) {
-        this.nioReader = new NioReader(clientDataHandler, byteBufferStore);
+        WaitStrategy waitStrategy, 
+        Stopwatch stopwatch) {
+        this.stopwatch = stopwatch;
+        this.nioReader = new NioReader(clientDataHandler, byteBufferStore, null);
         this.timeoutMs = timeoutMs;
         this.waitStrategy = waitStrategy;
     }
 
     @Override
     public int read(SelectionKey key, SocketChannel selectableChannel) throws IOException {
+        startTimer();
+        try {
+            return doRead(key, selectableChannel);
+        } finally {
+            stopTimer();
+        }
+    }
+
+    private int doRead(SelectionKey key, SocketChannel selectableChannel) throws IOException {
         long start = now();
         int read = 0;
         do {
@@ -43,6 +56,18 @@ public class NioReaderLooping implements AbstractNioReader {
             close(key, selectableChannel);
         }
         return read;
+    }
+
+    private void stopTimer() {
+        if (stopwatch != null) {
+            stopwatch.stop();
+        }
+    }
+
+    private void startTimer() {
+        if (stopwatch != null) {
+            stopwatch.start();
+        }
     }
 
     private void close(SelectionKey key, SocketChannel selectableChannel) throws IOException {

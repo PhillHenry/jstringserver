@@ -24,8 +24,8 @@ public class BatchingServerAndReadingStrategyTest extends AbstractThreadStrategy
             clientDataHandler, 
             getByteBufferStore(), 
             1000, 
-            new SleepWaitStrategy(10));
-        AbstractNioWriter writer            = new NioWriter(clientDataHandler);
+            new SleepWaitStrategy(10), null);
+        AbstractNioWriter writer            = new NioWriter(clientDataHandler, null);
         return new BatchAcceptorAndReadingThreadStrategy(
             server,
             reader, 

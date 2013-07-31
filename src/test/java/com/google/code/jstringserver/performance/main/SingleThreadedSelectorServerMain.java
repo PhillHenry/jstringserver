@@ -20,8 +20,8 @@ public class SingleThreadedSelectorServerMain extends AbstractServerMain {
         return new SingleThreadedReadingSelectionStrategy(
             null, 
             null, 
-            new NioWriter(clientDataHandler), 
-            new NioReader(clientDataHandler, byteBufferStore));
+            new NioWriter(clientDataHandler, null), 
+            new NioReader(clientDataHandler, byteBufferStore, null));
     }
 
 }

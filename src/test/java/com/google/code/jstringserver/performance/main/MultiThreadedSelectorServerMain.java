@@ -27,8 +27,8 @@ public class MultiThreadedSelectorServerMain extends AbstractServerMain {
         return new MultiThreadedReadingSelectionStrategy(
             null, 
             null, 
-            new NioWriter(clientDataHandler), 
-            new NioReaderLooping(clientDataHandler, byteBufferStore, 10000L, new SleepWaitStrategy(1)), 
+            new NioWriter(clientDataHandler, null), 
+            new NioReaderLooping(clientDataHandler, byteBufferStore, 10000L, new SleepWaitStrategy(1), null), 
             createThreadPool());
     }
 

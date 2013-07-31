@@ -49,8 +49,8 @@ public class SingleThreadedClientChannelListenerTest {
         SelectionStrategy selectionStrategy = new SingleThreadedReadingSelectionStrategy(
                                                                                           null, 
                                                                                           clientSelector, 
-                                                                                          new NioWriter(mockClientDataHandler), 
-                                                                                          new NioReader(mockClientDataHandler, mockByteBufferStore));
+                                                                                          new NioWriter(mockClientDataHandler, null), 
+                                                                                          new NioReader(mockClientDataHandler, mockByteBufferStore, null));
         toTest = new ReadWriteDispatcher(socketChannelExchanger, selectionStrategy, clientSelector);
         socketChannelExchanger.setReadyCallback(new ReadyCallback() {
             

@@ -24,8 +24,8 @@ public class BatchServerAndReadingSelectionStrategy implements SelectionStrategy
     
     private final ReaderWriter      readThenWriteJob;
     private final ClientConfigurer  clientConfigurer;
-    private final WaitStrategy waitStrategy;
-    private final Selector selector;
+    private final WaitStrategy      waitStrategy;
+    private final Selector          selector;
 
     public BatchServerAndReadingSelectionStrategy(
         WaitStrategy        waitStrategy,
@@ -39,20 +39,20 @@ public class BatchServerAndReadingSelectionStrategy implements SelectionStrategy
     }
     
     @Override
-    public synchronized void select() throws IOException {
-        selectWithLock();
+    public void select() throws IOException {
+        int selected = selectWithLock(); 
+        if (selected == 0 && waitStrategy != null) {
+            waitStrategy.pause();
+        }
         handleClients();
     }
 
-    private synchronized void selectWithLock() throws IOException {
-        int selected = selector.select(); 
+    private synchronized int selectWithLock() throws IOException {
+        int selected = selector.selectNow();
         if (selected > 0) {
             differentiateKeys();
-        } else {
-            if (waitStrategy != null) {
-                waitStrategy.pause();
-            }
-        }
+        } 
+        return selected;
     }
 
     private void handleClients() throws IOException {

@@ -31,14 +31,14 @@ public abstract class AbstractServerMain {
 
     public static final int     PORT                    = 8888;
     public static final String  EXPECTED_PAYLOAD        = getPayload();
-    private static final int    SAMPLE_SIZE_HINT        = 100;
     
-    private final Map<String, Stopwatch> nameToStopwatch = new HashMap<>();
-    private final Selector clientSelector;
+    private final StatsCollector statsCollector;
+    private final Selector       clientSelector;
     
     public AbstractServerMain() throws IOException {
         super();
         clientSelector = Selector.open();
+        statsCollector = new StatsCollector();
     }
 
     protected void start(String[] args) throws UnknownHostException, IOException, InterruptedException {
@@ -59,18 +59,9 @@ public abstract class AbstractServerMain {
                 clientChannelListener,
                 acceptorStrategy);
         selectorStrategy.start();
-        started();
+        statsCollector.started();
     }
 
-    private void started() throws InterruptedException {
-        System.out.println("Started");
-        while (true) {
-            for (Stopwatch stopwatch : nameToStopwatch.values()) {
-                System.out.println(stopwatch);
-            }
-            Thread.sleep(10000);
-        }
-    }
 
     protected abstract SelectionStrategy createSelectionStrategy(ClientDataHandler clientDataHandler, ByteBufferStore byteBufferStore); 
     
@@ -101,20 +92,16 @@ public abstract class AbstractServerMain {
         return byteBufferStore;
     }
 
-    private Server getConnectedServer(String ipInterface) throws UnknownHostException, IOException {
+    public static Server getConnectedServer(String ipInterface) throws UnknownHostException, IOException {
         int backlog = 100;
         Server server = new Server(ipInterface, PORT, true, backlog);
         server.connect();
         return server;
     }
-    
+
+
     protected Stopwatch getStopWatchFor(String name) {
-        Stopwatch stopwatch = nameToStopwatch.get(name);
-        if (stopwatch == null) {
-            stopwatch = new ThreadLocalStopWatch(name, SAMPLE_SIZE_HINT);
-            nameToStopwatch.put(name, stopwatch);
-        }
-        return stopwatch;
+        return statsCollector.getStopWatchFor(name);
     }
 
     protected Selector getClientSelector() {

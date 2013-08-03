@@ -10,32 +10,47 @@ import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 import com.google.code.jstringserver.stats.Stopwatch;
 
 public class NioReader implements AbstractNioReader {
-    private final ClientDataHandler         clientDataHandler;
-    private final ByteBufferStore           byteBufferStore;
-    private final Stopwatch stopwatch;
-    
+    private final ClientDataHandler clientDataHandler;
+    private final ByteBufferStore   byteBufferStore;
+    private final Stopwatch         stopwatch;
 
-    public NioReader(ClientDataHandler clientDataHandler,
-                     ByteBufferStore byteBufferStore, Stopwatch stopwatch) {
+    public NioReader(
+        ClientDataHandler clientDataHandler,
+        ByteBufferStore byteBufferStore,
+        Stopwatch stopwatch) {
         super();
         this.clientDataHandler = clientDataHandler;
         this.byteBufferStore = byteBufferStore;
         this.stopwatch = stopwatch;
     }
 
-    /* (non-Javadoc)
-     * @see com.google.code.jstringserver.server.nio.select.AbstractNioReader#read(java.nio.channels.SelectionKey, java.nio.channels.SocketChannel)
-     */
     @Override
     public int read(SelectionKey key, SocketChannel selectableChannel) throws IOException {
-        ByteBuffer byteBuffer = byteBufferStore.getByteBuffer();
-        byteBuffer.clear();
-        int read = selectableChannel.read(byteBuffer);
-        byteBuffer.flip();
-        clientDataHandler.handle(byteBuffer, key);
-        return read;
+        start();
+        try {
+            ByteBuffer byteBuffer = byteBufferStore.getByteBuffer();
+            byteBuffer.clear();
+            int read = selectableChannel.read(byteBuffer);
+            byteBuffer.flip();
+            clientDataHandler.handle(byteBuffer, key);
+            return read;
+        } finally {
+            stop();
+        }
     }
     
+    private void stop() {
+        if (stopwatch != null) {
+            stopwatch.stop();
+        }
+    }
+
+    private void start() {
+        if (stopwatch != null) {
+            stopwatch.start();
+        }
+    }
+
     protected boolean finished(SelectionKey key) {
         return !clientDataHandler.isNotComplete(key);
     }

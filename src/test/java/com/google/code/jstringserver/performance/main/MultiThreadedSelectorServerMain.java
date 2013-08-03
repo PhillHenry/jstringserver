@@ -14,6 +14,7 @@ import com.google.code.jstringserver.server.nio.select.NioReaderLooping;
 import com.google.code.jstringserver.server.nio.select.NioWriter;
 import com.google.code.jstringserver.server.nio.select.SelectionStrategy;
 import com.google.code.jstringserver.server.wait.SleepWaitStrategy;
+import com.google.code.jstringserver.stats.Stopwatch;
 
 public class MultiThreadedSelectorServerMain extends AbstractServerMain {
 
@@ -24,11 +25,13 @@ public class MultiThreadedSelectorServerMain extends AbstractServerMain {
 
     @Override
     protected SelectionStrategy createSelectionStrategy(ClientDataHandler clientDataHandler, ByteBufferStore byteBufferStore) {
+        Stopwatch writerStopWatch = getStopWatchFor(MultiThreadedReadingSelectionStrategy.class.getSimpleName());
+        Stopwatch readerStopWatch = getStopWatchFor(NioReaderLooping.class.getSimpleName());
         return new MultiThreadedReadingSelectionStrategy(
             null, 
             null, 
-            new NioWriter(clientDataHandler, null), 
-            new NioReaderLooping(clientDataHandler, byteBufferStore, 10000L, new SleepWaitStrategy(1), null), 
+            new NioWriter(clientDataHandler, writerStopWatch), 
+            new NioReaderLooping(clientDataHandler, byteBufferStore, 10000L, new SleepWaitStrategy(1), readerStopWatch ), 
             createThreadPool());
     }
 

@@ -5,6 +5,8 @@ import static com.google.code.jstringserver.performance.AbstractThreadStrategyTe
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.nio.channels.Selector;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.google.code.jstringserver.performance.AsynchClientDataHandler;
 import com.google.code.jstringserver.server.ExchangingThreadStrategy;
@@ -22,11 +24,16 @@ import com.google.code.jstringserver.server.nio.ServerSocketDispatchingSelection
 import com.google.code.jstringserver.server.nio.select.AbstractSelectionStrategy;
 import com.google.code.jstringserver.server.nio.select.SelectionStrategy;
 import com.google.code.jstringserver.server.wait.SleepWaitStrategy;
+import com.google.code.jstringserver.stats.Stopwatch;
+import com.google.code.jstringserver.stats.ThreadLocalStopWatch;
 
 public abstract class AbstractServerMain {
 
-    public static final int     PORT                = 8888;
-    public static final String  EXPECTED_PAYLOAD    = getPayload();
+    public static final int     PORT                    = 8888;
+    public static final String  EXPECTED_PAYLOAD        = getPayload();
+    private static final int    SAMPLE_SIZE_HINT        = 100;
+    
+    private final Map<String, Stopwatch> nameToStopwatch = new HashMap<>();
     
     protected void start(String[] args) throws UnknownHostException, IOException {
         String                  ipInterface             = args.length < 1 ? "localhost" : args[0];
@@ -35,7 +42,7 @@ public abstract class AbstractServerMain {
         ClientDataHandler       clientDataHandler       = new AsynchClientDataHandler(EXPECTED_PAYLOAD);
         ByteBufferStore         byteBufferStore         = createByteBufferStore();
         
-        SelectionStrategy   selectionStrategy       = createSelectionStrategy(clientDataHandler, byteBufferStore);
+        SelectionStrategy           selectionStrategy       = createSelectionStrategy(clientDataHandler, byteBufferStore);
         ClientChannelListener       clientChannelListener   = createClientListener(socketChannelExchanger, selectionStrategy);
         SleepWaitStrategy           waitStrategy            = new SleepWaitStrategy(10);
         AbstractSelectionStrategy   acceptorStrategy        = createAcceptorStrategy(socketChannelExchanger, waitStrategy);
@@ -46,6 +53,7 @@ public abstract class AbstractServerMain {
                 clientChannelListener,
                 acceptorStrategy);
         selectorStrategy.start();
+        System.out.println("Started");
     }
 
     protected abstract SelectionStrategy createSelectionStrategy(ClientDataHandler clientDataHandler, ByteBufferStore byteBufferStore); 
@@ -85,5 +93,13 @@ public abstract class AbstractServerMain {
         return server;
     }
     
+    protected Stopwatch getStopWatchFor(String name) {
+        Stopwatch stopwatch = nameToStopwatch.get(name);
+        if (stopwatch == null) {
+            stopwatch = new ThreadLocalStopWatch(name, SAMPLE_SIZE_HINT);
+            nameToStopwatch.put(name, stopwatch);
+        }
+        return stopwatch;
+    }
 
 }

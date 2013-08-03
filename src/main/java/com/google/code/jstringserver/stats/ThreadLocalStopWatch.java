@@ -56,12 +56,16 @@ public class ThreadLocalStopWatch implements Stopwatch {
 
     @Override
     public String toString() {
-        return "ThreadLocalStopWatch [totalCallsServiced="
+        long totalCallsServiced = this.totalCallsServiced.longValue();
+        long totalTimeTaken = this.totalTimeTaken.longValue();
+        return "ThreadLocalStopWatch [" 
+            + "name="
+            + name
+            + ", totalCallsServiced="
             + totalCallsServiced
             + ", totalTimeTaken="
             + totalTimeTaken
-            + ", name="
-            + name
+            + ", Average time = " + (totalCallsServiced == 0 ? "NA" : (totalTimeTaken * 1000 / totalCallsServiced) + "us")
             + "]";
     }
 }

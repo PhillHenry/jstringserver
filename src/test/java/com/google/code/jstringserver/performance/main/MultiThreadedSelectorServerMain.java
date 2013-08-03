@@ -18,7 +18,11 @@ import com.google.code.jstringserver.stats.Stopwatch;
 
 public class MultiThreadedSelectorServerMain extends AbstractServerMain {
 
-    public static void main(String[] args) throws UnknownHostException, IOException {
+    public MultiThreadedSelectorServerMain() throws IOException {
+        super();
+    }
+
+    public static void main(String[] args) throws UnknownHostException, IOException, InterruptedException {
         MultiThreadedSelectorServerMain app = new MultiThreadedSelectorServerMain();
         app.start(args);
     }
@@ -29,7 +33,7 @@ public class MultiThreadedSelectorServerMain extends AbstractServerMain {
         Stopwatch readerStopWatch = getStopWatchFor(NioReaderLooping.class.getSimpleName());
         return new MultiThreadedReadingSelectionStrategy(
             null, 
-            null, 
+            getClientSelector(), 
             new NioWriter(clientDataHandler, writerStopWatch), 
             new NioReaderLooping(clientDataHandler, byteBufferStore, 10000L, new SleepWaitStrategy(1), readerStopWatch ), 
             createThreadPool());

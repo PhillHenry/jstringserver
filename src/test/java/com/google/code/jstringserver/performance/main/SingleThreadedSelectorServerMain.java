@@ -11,6 +11,10 @@ import com.google.code.jstringserver.server.nio.select.SingleThreadedReadingSele
 
 public class SingleThreadedSelectorServerMain extends AbstractServerMain {
 
+    public SingleThreadedSelectorServerMain() throws IOException {
+        super();
+    }
+
     public static void main(String[] args) throws IOException, InterruptedException {
         SingleThreadedSelectorServerMain app = new SingleThreadedSelectorServerMain();
         app.start(args);
@@ -19,7 +23,7 @@ public class SingleThreadedSelectorServerMain extends AbstractServerMain {
     protected SelectionStrategy createSelectionStrategy(ClientDataHandler clientDataHandler, ByteBufferStore byteBufferStore) {
         return new SingleThreadedReadingSelectionStrategy(
             null, 
-            null, 
+            getClientSelector(), 
             new NioWriter(clientDataHandler, null), 
             new NioReader(clientDataHandler, byteBufferStore, null));
     }

@@ -34,8 +34,14 @@ public abstract class AbstractServerMain {
     private static final int    SAMPLE_SIZE_HINT        = 100;
     
     private final Map<String, Stopwatch> nameToStopwatch = new HashMap<>();
+    private final Selector clientSelector;
     
-    protected void start(String[] args) throws UnknownHostException, IOException {
+    public AbstractServerMain() throws IOException {
+        super();
+        clientSelector = Selector.open();
+    }
+
+    protected void start(String[] args) throws UnknownHostException, IOException, InterruptedException {
         String                  ipInterface             = args.length < 1 ? "localhost" : args[0];
         Server                  server                  = getConnectedServer(ipInterface);
         SocketChannelExchanger  socketChannelExchanger  = new NonBlockingSocketChannelExchanger();
@@ -53,7 +59,17 @@ public abstract class AbstractServerMain {
                 clientChannelListener,
                 acceptorStrategy);
         selectorStrategy.start();
+        started();
+    }
+
+    private void started() throws InterruptedException {
         System.out.println("Started");
+        while (true) {
+            for (Stopwatch stopwatch : nameToStopwatch.values()) {
+                System.out.println(stopwatch);
+            }
+            Thread.sleep(10000);
+        }
     }
 
     protected abstract SelectionStrategy createSelectionStrategy(ClientDataHandler clientDataHandler, ByteBufferStore byteBufferStore); 
@@ -62,7 +78,6 @@ public abstract class AbstractServerMain {
         SocketChannelExchanger socketChannelExchanger, 
         SelectionStrategy selectionStrategy)
         throws IOException {
-        Selector clientSelector = Selector.open();
         return new ReadWriteDispatcher(socketChannelExchanger, selectionStrategy, clientSelector);
     }
 
@@ -100,6 +115,10 @@ public abstract class AbstractServerMain {
             nameToStopwatch.put(name, stopwatch);
         }
         return stopwatch;
+    }
+
+    protected Selector getClientSelector() {
+        return clientSelector;
     }
 
 }

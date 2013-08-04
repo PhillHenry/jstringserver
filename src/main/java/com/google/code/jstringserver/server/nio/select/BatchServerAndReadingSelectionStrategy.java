@@ -82,7 +82,6 @@ public class BatchServerAndReadingSelectionStrategy implements SelectionStrategy
         while (keyIterator.hasNext()) {
             SelectionKey key = keyIterator.next();
             SocketChannel clientChannel = (SocketChannel) key.channel();
-            clientChannel.finishConnect();
             readThenWriteJob.doWork(key);
             keyIterator.remove();
         }

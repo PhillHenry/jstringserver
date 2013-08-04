@@ -41,6 +41,7 @@ public class Connector extends Networker {
     }
 
     protected void close(SocketChannel socketChannel) throws IOException {
+        socketChannel.socket().close();
         socketChannel.close();
     }
 
@@ -48,6 +49,7 @@ public class Connector extends Networker {
         InetSocketAddress   inetSocketAddress,
         SocketChannel       socketChannel) throws IOException {
         socketChannel.configureBlocking(true);
+        socketChannel.socket().setSoLinger(true, 0);
         socketChannel.setOption(
             SO_RCVBUF,
             1000000);

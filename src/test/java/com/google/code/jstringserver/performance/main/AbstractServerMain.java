@@ -93,7 +93,7 @@ public abstract class AbstractServerMain {
     }
 
     public static Server getConnectedServer(String ipInterface) throws UnknownHostException, IOException {
-        int backlog = 100;
+        int backlog = 0;
         Server server = new Server(ipInterface, PORT, true, backlog);
         server.connect();
         return server;

@@ -35,16 +35,12 @@ public class BatchedServerMain {
     private void startServer(String[] args) throws Exception {
         String              ipInterface         = args.length < 1 ? "localhost" : args[0];
         Server              server              = getConnectedServer(ipInterface);
-        
-        Selector            selector            = Selector.open();
-        server.register(selector);
 
         ClientDataHandler   clientDataHandler   = new AsynchClientDataHandler(EXPECTED_PAYLOAD);
         AbstractNioReader   reader              = createReader(clientDataHandler);
         AbstractNioWriter   writer              = createWriter(clientDataHandler);
-
         
-        ThreadPoolFactory threadPoolFactory = new ThreadPoolFactory(4);
+        ThreadPoolFactory   threadPoolFactory   = new ThreadPoolFactory(2);
         Stopwatch           stopwatch           = statsCollector.getStopWatchFor(BatchServerAndReadingSelectionStrategy.class.getSimpleName());
         BatchAcceptorAndReadingThreadStrategy threadStrategy = new BatchAcceptorAndReadingThreadStrategy(
             server, 

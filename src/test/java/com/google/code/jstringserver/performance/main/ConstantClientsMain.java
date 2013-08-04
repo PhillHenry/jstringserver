@@ -13,22 +13,32 @@ import java.util.concurrent.TimeUnit;
 import com.google.code.jstringserver.client.ConstantWritingConnector;
 import com.google.code.jstringserver.server.bytebuffers.factories.DirectByteBufferFactory;
 import com.google.code.jstringserver.server.bytebuffers.store.ThreadLocalByteBufferStore;
+import com.google.code.jstringserver.stats.Stopwatch;
+import com.google.code.jstringserver.stats.ThreadLocalStopWatch;
 
 public class ConstantClientsMain {
+
+    private static final int sampleSizeHint = 100;
 
     public static void main(
             String[] args) throws InterruptedException {
         String address                              = getAddress(args);
         int numThreads                              = getNumberOfThreads(args);
         ThreadLocalByteBufferStore byteBufferStore  = createByteBufferStore();
+        Stopwatch                  readStopWatch    = new ThreadLocalStopWatch("read", sampleSizeHint);
+        Stopwatch                  writeStopWatch   = new ThreadLocalStopWatch("write", sampleSizeHint);
+        Stopwatch                  connectStopWatch = new ThreadLocalStopWatch("connect", sampleSizeHint);
         ConstantWritingConnector[] connectors       = createConnectors(
             address,
             numThreads,
             numThreads,
-            byteBufferStore);
+            byteBufferStore, 
+            readStopWatch, 
+            writeStopWatch, 
+            connectStopWatch);
         run(numThreads,
             connectors);
-        doMetrics();
+        doMetrics(readStopWatch, writeStopWatch, connectStopWatch);
     }
 
     private static int getNumberOfThreads(String[] args) {
@@ -45,15 +55,19 @@ public class ConstantClientsMain {
         return host;
     }
 
-    private static void doMetrics() throws InterruptedException {
+    private static void doMetrics(Stopwatch readStopWatch, Stopwatch writeStopWatch, Stopwatch connectStopWatch) throws InterruptedException {
         int oldTotalCalls = 0;
-        int sleepTime = 1000;
+        int sleepTime = 2000;
         while (true) {
             int totalCalls = getTotalCalls();
             System.out.println("Initiated " + totalCalls + 
                 " calls. Calls per second = " + ((totalCalls - oldTotalCalls) * 1000) / sleepTime +
                 ". number of errors at client side = " + getTotalErrors() + 
                 ". Average call time = " + (totalCalls != 0 ? ("" + getTotalCallTime() / totalCalls) : "NA") + "ms");
+            System.out.println(readStopWatch);
+            System.out.println(writeStopWatch);
+            System.out.println(connectStopWatch);
+            System.out.println();
             
             Thread.sleep(sleepTime);
             oldTotalCalls = totalCalls;
@@ -84,14 +98,20 @@ public class ConstantClientsMain {
             String address,
             int numThreads,
             int num,
-            ThreadLocalByteBufferStore byteBufferStore) {
+            ThreadLocalByteBufferStore byteBufferStore,
+            Stopwatch readStopWatch, 
+            Stopwatch writeStopWatch, 
+            Stopwatch connectTimer) {
         ConstantWritingConnector[] constantWritingConnectors    = new ConstantWritingConnector[num];
         for (int i = 0; i < numThreads; i++) {
             constantWritingConnectors[i] = new ConstantWritingConnector(
                     address, 
                     PORT,
                     EXPECTED_PAYLOAD,
-                    byteBufferStore);
+                    byteBufferStore, 
+                    readStopWatch, 
+                    writeStopWatch, 
+                    connectTimer);
         }
         return constantWritingConnectors;
     }

@@ -7,7 +7,9 @@ import java.io.IOException;
 import java.nio.channels.Selector;
 
 import com.google.code.jstringserver.performance.AsynchClientDataHandler;
+import com.google.code.jstringserver.server.BatchAcceptorAndReadingThreadStrategy;
 import com.google.code.jstringserver.server.Server;
+import com.google.code.jstringserver.server.ThreadPoolFactory;
 import com.google.code.jstringserver.server.bytebuffers.factories.DirectByteBufferFactory;
 import com.google.code.jstringserver.server.bytebuffers.store.ByteBufferStore;
 import com.google.code.jstringserver.server.bytebuffers.store.ThreadLocalByteBufferStore;
@@ -17,7 +19,6 @@ import com.google.code.jstringserver.server.nio.select.AbstractNioWriter;
 import com.google.code.jstringserver.server.nio.select.BatchServerAndReadingSelectionStrategy;
 import com.google.code.jstringserver.server.nio.select.NioReaderLooping;
 import com.google.code.jstringserver.server.nio.select.NioWriter;
-import com.google.code.jstringserver.server.nio.select.SelectionStrategy;
 import com.google.code.jstringserver.server.wait.NoOpWaitStrategy;
 import com.google.code.jstringserver.server.wait.WaitStrategy;
 import com.google.code.jstringserver.stats.Stopwatch;
@@ -31,7 +32,7 @@ public class BatchedServerMain {
         statsCollector                          = new StatsCollector();
     }
 
-    private void startServer(String[] args) throws IOException, InterruptedException {
+    private void startServer(String[] args) throws Exception {
         String              ipInterface         = args.length < 1 ? "localhost" : args[0];
         Server              server              = getConnectedServer(ipInterface);
         
@@ -41,30 +42,19 @@ public class BatchedServerMain {
         ClientDataHandler   clientDataHandler   = new AsynchClientDataHandler(EXPECTED_PAYLOAD);
         AbstractNioReader   reader              = createReader(clientDataHandler);
         AbstractNioWriter   writer              = createWriter(clientDataHandler);
-        BatchServerAndReadingSelectionStrategy   strategy =
-            new BatchServerAndReadingSelectionStrategy(createWaitStrategy(), selector, reader, writer);
+
         
-        startListening(strategy);
+        ThreadPoolFactory threadPoolFactory = new ThreadPoolFactory(4);
+        Stopwatch           stopwatch           = statsCollector.getStopWatchFor(BatchServerAndReadingSelectionStrategy.class.getSimpleName());
+        BatchAcceptorAndReadingThreadStrategy threadStrategy = new BatchAcceptorAndReadingThreadStrategy(
+            server, 
+            reader, 
+            threadPoolFactory, 
+            writer,
+            stopwatch);
+        threadStrategy.start();
         
         statsCollector.started();
-    }
-
-    private void startListening(final BatchServerAndReadingSelectionStrategy strategy) {
-        Thread thread = new Thread(new Runnable() {
-            
-            @Override
-            public void run() {
-                while (!Thread.interrupted()) {
-                    try {
-                        strategy.select();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        break;
-                    }
-                }
-            }
-        });
-        thread.start();
     }
 
     private AbstractNioWriter createWriter(ClientDataHandler clientDataHandler) {
@@ -88,7 +78,7 @@ public class BatchedServerMain {
         return new NoOpWaitStrategy();
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws Exception {
         BatchedServerMain app = new BatchedServerMain();
         app.startServer(args);
     }

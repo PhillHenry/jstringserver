@@ -68,7 +68,7 @@ public class SingleThreadedReadingSelectionStrategyTest extends AbstractMultiThr
     }
 
     private void clientsConnectThenDisconnect() throws IOException {
-        Connector[] connectors = new Connector[] { new Connector(HOST, serverTestSetup.getPort()) {
+        Connector[] connectors = new Connector[] { new Connector(HOST, serverTestSetup.getPort(), null) {
 
             @Override
             protected void configure(InetSocketAddress inetSocketAddress, SocketChannel socketChannel) throws IOException {

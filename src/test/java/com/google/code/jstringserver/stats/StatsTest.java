@@ -6,14 +6,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ThreadLocalStopWatchTest {
+public class StatsTest {
     
     private ThreadLocalStopWatch toTest;
 
     @Test
     public void test() {
-        ThreadLocalStopWatch toTest = new ThreadLocalStopWatch("name", 17);
-        Assert.assertEquals(31, toTest.getSampleSize());
+        ThreadLocalStats toTest = new ThreadLocalStats(17);
+        assertEquals(31, toTest.getSampleSize());
     }
 
 }

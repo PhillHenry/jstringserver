@@ -115,7 +115,7 @@ public abstract class AbstractThreadedSelectionStrategyTest {
         public SteppingConnector(
             String address,
             int port) {
-            super(address, port);
+            super(address, port, null);
         }
 
         @Override

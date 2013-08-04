@@ -12,6 +12,7 @@ import java.util.Set;
 
 import com.google.code.jstringserver.server.nio.ClientConfigurer;
 import com.google.code.jstringserver.server.wait.WaitStrategy;
+import com.google.code.jstringserver.stats.Stopwatch;
 
 public class BatchServerAndReadingSelectionStrategy implements SelectionStrategy {
     
@@ -26,25 +27,45 @@ public class BatchServerAndReadingSelectionStrategy implements SelectionStrategy
     private final ClientConfigurer  clientConfigurer;
     private final WaitStrategy      waitStrategy;
     private final Selector          selector;
+    private final Stopwatch         stopWatch;
 
     public BatchServerAndReadingSelectionStrategy(
         WaitStrategy        waitStrategy,
         Selector            selector,
         AbstractNioReader   reader, 
-        AbstractNioWriter   writer) {
+        AbstractNioWriter   writer, 
+        Stopwatch           stopWatch) {
         this.waitStrategy       = waitStrategy;
         this.selector           = selector;
+        this.stopWatch          = stopWatch;
         this.readThenWriteJob   = new ReaderWriter(reader, writer);
         this.clientConfigurer   = new ClientConfigurer(selector);
     }
     
     @Override
     public void select() throws IOException {
-        int selected = selectWithLock(); 
-        if (selected == 0 && waitStrategy != null) {
-            waitStrategy.pause();
+        startTimer();
+        try {
+            int selected = selectWithLock(); 
+            if (selected == 0 && waitStrategy != null) {
+                waitStrategy.pause();
+            }
+            handleClients();
+        } finally {
+            stopTimer();
         }
-        handleClients();
+    }
+
+    private void stopTimer() {
+        if (stopWatch != null) {
+            stopWatch.stop();
+        }
+    }
+
+    private void startTimer() {
+        if (stopWatch != null) {
+            stopWatch.start();
+        }
     }
 
     private synchronized int selectWithLock() throws IOException {

@@ -1,63 +1,41 @@
 package com.google.code.jstringserver.stats;
 
-import static java.lang.Integer.highestOneBit;
-
-import java.util.concurrent.atomic.AtomicLong;
 
 public class ThreadLocalStopWatch implements Stopwatch {
 
-    private final AtomicLong        totalCallsServiced = new AtomicLong();
-    private final AtomicLong        totalTimeTaken     = new AtomicLong();
-
-    private final ThreadLocal<Long> cumulativeTime          = new ThreadLocal<Long>();
-
+    private final ThreadLocalStats stats;
+    private final String name;
+    
     private final ThreadLocal<Long> startTime          = new ThreadLocal<>();
-
-    private final ThreadLocal<Long> callsServiced      = new ThreadLocal<Long>() {
-        @Override
-        protected Long initialValue() {
-                return 0L;
-            }
-        };
-
-    private final String            name;
-    private final int               sampleSize;
 
     public ThreadLocalStopWatch(
         String name,
         int sampleSizeHint) {
         super();
         this.name = name;
-        int leftMost = highestOneBit(sampleSizeHint);
-        this.sampleSize = (leftMost << 1) - 1;
+        this.stats = new ThreadLocalStats(sampleSizeHint);
     }
 
     @Override
     public void start() {
-        startTime.set(System.currentTimeMillis());
-        long calls = callsServiced.get().longValue();
-        if ((calls & sampleSize) > 0) {
-            totalCallsServiced.addAndGet(calls);
-            callsServiced.set(0L);
-            totalTimeTaken.addAndGet(cumulativeTime.get());
-            cumulativeTime.set(0L);
-        }
+        long timeMillis = getTime();
+        stats.start(timeMillis);
+        startTime.set(timeMillis);
     }
 
+    protected long getTime() {
+        return System.currentTimeMillis();
+    }
+    
     @Override
     public void stop() {
-        cumulativeTime.set(System.currentTimeMillis() - startTime.get());
-        callsServiced.set(callsServiced.get() + 1);
-    }
-
-    int getSampleSize() {
-        return sampleSize;
+        stats.stop(getTime() - startTime.get());
     }
 
     @Override
     public String toString() {
-        long totalCallsServiced = this.totalCallsServiced.longValue();
-        long totalTimeTaken = this.totalTimeTaken.longValue();
+        long totalCallsServiced = stats.getTotalCallsServiced();
+        long totalTimeTaken = stats.getTotalTimeTaken();
         return "ThreadLocalStopWatch [" 
             + "name="
             + name
@@ -65,7 +43,16 @@ public class ThreadLocalStopWatch implements Stopwatch {
             + totalCallsServiced
             + ", totalTimeTaken="
             + totalTimeTaken
-            + ", Average time = " + (totalCallsServiced == 0 ? "NA" : (totalTimeTaken * 1000 / totalCallsServiced) + "us")
+            + ", max time = " + stats.getMaxTime() + timeUnit()
+            + ", Average time = " + (totalCallsServiced == 0 ? "NA" : calcAverage(totalCallsServiced, totalTimeTaken))
             + "]";
+    }
+
+    protected String timeUnit() {
+        return "ms";
+    }
+
+    protected String calcAverage(long totalCallsServiced, long totalTimeTaken) {
+        return (totalTimeTaken * 1000 / totalCallsServiced) + "us";
     }
 }

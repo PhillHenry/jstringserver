@@ -8,7 +8,7 @@ import java.nio.channels.SocketChannel;
 public class BlockingConnector extends Connector {
 
     public BlockingConnector(String address, int port) {
-        super(address, port);
+        super(address, port, null);
     }
 
     @Override

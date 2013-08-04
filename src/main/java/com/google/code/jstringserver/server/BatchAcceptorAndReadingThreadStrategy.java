@@ -7,7 +7,9 @@ import java.util.concurrent.ExecutorService;
 import com.google.code.jstringserver.server.nio.select.AbstractNioReader;
 import com.google.code.jstringserver.server.nio.select.AbstractNioWriter;
 import com.google.code.jstringserver.server.nio.select.BatchServerAndReadingSelectionStrategy;
+import com.google.code.jstringserver.server.wait.NoOpWaitStrategy;
 import com.google.code.jstringserver.server.wait.WaitStrategy;
+import com.google.code.jstringserver.stats.Stopwatch;
 
 public class BatchAcceptorAndReadingThreadStrategy implements ThreadStrategy {
     
@@ -21,12 +23,24 @@ public class BatchAcceptorAndReadingThreadStrategy implements ThreadStrategy {
         Server            server,
         AbstractNioReader reader, 
         ThreadPoolFactory threadPoolFactory, 
-        AbstractNioWriter writer) throws IOException {
+        AbstractNioWriter writer, 
+        Stopwatch         stopWatch) throws IOException {
         super();
         executor                    = threadPoolFactory.createThreadPoolExecutor();
         final Selector selector     = Selector.open();
         server.register(selector);
-        WaitStrategy waitStrategy = new WaitStrategy() {
+        WaitStrategy waitStrategy   = new NoOpWaitStrategy(); // createWaitStrategy(selector);
+        batchSelectionStrategy      = new BatchServerAndReadingSelectionStrategy(
+            waitStrategy, 
+            selector, 
+            reader, 
+            writer, 
+            stopWatch);
+        numThreads                  = threadPoolFactory.getNumThreads();
+    }
+
+    private WaitStrategy createWaitStrategy(final Selector selector) {
+        return new WaitStrategy() {
             
             @Override
             public boolean pause() {
@@ -34,12 +48,6 @@ public class BatchAcceptorAndReadingThreadStrategy implements ThreadStrategy {
                 return true;
             }
         };
-        batchSelectionStrategy      = new BatchServerAndReadingSelectionStrategy(
-            waitStrategy, 
-            selector, 
-            reader, 
-            writer);
-        numThreads                  = threadPoolFactory.getNumThreads();
     }
 
     @Override

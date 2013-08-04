@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.google.code.jstringserver.server.bytebuffers.store.ByteBufferStore;
+import com.google.code.jstringserver.stats.Stopwatch;
 
 public class ConstantWritingConnector extends WritingConnector {
 
@@ -34,12 +35,18 @@ public class ConstantWritingConnector extends WritingConnector {
         String address,
         int port,
         String payload,
-        ByteBufferStore byteBufferStore) {
+        ByteBufferStore byteBufferStore,
+        Stopwatch readStopWatch, 
+        Stopwatch writeStopWatch, 
+        Stopwatch connectTimer) {
         super(
             address,
             port,
             payload,
-            byteBufferStore);
+            byteBufferStore, 
+            readStopWatch, 
+            writeStopWatch, 
+            connectTimer);
     }
 
     @Override

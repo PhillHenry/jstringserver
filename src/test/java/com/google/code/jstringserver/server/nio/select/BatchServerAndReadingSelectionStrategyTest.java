@@ -28,7 +28,7 @@ public class BatchServerAndReadingSelectionStrategyTest extends AbstractMultiThr
     public void setUp() throws IOException {
         serverTestSetup = new ServerTestSetup();
         mocks = new ReadWriteMockFacade();
-        toTest = new BatchServerAndReadingSelectionStrategy(null, serverTestSetup.getSelector(), mocks.getReader(), mocks.getWriter());
+        toTest = new BatchServerAndReadingSelectionStrategy(null, serverTestSetup.getSelector(), mocks.getReader(), mocks.getWriter(), null);
     }
     
     @After

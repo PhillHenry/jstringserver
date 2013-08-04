@@ -42,7 +42,7 @@ public class LatchedWritingConnector extends WritingConnector {
         CountDownLatch preRead,
         CountDownLatch postRead,
         CountDownLatch postClose) {
-        super(address, port, payload, byteBufferStore);
+        super(address, port, payload, byteBufferStore, null, null, null);
         this.preWrite = preWrite;
         this.postWrite = postWrite;
         this.preRead = preRead;
@@ -51,10 +51,11 @@ public class LatchedWritingConnector extends WritingConnector {
     }
 
     @Override
-    protected void read(SocketChannel socketChannel) throws IOException {
+    protected int read(SocketChannel socketChannel) throws IOException {
         preWrite.countDown();
-        super.read(socketChannel);
+        int read = super.read(socketChannel);
         postWrite.countDown();
+        return read;
     }
 
     @Override

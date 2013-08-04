@@ -22,8 +22,10 @@ public class ClientConfigurer {
     public void register(SocketChannel socketChannel) throws IOException, ClosedChannelException {
         if (socketChannel != null) {
             Socket socket = socketChannel.socket();
-//            if (socket.isConnected())
-            socket.setSoLinger(true, 0);
+            if (socket.isConnected()) {
+                socket.setSoLinger(true, 0); // <-- this is important! Stevens warns against it but line below seems insufficient...
+                socket.setReuseAddress(true); // <-- but this is better, see Unix Network Programming, Stevens et al. 
+            }
             socketChannel.configureBlocking(false);
             socketChannel.register(selector, OP_READ | OP_CONNECT | OP_WRITE); // can block if other threads are selecting. see http://stackoverflow.com/questions/1057224/thread-is-stuck-while-registering-channel-with-selector-in-java-nio-server
         }

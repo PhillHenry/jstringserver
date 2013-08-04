@@ -5,6 +5,7 @@ import static java.net.StandardSocketOptions.SO_RCVBUF;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.StandardSocketOptions;
 import java.nio.channels.SocketChannel;
 
@@ -49,7 +50,9 @@ public class Connector extends Networker {
         InetSocketAddress   inetSocketAddress,
         SocketChannel       socketChannel) throws IOException {
         socketChannel.configureBlocking(true);
-        socketChannel.socket().setSoLinger(true, 0);
+        Socket socket = socketChannel.socket();
+//        socket.setSoLinger(true, 0);
+//        socket.setReuseAddress(true);
         socketChannel.setOption(
             SO_RCVBUF,
             1000000);

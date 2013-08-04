@@ -30,6 +30,7 @@ public class Server {
     public void connect() throws IOException {
         serverSocketChannel = ServerSocketChannel.open();
         serverSocketChannel.configureBlocking(blocking);
+        serverSocketChannel.socket().setReuseAddress(true);
         SocketAddress socketAddress = new InetSocketAddress(listeningAddress, port);
         serverSocketChannel.bind(socketAddress, backlog);
     }

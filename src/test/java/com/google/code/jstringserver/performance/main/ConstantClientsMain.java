@@ -19,15 +19,28 @@ import com.google.code.jstringserver.stats.ThreadLocalStopWatch;
 public class ConstantClientsMain {
 
     private static final int sampleSizeHint = 100;
+    private ThreadLocalStopWatch readStopWatch;
+    private ThreadLocalStopWatch writeStopWatch;
+    private ThreadLocalStopWatch connectStopWatch;
 
     public static void main(
             String[] args) throws InterruptedException {
+        ConstantClientsMain app = new ConstantClientsMain();
+        app.start(args);
+    }
+    
+    public void start(String[] args) throws InterruptedException {
+        run(args);
+        doMetrics(readStopWatch, writeStopWatch, connectStopWatch);
+    }
+
+    public ConstantWritingConnector[] run(String[] args) {
         String address                              = getAddress(args);
         int numThreads                              = getNumberOfThreads(args);
         ThreadLocalByteBufferStore byteBufferStore  = createByteBufferStore();
-        Stopwatch                  readStopWatch    = new ThreadLocalStopWatch("read", sampleSizeHint);
-        Stopwatch                  writeStopWatch   = new ThreadLocalStopWatch("write", sampleSizeHint);
-        Stopwatch                  connectStopWatch = new ThreadLocalStopWatch("connect", sampleSizeHint);
+        readStopWatch                               = new ThreadLocalStopWatch("read", sampleSizeHint);
+        writeStopWatch                              = new ThreadLocalStopWatch("write", sampleSizeHint);
+        connectStopWatch                            = new ThreadLocalStopWatch("connect", sampleSizeHint);
         ConstantWritingConnector[] connectors       = createConnectors(
             address,
             numThreads,
@@ -38,7 +51,7 @@ public class ConstantClientsMain {
             connectStopWatch);
         run(numThreads,
             connectors);
-        doMetrics(readStopWatch, writeStopWatch, connectStopWatch);
+        return connectors;
     }
 
     private static int getNumberOfThreads(String[] args) {
@@ -118,6 +131,18 @@ public class ConstantClientsMain {
 
     private static ThreadLocalByteBufferStore createByteBufferStore() {
         return new ThreadLocalByteBufferStore(new DirectByteBufferFactory(1024));
+    }
+
+    public ThreadLocalStopWatch getReadStopWatch() {
+        return readStopWatch;
+    }
+
+    public ThreadLocalStopWatch getWriteStopWatch() {
+        return writeStopWatch;
+    }
+
+    public ThreadLocalStopWatch getConnectStopWatch() {
+        return connectStopWatch;
     }
 
 }

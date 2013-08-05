@@ -4,6 +4,7 @@ import static com.google.code.jstringserver.performance.main.AbstractServerMain.
 import static com.google.code.jstringserver.performance.main.AbstractServerMain.getConnectedServer;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.nio.channels.Selector;
 
 import com.google.code.jstringserver.performance.AsynchClientDataHandler;
@@ -26,15 +27,22 @@ import com.google.code.jstringserver.stats.Stopwatch;
 public class BatchedServerMain {
 
     private final StatsCollector statsCollector;
+    private Server server;
+    private BatchAcceptorAndReadingThreadStrategy threadStrategy;
 
     public BatchedServerMain() throws IOException {
         super();
         statsCollector                          = new StatsCollector();
     }
 
-    private void startServer(String[] args) throws Exception {
+    private void startServerAndCollectData(String[] args) throws Exception {
+        startServer(args);
+        statsCollector.started();
+    }
+
+    public void startServer(String[] args) throws UnknownHostException, IOException, Exception {
         String              ipInterface         = args.length < 1 ? "localhost" : args[0];
-        Server              server              = getConnectedServer(ipInterface);
+        server                                  = getConnectedServer(ipInterface);
 
         ClientDataHandler   clientDataHandler   = new AsynchClientDataHandler(EXPECTED_PAYLOAD);
         AbstractNioReader   reader              = createReader(clientDataHandler);
@@ -42,15 +50,18 @@ public class BatchedServerMain {
         
         ThreadPoolFactory   threadPoolFactory   = new ThreadPoolFactory(2);
         Stopwatch           stopwatch           = statsCollector.getStopWatchFor(BatchServerAndReadingSelectionStrategy.class.getSimpleName());
-        BatchAcceptorAndReadingThreadStrategy threadStrategy = new BatchAcceptorAndReadingThreadStrategy(
+        threadStrategy                          = new BatchAcceptorAndReadingThreadStrategy(
             server, 
             reader, 
             threadPoolFactory, 
             writer,
             stopwatch);
         threadStrategy.start();
-        
-        statsCollector.started();
+    }
+    
+    public void stop() throws IOException {
+        server.shutdown();
+        threadStrategy.shutdown();
     }
 
     private AbstractNioWriter createWriter(ClientDataHandler clientDataHandler) {
@@ -76,7 +87,7 @@ public class BatchedServerMain {
 
     public static void main(String[] args) throws Exception {
         BatchedServerMain app = new BatchedServerMain();
-        app.startServer(args);
+        app.startServerAndCollectData(args);
     }
 
 }

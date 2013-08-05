@@ -51,6 +51,16 @@ public class ThreadLocalStopWatch implements Stopwatch {
     protected String timeUnit() {
         return "ms";
     }
+    
+    public long getMaxTime() {
+        return stats.getMaxTime();
+    }
+    
+    public double getAverageInMicroSeconds() {
+        long totalCallsServiced = stats.getTotalCallsServiced();
+        long totalTimeTaken = stats.getTotalTimeTaken();
+        return (totalTimeTaken * 1000 / totalCallsServiced);
+    }
 
     protected String calcAverage(long totalCallsServiced, long totalTimeTaken) {
         return (totalTimeTaken * 1000 / totalCallsServiced) + "us";

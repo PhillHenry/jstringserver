@@ -51,8 +51,8 @@ public class Connector extends Networker {
         SocketChannel       socketChannel) throws IOException {
         socketChannel.configureBlocking(true);
         Socket socket = socketChannel.socket();
-//        socket.setSoLinger(true, 0);
-//        socket.setReuseAddress(true);
+        socket.setSoLinger(true, 0);
+        socket.setReuseAddress(true);
         socketChannel.setOption(
             SO_RCVBUF,
             1000000);

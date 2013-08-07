@@ -67,14 +67,14 @@ public class MultiThreadedReadingSelectionStrategy extends AbstractSelectionStra
     }
     
     class ReadWriterTask extends AbstractTask {
-        private final ReaderWriter readThenWriteJob;
+        private final ReaderThenWriter readThenWriteJob;
 
         public ReadWriterTask(
             SelectionKey key, 
             AbstractNioReader reader,
             AbstractNioWriter writer) {
             super(key);
-            this.readThenWriteJob = new ReaderWriter(reader, writer);
+            this.readThenWriteJob = new ReaderThenWriter(reader, writer);
         }
 
         @Override

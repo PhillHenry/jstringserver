@@ -4,18 +4,18 @@ import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
-public class ReaderWriter {
+public class ReaderThenWriter {
     private final AbstractNioWriter writer;
     private final AbstractNioReader reader;
 
-    public ReaderWriter(
+    public ReaderThenWriter(
         AbstractNioReader reader,
         AbstractNioWriter writer) {
         this.reader = reader;
         this.writer = writer;
     }
 
-    protected void doWork(SelectionKey key) throws IOException {
+    public void doWork(SelectionKey key) throws IOException {
         SocketChannel channel = (SocketChannel) key.channel();
         try {
             reader.read(key, channel);

@@ -67,8 +67,8 @@ public class ConstantWritingConnector extends WritingConnector {
 
     @Override
     protected void connected(SocketChannel socketChannel) throws IOException {
-        socketChannel.socket().setSoTimeout(10000);
-        socketChannel.socket().setReuseAddress(true);
+//        socketChannel.socket().setSoTimeout(10000);
+//        socketChannel.socket().setReuseAddress(true);
 //        socketChannel.socket().setSoLinger(false, 10000);
         super.connected(socketChannel);
     }

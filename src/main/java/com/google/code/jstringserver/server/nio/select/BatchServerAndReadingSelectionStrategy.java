@@ -23,7 +23,7 @@ public class BatchServerAndReadingSelectionStrategy implements SelectionStrategy
         }
     };
     
-    private final ReaderWriter      readThenWriteJob;
+    private final ReaderThenWriter      readerWriter;
     private final ClientConfigurer  clientConfigurer;
     private final WaitStrategy      waitStrategy;
     private final Selector          selector;
@@ -38,7 +38,7 @@ public class BatchServerAndReadingSelectionStrategy implements SelectionStrategy
         this.waitStrategy       = waitStrategy;
         this.selector           = selector;
         this.stopWatch          = stopWatch;
-        this.readThenWriteJob   = new ReaderWriter(reader, writer);
+        this.readerWriter       = new ReaderThenWriter(reader, writer);
         this.clientConfigurer   = new ClientConfigurer(selector);
     }
     
@@ -82,7 +82,7 @@ public class BatchServerAndReadingSelectionStrategy implements SelectionStrategy
         while (keyIterator.hasNext()) {
             SelectionKey key = keyIterator.next();
             keyIterator.remove();
-            readThenWriteJob.doWork(key);
+            readerWriter.doWork(key);
         }
     }
 

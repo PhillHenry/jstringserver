@@ -23,7 +23,7 @@ public class ReadWriteDispatcher implements ClientChannelListener {
         this.socketChannelExchanger = socketChannelExchanger;
         this.selectionStrategy = selectionStrategy;
         this.selector = selector;
-        this.clientConfigurer = new ClientConfigurer(selector);
+        this.clientConfigurer = new ClientConfigurer(new SimpleSelectorHolder(selector));
     }
 
     @Override

@@ -52,17 +52,17 @@ public class LatchedWritingConnector extends WritingConnector {
 
     @Override
     protected int read(SocketChannel socketChannel) throws IOException {
-        preWrite.countDown();
+        preRead.countDown();
         int read = super.read(socketChannel);
-        postWrite.countDown();
+        postRead.countDown();
         return read;
     }
 
     @Override
     protected void write(SocketChannel socketChannel) throws IOException {
-        preRead.countDown();
+        preWrite.countDown();
         super.write(socketChannel);
-        postRead.countDown();
+        postWrite.countDown();
     }
 
     @Override

@@ -15,6 +15,9 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.google.code.jstringserver.server.AbstractMultiThreadedTest;
+import com.google.code.jstringserver.server.bytebuffers.factories.DirectByteBufferFactory;
+import com.google.code.jstringserver.server.bytebuffers.store.ThreadLocalByteBufferStore;
+import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 
 public class BatchServerAndReadingSelectionStrategyTest extends AbstractMultiThreadedTest {
     
@@ -22,13 +25,12 @@ public class BatchServerAndReadingSelectionStrategyTest extends AbstractMultiThr
     
     private ServerTestSetup serverTestSetup;
 
-    private ReadWriteMockFacade mocks;
+    private ClientTestSetup clientTestSetup;
 
     @Before
     public void setUp() throws IOException {
         serverTestSetup = new ServerTestSetup();
-        mocks = new ReadWriteMockFacade();
-        toTest = new BatchServerAndReadingSelectionStrategy(null, serverTestSetup.getSelector(), mocks.getReader(), mocks.getWriter(), null);
+        clientTestSetup = new ClientTestSetup(serverTestSetup, 1);
     }
     
     @After
@@ -38,19 +40,32 @@ public class BatchServerAndReadingSelectionStrategyTest extends AbstractMultiThr
 
     @Test
     public void lifecycle() throws IOException, InterruptedException {
-        ClientTestSetup clientTestSetup = new ClientTestSetup(serverTestSetup, 1);
+        createToTest();
+        toTest.select();
         start(clientTestSetup.createLatchedClients(), "rw");
-        clientTestSetup.awaitPostRead();
+        toTest.select();
         clientTestSetup.awaitPreWrite();
         toTest.select();
+        clientTestSetup.awaitPostWrite();
         toTest.select();
-        mocks.checkReadAndWrite(1);
-        
         everythingProcessed();
     }
+    
+    private ReadWriteMockFacade createToTest() {
+        ReadWriteMockFacade mocks = new ReadWriteMockFacade();
+        ClientDataHandler mockClientDataHandler = mock(ClientDataHandler.class);
+        NioReader reader = new NioReader(mockClientDataHandler , new ThreadLocalByteBufferStore(new DirectByteBufferFactory(4096)), null);
+        Mockito.when(mockClientDataHandler.end(Mockito.any())).thenReturn("OK");
+        AbstractNioWriter writer = new NioWriter(mockClientDataHandler, null);
+        toTest = new BatchServerAndReadingSelectionStrategy(null, serverTestSetup.getSelector(), reader, writer , null);
+        return mocks;
+    }
 
-    private void everythingProcessed() throws IOException {
+    private void everythingProcessed() throws IOException, InterruptedException {
         Set<SelectionKey> keys = toTest.selected();
+        clientTestSetup.awaitPreRead();
+        clientTestSetup.awaitPostRead();
+        clientTestSetup.awaitPostClose();
         assertEquals(0, keys.size());
     }
 

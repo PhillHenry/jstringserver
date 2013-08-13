@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
-public class ReaderThenWriter {
+public class ReaderThenWriter implements ReaderWriter {
     private final AbstractNioWriter writer;
     private final AbstractNioReader reader;
 
@@ -15,6 +15,7 @@ public class ReaderThenWriter {
         this.writer = writer;
     }
 
+    @Override
     public void doWork(SelectionKey key) throws IOException {
         SocketChannel channel = (SocketChannel) key.channel();
         try {

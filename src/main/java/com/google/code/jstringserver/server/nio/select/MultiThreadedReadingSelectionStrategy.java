@@ -67,7 +67,7 @@ public class MultiThreadedReadingSelectionStrategy extends AbstractSelectionStra
     }
     
     class ReadWriterTask extends AbstractTask {
-        private final ReaderThenWriter readThenWriteJob;
+        private final ReaderWriter readThenWriteJob;
 
         public ReadWriterTask(
             SelectionKey key, 

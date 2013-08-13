@@ -61,7 +61,7 @@ public class SingleThreadedReadingSelectionStrategyTest extends AbstractMultiThr
     public void selectLifecycle() throws IOException, InterruptedException {
         clientsConnectAndReadyForReadWrite();
 
-        clientTestSetup.awaitPostRead();
+        clientTestSetup.awaitPreRead();
         clientTestSetup.awaitPreWrite();
         toTest.select();
         mocks.checkReadAndWrite(1);

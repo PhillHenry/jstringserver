@@ -15,9 +15,9 @@ public class NioReader implements AbstractNioReader {
     private final Stopwatch         stopwatch;
 
     public NioReader(
-        ClientDataHandler clientDataHandler,
-        ByteBufferStore byteBufferStore,
-        Stopwatch stopwatch) {
+        ClientDataHandler   clientDataHandler,
+        ByteBufferStore     byteBufferStore,
+        Stopwatch           stopwatch) {
         super();
         this.clientDataHandler = clientDataHandler;
         this.byteBufferStore = byteBufferStore;

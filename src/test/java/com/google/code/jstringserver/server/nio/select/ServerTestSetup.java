@@ -13,6 +13,7 @@ import java.util.Set;
 import com.google.code.jstringserver.server.FreePortFinder;
 import com.google.code.jstringserver.server.Server;
 import com.google.code.jstringserver.server.nio.ClientConfigurer;
+import com.google.code.jstringserver.server.nio.SimpleSelectorHolder;
 
 public class ServerTestSetup {
     
@@ -65,7 +66,7 @@ public class ServerTestSetup {
             for (SelectionKey key : selectedKeys) {
                 ServerSocketChannel selectableChannel = (ServerSocketChannel) key.channel();
                 SocketChannel clientChannel = selectableChannel.accept();
-                ClientConfigurer clientConfigurer = new ClientConfigurer(clientSelector);
+                ClientConfigurer clientConfigurer = new ClientConfigurer(new SimpleSelectorHolder(clientSelector));
                 clientConfigurer.register(clientChannel);
             }
         }

@@ -1,5 +1,9 @@
 package com.google.code.jstringserver.server.nio.select;
 
+import static java.nio.channels.SelectionKey.OP_CONNECT;
+import static java.nio.channels.SelectionKey.OP_READ;
+import static java.nio.channels.SelectionKey.OP_WRITE;
+
 import java.io.IOException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
@@ -11,23 +15,46 @@ import java.util.Iterator;
 import java.util.Set;
 
 import com.google.code.jstringserver.server.nio.ClientConfigurer;
+import com.google.code.jstringserver.server.nio.SelectorHolder;
 import com.google.code.jstringserver.server.wait.WaitStrategy;
 import com.google.code.jstringserver.stats.Stopwatch;
 
 public class BatchServerAndReadingSelectionStrategy implements SelectionStrategy {
     
-    private final ThreadLocal<Set<SelectionKey>> clientSelectionKeys = new ThreadLocal<Set<SelectionKey>>() {
+//    private final ThreadLocal<Set<SelectionKey>> clientSelectionKeys = new ThreadLocal<Set<SelectionKey>>() {
+//        @Override
+//        protected Set<SelectionKey> initialValue() {
+//            return new HashSet<>();
+//        }
+//    };
+    
+    private final ThreadLocal<Selector> selectors = new ThreadLocal<Selector>() {
         @Override
-        protected Set<SelectionKey> initialValue() {
-            return new HashSet<>();
+        protected Selector initialValue() {
+            try {
+                return Selector.open();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     };
     
-    private final ReaderThenWriter      readerWriter;
+    private final ThreadLocal<ReaderWriter> readWriters = new ThreadLocal<ReaderWriter>() {
+        @Override
+        protected ReaderWriter initialValue() {
+            return new ChunkedReaderWriter((NioReader) reader, writer, selectors.get());
+        }
+    };
+    
+    
+    
+//    private final ReaderWriter      readerWriter;
     private final ClientConfigurer  clientConfigurer;
     private final WaitStrategy      waitStrategy;
-    private final Selector          selector;
+    private final Selector          acceptorSelector;
     private final Stopwatch         stopWatch;
+    private final AbstractNioReader reader;
+    private final AbstractNioWriter writer;
 
     public BatchServerAndReadingSelectionStrategy(
         WaitStrategy        waitStrategy,
@@ -36,11 +63,19 @@ public class BatchServerAndReadingSelectionStrategy implements SelectionStrategy
         AbstractNioWriter   writer, 
         Stopwatch           stopWatch) {
         this.waitStrategy       = waitStrategy;
-        this.selector           = selector;
+        this.acceptorSelector   = selector;
+        this.reader             = reader;
+        this.writer             = writer;
         this.stopWatch          = stopWatch;
-        this.readerWriter       = new ReaderThenWriter(reader, writer);
-        this.clientConfigurer   = new ClientConfigurer(selector);
+//        this.readerWriter       = new ReaderThenWriter(reader, writer);
+        this.clientConfigurer   = new ClientConfigurer(new SelectorHolder() {
+            @Override
+            public Selector getSelector() {
+                return selectors.get();
+            }
+        });
     }
+   
     
     @Override
     public void select() throws IOException {
@@ -69,7 +104,7 @@ public class BatchServerAndReadingSelectionStrategy implements SelectionStrategy
     }
 
     private synchronized int selectWithLock() throws IOException {
-        int selected = selector.selectNow();
+        int selected = acceptorSelector.selectNow();
         if (selected > 0) {
             differentiateKeys();
         } 
@@ -77,12 +112,16 @@ public class BatchServerAndReadingSelectionStrategy implements SelectionStrategy
     }
 
     private void handleClients() throws IOException {
-        Set<SelectionKey>       keys        = clientSelectionKeys.get();
-        Iterator<SelectionKey>  keyIterator = keys.iterator();
-        while (keyIterator.hasNext()) {
-            SelectionKey key = keyIterator.next();
-            keyIterator.remove();
-            readerWriter.doWork(key);
+        Selector                selector    = selectors.get();
+        int                     select      = selector.selectNow();
+        if (select > 0) {
+            Set<SelectionKey>       keys        = selector.selectedKeys();
+            Iterator<SelectionKey>  keyIterator = keys.iterator();
+            while (keyIterator.hasNext()) {
+                SelectionKey key = keyIterator.next();
+                keyIterator.remove();
+                readWriters.get().doWork(key);
+            }
         }
     }
 
@@ -93,8 +132,9 @@ public class BatchServerAndReadingSelectionStrategy implements SelectionStrategy
             SocketChannel       clientChannel       = serverSocketChannel.accept();
             clientConfigurer.register(clientChannel);
         } else {
-            key.cancel();
-            clientSelectionKeys.get().add(key);
+            System.err.println("Shouldn't happen");
+//            key.cancel();
+//            clientSelectionKeys.get().add(key);
         }
     }
     
@@ -110,7 +150,7 @@ public class BatchServerAndReadingSelectionStrategy implements SelectionStrategy
     }
 
     Set<SelectionKey> selected() {
-        return selector.selectedKeys();
+        return acceptorSelector.selectedKeys();
     }
     
 }

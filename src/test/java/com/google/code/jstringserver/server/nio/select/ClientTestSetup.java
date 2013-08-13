@@ -70,4 +70,12 @@ public class ClientTestSetup {
     public void awaitPreWrite() throws InterruptedException {
         await(preWrite);
     }
+
+    public void awaitPostWrite() throws InterruptedException {
+        await(postWrite);
+    }
+
+    public void awaitPreRead() throws InterruptedException {
+        await(preRead);
+    }
 }

@@ -11,12 +11,12 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
 public class ClientConfigurer {
-
-    private final Selector selector;
+    
+    private final SelectorHolder selectorHolder;
 
     public ClientConfigurer(
-        Selector selector) {
-            this.selector = selector;
+        SelectorHolder selectorHolder) {
+            this.selectorHolder = selectorHolder;
     }
 
     public void register(SocketChannel socketChannel) throws IOException, ClosedChannelException {
@@ -27,6 +27,7 @@ public class ClientConfigurer {
                 socket.setReuseAddress(true); // <-- but this is better, see Unix Network Programming, Stevens et al. 
             }
             socketChannel.configureBlocking(false);
+            Selector selector = selectorHolder.getSelector();
             socketChannel.register(selector, OP_READ | OP_CONNECT | OP_WRITE); // can block if other threads are selecting. see http://stackoverflow.com/questions/1057224/thread-is-stuck-while-registering-channel-with-selector-in-java-nio-server
         }
     }

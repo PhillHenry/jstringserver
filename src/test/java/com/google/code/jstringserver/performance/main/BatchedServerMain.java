@@ -18,6 +18,7 @@ import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 import com.google.code.jstringserver.server.nio.select.AbstractNioReader;
 import com.google.code.jstringserver.server.nio.select.AbstractNioWriter;
 import com.google.code.jstringserver.server.nio.select.BatchServerAndReadingSelectionStrategy;
+import com.google.code.jstringserver.server.nio.select.NioReader;
 import com.google.code.jstringserver.server.nio.select.NioReaderLooping;
 import com.google.code.jstringserver.server.nio.select.NioWriter;
 import com.google.code.jstringserver.server.wait.NoOpWaitStrategy;
@@ -69,12 +70,13 @@ public class BatchedServerMain {
         return new NioWriter(clientDataHandler, stopwatch);
     }
 
-    protected NioReaderLooping createReader(ClientDataHandler clientDataHandler) {
-        WaitStrategy        waitStrategy        = createWaitStrategy();
-        Stopwatch           stopwatch           = statsCollector.getStopWatchFor(NioReaderLooping.class.getSimpleName());
-        long                timeoutMs           = 2000L;
+    protected AbstractNioReader createReader(ClientDataHandler clientDataHandler) {
+        Stopwatch           stopwatch           = statsCollector.getStopWatchFor(NioReader.class.getSimpleName());
         ByteBufferStore     byteBufferStore     = createByteBufferStore();
-        return new NioReaderLooping(clientDataHandler, byteBufferStore, timeoutMs, waitStrategy, stopwatch);
+        return new NioReader(
+            clientDataHandler, 
+            byteBufferStore, 
+            stopwatch);
     }
 
     protected ByteBufferStore createByteBufferStore() {

@@ -21,6 +21,7 @@ import com.google.code.jstringserver.server.nio.select.BatchServerAndReadingSele
 import com.google.code.jstringserver.server.nio.select.NioReader;
 import com.google.code.jstringserver.server.nio.select.NioReaderLooping;
 import com.google.code.jstringserver.server.nio.select.NioWriter;
+import com.google.code.jstringserver.server.nio.select.ReaderWriter;
 import com.google.code.jstringserver.server.wait.NoOpWaitStrategy;
 import com.google.code.jstringserver.server.wait.WaitStrategy;
 import com.google.code.jstringserver.stats.Stopwatch;
@@ -51,12 +52,14 @@ public class BatchedServerMain {
         
         ThreadPoolFactory   threadPoolFactory   = new ThreadPoolFactory(2);
         Stopwatch           stopwatch           = statsCollector.getStopWatchFor(BatchServerAndReadingSelectionStrategy.class.getSimpleName());
+        Stopwatch           rwStopwatch         = statsCollector.getStopWatchFor(ReaderWriter.class.getSimpleName());
         threadStrategy                          = new BatchAcceptorAndReadingThreadStrategy(
             server, 
             reader, 
             threadPoolFactory, 
             writer,
-            stopwatch);
+            stopwatch, 
+            rwStopwatch);
         threadStrategy.start();
     }
     

@@ -7,6 +7,10 @@ import java.util.concurrent.ExecutorService;
 import com.google.code.jstringserver.server.nio.select.AbstractNioReader;
 import com.google.code.jstringserver.server.nio.select.AbstractNioWriter;
 import com.google.code.jstringserver.server.nio.select.BatchServerAndReadingSelectionStrategy;
+import com.google.code.jstringserver.server.nio.select.ChunkedReaderWriter;
+import com.google.code.jstringserver.server.nio.select.NioReader;
+import com.google.code.jstringserver.server.nio.select.ReaderWriter;
+import com.google.code.jstringserver.server.nio.select.ReaderWriterFactory;
 import com.google.code.jstringserver.server.wait.NoOpWaitStrategy;
 import com.google.code.jstringserver.server.wait.WaitStrategy;
 import com.google.code.jstringserver.stats.Stopwatch;
@@ -20,21 +24,29 @@ public class BatchAcceptorAndReadingThreadStrategy implements ThreadStrategy {
     private volatile boolean isRunning = true;
 
     public BatchAcceptorAndReadingThreadStrategy(
-        Server            server,
-        AbstractNioReader reader, 
-        ThreadPoolFactory threadPoolFactory, 
-        AbstractNioWriter writer, 
-        Stopwatch         stopWatch) throws IOException {
+        final Server            server,
+        final AbstractNioReader reader, 
+        final ThreadPoolFactory threadPoolFactory, 
+        final AbstractNioWriter writer, 
+        final Stopwatch         stopWatch,
+        final Stopwatch         readerWriterStopwatch) throws IOException {
         super();
         executor                    = threadPoolFactory.createThreadPoolExecutor();
         final Selector selector     = Selector.open();
         server.register(selector);
+        ReaderWriterFactory readerWriterFactory = new ReaderWriterFactory() {
+
+            @Override
+            public ReaderWriter createReaderWriter() {
+                return new ChunkedReaderWriter((NioReader) reader, writer, readerWriterStopwatch);
+            }
+            
+        };
         WaitStrategy waitStrategy   = new NoOpWaitStrategy(); // createWaitStrategy(selector);
         batchSelectionStrategy      = new BatchServerAndReadingSelectionStrategy(
             waitStrategy, 
             selector, 
-            reader, 
-            writer, 
+            readerWriterFactory, 
             stopWatch);
         numThreads                  = threadPoolFactory.getNumThreads();
     }

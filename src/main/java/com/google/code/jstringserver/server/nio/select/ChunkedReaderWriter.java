@@ -5,24 +5,35 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
+import com.google.code.jstringserver.stats.Stopwatch;
+
 public class ChunkedReaderWriter implements ReaderWriter {
     
     private final NioReader         reader;
     private final AbstractNioWriter writer;
-    private final Selector          selector;
+    private final Stopwatch         stopwatch;
 
     public ChunkedReaderWriter(
         NioReader reader,
         AbstractNioWriter writer,
-        Selector selector) {
+        Stopwatch stopwatch) {
         super();
         this.reader = reader;
         this.writer = writer;
-        this.selector = selector;
+        this.stopwatch = stopwatch;
     }
 
     @Override
     public void doWork(SelectionKey key) throws IOException {
+        startTimer();
+        try {
+            readWrite(key);
+        } finally {
+            stopTimer();
+        }
+    }
+
+    private void readWrite(SelectionKey key) throws IOException {
         SocketChannel selectableChannel = (SocketChannel) key.channel();
         if (reader.finished(key)) {
             writer.write(key, selectableChannel);
@@ -33,7 +44,17 @@ public class ChunkedReaderWriter implements ReaderWriter {
                 reader.read(key, selectableChannel);
             }
         }
-        
     }
-
+    
+    private void startTimer() {
+        if (stopwatch != null) {
+            stopwatch.start();
+        }
+    }
+    
+    private void stopTimer() {
+        if (stopwatch != null) {
+            stopwatch.stop();
+        }
+    }
 }

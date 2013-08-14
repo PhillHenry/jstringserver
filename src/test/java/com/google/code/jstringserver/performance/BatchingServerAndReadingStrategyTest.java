@@ -31,6 +31,7 @@ public class BatchingServerAndReadingStrategyTest extends AbstractThreadStrategy
             reader, 
             threadPoolFactory, 
             writer,
+            null, 
             null);
     }
 

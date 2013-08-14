@@ -54,10 +54,18 @@ public class BatchServerAndReadingSelectionStrategyTest extends AbstractMultiThr
     private ReadWriteMockFacade createToTest() {
         ReadWriteMockFacade mocks = new ReadWriteMockFacade();
         ClientDataHandler mockClientDataHandler = mock(ClientDataHandler.class);
-        NioReader reader = new NioReader(mockClientDataHandler , new ThreadLocalByteBufferStore(new DirectByteBufferFactory(4096)), null);
+        final NioReader reader = new NioReader(mockClientDataHandler , new ThreadLocalByteBufferStore(new DirectByteBufferFactory(4096)), null);
         Mockito.when(mockClientDataHandler.end(Mockito.any())).thenReturn("OK");
-        AbstractNioWriter writer = new NioWriter(mockClientDataHandler, null);
-        toTest = new BatchServerAndReadingSelectionStrategy(null, serverTestSetup.getSelector(), reader, writer , null);
+        final AbstractNioWriter writer = new NioWriter(mockClientDataHandler, null);
+        ReaderWriterFactory readerWriterFactory = new ReaderWriterFactory() {
+
+            @Override
+            public ReaderWriter createReaderWriter() {
+                return new ChunkedReaderWriter(reader, writer, null);
+            }
+            
+        };
+        toTest = new BatchServerAndReadingSelectionStrategy(null, serverTestSetup.getSelector(), readerWriterFactory, null);
         return mocks;
     }
 

@@ -42,33 +42,28 @@ public class BatchServerAndReadingSelectionStrategy implements SelectionStrategy
     private final ThreadLocal<ReaderWriter> readWriters = new ThreadLocal<ReaderWriter>() {
         @Override
         protected ReaderWriter initialValue() {
-            return new ChunkedReaderWriter((NioReader) reader, writer, selectors.get());
+            return readerWriterFactory.createReaderWriter();
         }
     };
     
     
     
-//    private final ReaderWriter      readerWriter;
-    private final ClientConfigurer  clientConfigurer;
-    private final WaitStrategy      waitStrategy;
-    private final Selector          acceptorSelector;
-    private final Stopwatch         stopWatch;
-    private final AbstractNioReader reader;
-    private final AbstractNioWriter writer;
+    private final ReaderWriterFactory   readerWriterFactory;
+    private final ClientConfigurer      clientConfigurer;
+    private final WaitStrategy          waitStrategy;
+    private final Selector              acceptorSelector;
+    private final Stopwatch             stopWatch;
 
     public BatchServerAndReadingSelectionStrategy(
         WaitStrategy        waitStrategy,
         Selector            selector,
-        AbstractNioReader   reader, 
-        AbstractNioWriter   writer, 
+        ReaderWriterFactory readerWriterFactory, 
         Stopwatch           stopWatch) {
-        this.waitStrategy       = waitStrategy;
-        this.acceptorSelector   = selector;
-        this.reader             = reader;
-        this.writer             = writer;
-        this.stopWatch          = stopWatch;
-//        this.readerWriter       = new ReaderThenWriter(reader, writer);
-        this.clientConfigurer   = new ClientConfigurer(new SelectorHolder() {
+        this.waitStrategy        = waitStrategy;
+        this.acceptorSelector    = selector;
+        this.readerWriterFactory = readerWriterFactory;
+        this.stopWatch           = stopWatch;
+        this.clientConfigurer    = new ClientConfigurer(new SelectorHolder() {
             @Override
             public Selector getSelector() {
                 return selectors.get();

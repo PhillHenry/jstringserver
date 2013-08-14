@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.nio.channels.Selector;
 
+import com.google.code.jstringserver.performance.AbstractThreadStrategyTest;
 import com.google.code.jstringserver.performance.AsynchClientDataHandler;
 import com.google.code.jstringserver.server.BatchAcceptorAndReadingThreadStrategy;
 import com.google.code.jstringserver.server.Server;
@@ -50,7 +51,7 @@ public class BatchedServerMain {
         AbstractNioReader   reader              = createReader(clientDataHandler);
         AbstractNioWriter   writer              = createWriter(clientDataHandler);
         
-        ThreadPoolFactory   threadPoolFactory   = new ThreadPoolFactory(2);
+        ThreadPoolFactory   threadPoolFactory   = new ThreadPoolFactory(AbstractThreadStrategyTest.availableProcessors());
         Stopwatch           stopwatch           = statsCollector.getStopWatchFor(BatchServerAndReadingSelectionStrategy.class.getSimpleName());
         Stopwatch           rwStopwatch         = statsCollector.getStopWatchFor(ReaderWriter.class.getSimpleName());
         threadStrategy                          = new BatchAcceptorAndReadingThreadStrategy(

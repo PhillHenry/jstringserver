@@ -53,7 +53,7 @@ public abstract class AbstractThreadStrategyTest<T extends ThreadStrategy> {
         return 100;
     }
 
-    protected static int availableProcessors() {
+    public static int availableProcessors() {
         return Runtime.getRuntime().availableProcessors();
     }
     

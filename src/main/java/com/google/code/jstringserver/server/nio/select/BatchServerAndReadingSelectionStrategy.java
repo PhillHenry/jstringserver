@@ -108,7 +108,7 @@ public class BatchServerAndReadingSelectionStrategy implements SelectionStrategy
 
     private void handleClients() throws IOException {
         Selector                selector    = selectors.get();
-        int                     select      = selector.selectNow();
+        int                     select      = selector.select(10);
         if (select > 0) {
             Set<SelectionKey>       keys        = selector.selectedKeys();
             Iterator<SelectionKey>  keyIterator = keys.iterator();

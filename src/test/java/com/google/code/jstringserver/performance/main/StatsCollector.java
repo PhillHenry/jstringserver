@@ -26,6 +26,7 @@ public class StatsCollector {
             for (Stopwatch stopwatch : nameToStopwatch.values()) {
                 System.out.println(stopwatch);
             }
+            System.out.println();
             Thread.sleep(10000);
         }
     }

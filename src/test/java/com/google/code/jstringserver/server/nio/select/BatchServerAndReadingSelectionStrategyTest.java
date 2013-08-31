@@ -157,15 +157,6 @@ public class BatchServerAndReadingSelectionStrategyTest extends AbstractMultiThr
             checkNoLongerReadable(selectableChannel);
         }
 
-
-        private void waitForClientToFinish() {
-            try {
-                clientTestSetup.awaitPostClose();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
         @Override
         protected int read(SelectionKey key, SocketChannel selectableChannel) throws IOException {
             int read = super.read(key, selectableChannel);
@@ -174,6 +165,14 @@ public class BatchServerAndReadingSelectionStrategyTest extends AbstractMultiThr
                 when(mockClientDataHandler.isNotComplete(Mockito.any())).thenReturn(false);
             }
             return read;
+        }
+    }
+    
+    private void waitForClientToFinish() {
+        try {
+            clientTestSetup.awaitPostClose();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 

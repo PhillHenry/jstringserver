@@ -37,12 +37,16 @@ public class ClientTestSetup {
     }
 
     public LatchedWritingConnector[] createLatchedClients() {
+        String payload = "payload";
+        return createLatchedClients(payload);
+    }
 
+    public LatchedWritingConnector[] createLatchedClients(String payload) {
         LatchedWritingConnector[] writers = createWritingConnectors(
             numClients, 
             HOST, 
             serverTestSetup.getPort(), 
-            "payload", 
+            payload, 
             new ThreadLocalByteBufferStore(new DirectByteBufferFactory(1024)),
             preWrite,
             postWrite,

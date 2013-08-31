@@ -36,14 +36,30 @@ public class ChunkedReaderWriter implements ReaderWriter {
     private void readWrite(SelectionKey key) throws IOException {
         SocketChannel selectableChannel = (SocketChannel) key.channel();
         if (reader.finished(key)) {
-            writer.write(key, selectableChannel);
-            key.cancel();
-            selectableChannel.close();
+            finishedReading(key, selectableChannel);
         } else {
             if (key.isReadable()) {
-                reader.read(key, selectableChannel);
+                read(key, selectableChannel);
             }
         }
+    }
+
+    protected int read(SelectionKey key, SocketChannel selectableChannel) throws IOException {
+        return reader.read(key, selectableChannel);
+    }
+
+    protected void finishedReading(SelectionKey key, SocketChannel selectableChannel) throws IOException {
+        write(key, selectableChannel);
+        close(key, selectableChannel);
+    }
+
+    protected void write(SelectionKey key, SocketChannel selectableChannel) throws IOException {
+        writer.write(key, selectableChannel);
+    }
+
+    protected void close(SelectionKey key, SocketChannel selectableChannel) throws IOException {
+        key.cancel();
+        selectableChannel.close();
     }
     
     private void startTimer() {

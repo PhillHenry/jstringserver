@@ -141,7 +141,10 @@ public class BatchServerAndReadingSelectionStrategyTest extends AbstractMultiThr
         
         public void writeToEveryone() throws IOException {
             for (SelectionKey key : allSelectionKeysEver) {
-                write(key, (SocketChannel) key.channel());
+                SocketChannel socketChannel = (SocketChannel) key.channel();
+                if (socketChannel.isOpen()) {
+                    write(key, socketChannel);
+                }
             }
         }
     }

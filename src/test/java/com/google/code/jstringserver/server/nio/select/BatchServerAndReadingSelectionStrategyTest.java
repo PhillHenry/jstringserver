@@ -19,6 +19,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.google.code.jstringserver.client.LatchedWritingConnector;
 import com.google.code.jstringserver.server.AbstractMultiThreadedTest;
 import com.google.code.jstringserver.server.bytebuffers.factories.DirectByteBufferFactory;
 import com.google.code.jstringserver.server.bytebuffers.store.ThreadLocalByteBufferStore;
@@ -37,7 +38,7 @@ public class BatchServerAndReadingSelectionStrategyTest extends AbstractMultiThr
 
     private ClientDataHandler mockClientDataHandler;
     
-    private int expectedReadSizeOnFinish;
+    private LatchedWritingConnector[] clients;
 
     @Before
     public void setUp() throws IOException {
@@ -52,24 +53,41 @@ public class BatchServerAndReadingSelectionStrategyTest extends AbstractMultiThr
 
     @Test
     public void lifecycle() throws IOException, InterruptedException {
-        MyChunkedReaderWriter readerWriter = doClientsReadWrite();
-        toTest.select(); // client has finished writing. 
+        MyChunkedReaderWriter readerWriter = awaitClientsWrite();
+        toTest.select(); // client has finished writing. This will trigger a write to the client and thus make it read
         everythingProcessed(readerWriter);
     }
     
     @Test
-    public void clientClosesBeforeFinish() throws IOException, InterruptedException {
-        MyChunkedReaderWriter readerWriter = doClientsReadWrite();
-        readerWriter.writeToEveryone();
-        clientTestSetup.awaitPostClose();
-        expectedReadSizeOnFinish = -1;
-        everythingProcessed(readerWriter);
+    public void clientClosesBeforeServerFinishes() throws IOException, InterruptedException {
+        MyChunkedReaderWriter readerWriter = createToTest();
+        startClients();
+        clientTestSetup.awaitPostWrite(); // client is now waiting for a response
+        toTest.select(); // reads from client. state ready to write
+        toTest.select(); // triggers write to client
+        assertEquals(1, readerWriter.allSelectionKeysEver.size());
     }
     
-    private MyChunkedReaderWriter doClientsReadWrite() throws IOException, InterruptedException {
+    @Test
+    public void clientPrematurelyCloses() throws InterruptedException, IOException {
+        MyChunkedReaderWriter readerWriter = awaitClientsWrite();
+        closeAllClients();
+        assertEquals(PAYLOAD.getBytes().length, readerWriter.bytesRead);
+        SelectionKey selectionKey = readerWriter.allSelectionKeysEver.iterator().next();
+        SocketChannel channel = (SocketChannel) selectionKey.channel();
+        checkNoLongerReadable(channel);
+    }
+    
+    private void closeAllClients() throws IOException {
+        for (LatchedWritingConnector client : clients) {
+            client.close();
+        }
+    }
+    
+    private MyChunkedReaderWriter awaitClientsWrite() throws IOException, InterruptedException {
         MyChunkedReaderWriter readerWriter = createToTest();
         toTest.select();
-        start(clientTestSetup.createLatchedClients(PAYLOAD), "rw");
+        startClients();
         toTest.select();
         clientTestSetup.awaitPreWrite();
         toTest.select();
@@ -77,6 +95,11 @@ public class BatchServerAndReadingSelectionStrategyTest extends AbstractMultiThr
         assertEquals(1, readerWriter.allSelectionKeysEver.size());
         
         return readerWriter;
+    }
+
+    private void startClients() {
+        clients = clientTestSetup.createLatchedClients(PAYLOAD);
+        start(clients, "rw");
     }
    
     private MyChunkedReaderWriter createToTest() {
@@ -124,9 +147,23 @@ public class BatchServerAndReadingSelectionStrategyTest extends AbstractMultiThr
         }
 
         @Override
-        protected void finishedReading(SelectionKey key, SocketChannel selectableChannel) throws IOException {
-            assertEquals(expectedReadSizeOnFinish, selectableChannel.read(ByteBuffer.allocateDirect(1024)));
-            super.finishedReading(key, selectableChannel);
+        protected void close(SelectionKey key, SocketChannel selectableChannel) throws IOException {
+            assertNoMoreToRead(selectableChannel);
+            super.close(key, selectableChannel);
+        }
+
+        private void assertNoMoreToRead(SocketChannel selectableChannel) throws IOException {
+            waitForClientToFinish();
+            checkNoLongerReadable(selectableChannel);
+        }
+
+
+        private void waitForClientToFinish() {
+            try {
+                clientTestSetup.awaitPostClose();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         @Override
@@ -138,23 +175,20 @@ public class BatchServerAndReadingSelectionStrategyTest extends AbstractMultiThr
             }
             return read;
         }
-        
-        public void writeToEveryone() throws IOException {
-            for (SelectionKey key : allSelectionKeysEver) {
-                SocketChannel socketChannel = (SocketChannel) key.channel();
-                if (socketChannel.isOpen()) {
-                    write(key, socketChannel);
-                }
-            }
-        }
     }
 
+    private void checkNoLongerReadable(SocketChannel selectableChannel) throws IOException {
+        int lastRead = selectableChannel.read(ByteBuffer.allocateDirect(1024));
+        System.out.println("Server side: finished reading from client. Last read = " + lastRead);
+        assertEquals(-1, lastRead);
+    }
+    
     private void everythingProcessed(MyChunkedReaderWriter readerWriter) throws IOException, InterruptedException {
         Set<SelectionKey> keys = toTest.selected();
+        assertEquals(0, keys.size());
         clientTestSetup.awaitPreRead();
         clientTestSetup.awaitPostRead();
         clientTestSetup.awaitPostClose();
-        assertEquals(0, keys.size());
         assertEquals(PAYLOAD.getBytes().length, readerWriter.bytesRead);
     }
 

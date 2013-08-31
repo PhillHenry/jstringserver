@@ -18,6 +18,7 @@ public class Connector extends Networker {
     private final String address;
     private final int port;
     private final Stopwatch connectStopWatch;
+    private SocketChannel socketChannel;
 
     public Connector(String address, int port, Stopwatch connectStopWatch) {
         super();
@@ -30,7 +31,7 @@ public class Connector extends Networker {
     protected void doCall() throws Exception {
         InetAddress         addr                = InetAddress.getByName(address);
         InetSocketAddress   inetSocketAddress   = new InetSocketAddress(addr, port);
-        SocketChannel       socketChannel       = SocketChannel.open();
+        socketChannel                           = SocketChannel.open();
         try {
             configure(
                 inetSocketAddress,
@@ -73,6 +74,12 @@ public class Connector extends Networker {
     private void startConnectStopWatch() {
         if (connectStopWatch != null) {
             connectStopWatch.start();
+        }
+    }
+    
+    public void close() throws IOException {
+        if (socketChannel != null) {
+            socketChannel.close();
         }
     }
 

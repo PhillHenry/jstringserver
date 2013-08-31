@@ -1,5 +1,6 @@
 package com.google.code.jstringserver.server;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -44,7 +45,12 @@ public class ThreadedTaskBuilder {
     
     public void interruptAllThreads() {
         for (Thread thread : createdThreads) {
-            thread.interrupt();
+            if (thread.isAlive()) {
+                for (StackTraceElement stackTraceElement : thread.getStackTrace()) {
+                    System.out.println("\t" + stackTraceElement);
+                }
+                thread.interrupt();
+            }
         }
     }
 

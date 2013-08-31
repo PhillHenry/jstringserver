@@ -1,6 +1,8 @@
 package com.google.code.jstringserver.server.nio.select;
 
+import static com.google.code.jstringserver.client.LatchedWritingConnector.createWritingConnectors;
 import static com.google.code.jstringserver.server.nio.select.ServerTestSetup.HOST;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.CountDownLatch;
@@ -36,7 +38,7 @@ public class ClientTestSetup {
 
     public LatchedWritingConnector[] createLatchedClients() {
 
-        LatchedWritingConnector[] writers = LatchedWritingConnector.createWritingConnectors(
+        LatchedWritingConnector[] writers = createWritingConnectors(
             numClients, 
             HOST, 
             serverTestSetup.getPort(), 
@@ -59,7 +61,7 @@ public class ClientTestSetup {
     }
     
     public static void await(CountDownLatch latch, long timeoutMs) throws InterruptedException {
-        boolean noTimeout = latch.await(timeoutMs, TimeUnit.MILLISECONDS);
+        boolean noTimeout = latch.await(timeoutMs, MILLISECONDS);
         assertTrue(noTimeout);
     }
 

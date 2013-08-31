@@ -22,6 +22,7 @@ public class ClientConfigurer {
     public void register(SocketChannel socketChannel) throws IOException, ClosedChannelException {
         if (socketChannel != null) {
             Socket socket = socketChannel.socket();
+            socket.setTcpNoDelay(true);
             if (socket.isConnected()) {
 //                socket.setSoLinger(true, 0); // <-- this is important! Stevens warns against it but line below seems insufficient...
                 socket.setReuseAddress(true); // <-- but this is better, see Unix Network Programming, Stevens et al. 

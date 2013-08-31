@@ -2,6 +2,7 @@ package com.google.code.jstringserver.server.nio.select;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
@@ -51,13 +52,18 @@ public class BatchServerAndReadingSelectionStrategyTest extends AbstractMultiThr
         everythingProcessed();
     }
     
-    private ReadWriteMockFacade createToTest() {
-        ReadWriteMockFacade mocks = new ReadWriteMockFacade();
-        ClientDataHandler mockClientDataHandler = mock(ClientDataHandler.class);
-        final NioReader reader = new NioReader(mockClientDataHandler , new ThreadLocalByteBufferStore(new DirectByteBufferFactory(4096)), null);
-        Mockito.when(mockClientDataHandler.end(Mockito.any())).thenReturn("OK");
-        final AbstractNioWriter writer = new NioWriter(mockClientDataHandler, null);
-        ReaderWriterFactory readerWriterFactory = new ReaderWriterFactory() {
+    private void createToTest() {
+        ClientDataHandler   mockClientDataHandler   = mock(ClientDataHandler.class);
+        when(mockClientDataHandler.end(Mockito.any())).thenReturn("OK");
+        extracted(mockClientDataHandler);
+    }
+
+    private void extracted(ClientDataHandler mockClientDataHandler) {
+        final NioReader     reader                  = new NioReader(mockClientDataHandler, 
+            new ThreadLocalByteBufferStore(new DirectByteBufferFactory(4096)), 
+            null);
+        final AbstractNioWriter writer              = new NioWriter(mockClientDataHandler, null);
+        ReaderWriterFactory     readerWriterFactory = new ReaderWriterFactory() {
 
             @Override
             public ReaderWriter createReaderWriter() {
@@ -66,7 +72,6 @@ public class BatchServerAndReadingSelectionStrategyTest extends AbstractMultiThr
             
         };
         toTest = new BatchServerAndReadingSelectionStrategy(null, serverTestSetup.getSelector(), readerWriterFactory, null);
-        return mocks;
     }
 
     private void everythingProcessed() throws IOException, InterruptedException {

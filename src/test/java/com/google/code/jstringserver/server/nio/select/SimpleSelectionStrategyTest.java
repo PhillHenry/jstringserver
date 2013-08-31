@@ -1,5 +1,6 @@
 package com.google.code.jstringserver.server.nio.select;
 
+import static com.google.code.jstringserver.client.Connector.createConnectors;
 import static com.google.code.jstringserver.server.nio.select.ServerTestSetup.HOST;
 import static org.junit.Assert.assertEquals;
 
@@ -62,7 +63,7 @@ public class SimpleSelectionStrategyTest extends AbstractMultiThreadedTest {
     
     @Test
     public void levelTriggered() throws IOException {
-        Connector[] connectors = Connector.createConnectors(1, HOST, serverTestSetup.getPort());
+        Connector[] connectors = createConnectors(1, HOST, serverTestSetup.getPort());
         start(connectors, "first connector");
         Set<SelectionKey> firstSelect = doSelect();
         toTest.clear();

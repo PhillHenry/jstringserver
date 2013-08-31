@@ -34,7 +34,7 @@ public class ConstantClientsMain {
         doMetrics(readStopWatch, writeStopWatch, connectStopWatch);
     }
 
-    public ConstantWritingConnector[] run(String[] args) {
+    public ConstantWritingConnector[] run(String[] args) throws InterruptedException {
         String address                              = getAddress(args);
         int numThreads                              = getNumberOfThreads(args);
         ThreadLocalByteBufferStore byteBufferStore  = createByteBufferStore();
@@ -89,10 +89,11 @@ public class ConstantClientsMain {
 
     private static void run(
         int numThreads,
-        ConstantWritingConnector[] connectors) {
+        ConstantWritingConnector[] connectors) throws InterruptedException {
         ThreadPoolExecutor          threadPool = createThreadpool(numThreads);
         for (Runnable command : connectors) {
             threadPool.execute(command);
+            Thread.sleep(10);
         }
     }
 

@@ -1,16 +1,11 @@
 package com.google.code.jstringserver.server.nio.select;
 
-import static java.nio.channels.SelectionKey.OP_CONNECT;
-import static java.nio.channels.SelectionKey.OP_READ;
-import static java.nio.channels.SelectionKey.OP_WRITE;
-
 import java.io.IOException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -20,13 +15,6 @@ import com.google.code.jstringserver.server.wait.WaitStrategy;
 import com.google.code.jstringserver.stats.Stopwatch;
 
 public class BatchServerAndReadingSelectionStrategy implements SelectionStrategy {
-    
-//    private final ThreadLocal<Set<SelectionKey>> clientSelectionKeys = new ThreadLocal<Set<SelectionKey>>() {
-//        @Override
-//        protected Set<SelectionKey> initialValue() {
-//            return new HashSet<>();
-//        }
-//    };
     
     private final ThreadLocal<Selector> selectors = new ThreadLocal<Selector>() {
         @Override
@@ -45,8 +33,6 @@ public class BatchServerAndReadingSelectionStrategy implements SelectionStrategy
             return readerWriterFactory.createReaderWriter();
         }
     };
-    
-    
     
     private final ReaderWriterFactory   readerWriterFactory;
     private final ClientConfigurer      clientConfigurer;

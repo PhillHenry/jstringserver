@@ -53,23 +53,42 @@ public class LatchedWritingConnector extends WritingConnector {
     @Override
     protected int read(SocketChannel socketChannel) throws IOException {
         preRead.countDown();
-        int read = super.read(socketChannel);
-        postRead.countDown();
-        return read;
+        try {
+            int read = super.read(socketChannel);
+            return read;
+        } finally {
+            postRead.countDown();
+        }
     }
 
     @Override
     protected void write(SocketChannel socketChannel) throws IOException {
         preWrite.countDown();
-        super.write(socketChannel);
-        postWrite.countDown();
+        try {
+            super.write(socketChannel);
+        } finally {
+            postWrite.countDown();
+        }
     }
 
     @Override
     protected void close(SocketChannel socketChannel) throws IOException {
-        socketChannel.configureBlocking(true);
-        super.close(socketChannel);
-        postClose.countDown();
+        try {
+            try {
+            /*
+             * This failing can leave a CLOSE_WAIT:
+netstat -na | grep 50038
+tcp4      19      0  127.0.0.1.50038        127.0.0.1.50039        CLOSE_WAIT 
+tcp4       0      0  127.0.0.1.50038        *.*                    LISTEN  
+             */
+                socketChannel.configureBlocking(true);
+            } catch (Exception x) {
+                System.err.println("Failed to put client in non-blocking mode. This may effect your test. Error = " + x.getMessage());
+            }
+            super.close(socketChannel);
+        } finally {
+            postClose.countDown();
+        }
     }
 
 }

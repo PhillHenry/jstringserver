@@ -95,13 +95,14 @@ public class BatchServerAndReadingSelectionStrategy implements SelectionStrategy
     private void handleClients() throws IOException {
         Selector                selector    = selectors.get();
         int                     select      = selector.select(10);
-        if (select > 0) {
+        if (select > 0) { // NB, client may have disconnected but if we have data in the buffer, the server side socket will be CLOSE_WAIT and we must process the data
             Set<SelectionKey>       keys        = selector.selectedKeys();
             Iterator<SelectionKey>  keyIterator = keys.iterator();
             while (keyIterator.hasNext()) {
                 SelectionKey key = keyIterator.next();
                 keyIterator.remove();
-                readWriters.get().doWork(key);
+                ReaderWriter readerWriter = readWriters.get();
+                readerWriter.doWork(key);
             }
         }
     }
@@ -111,7 +112,7 @@ public class BatchServerAndReadingSelectionStrategy implements SelectionStrategy
         if (channel instanceof ServerSocketChannel) {
             ServerSocketChannel serverSocketChannel = (ServerSocketChannel) channel;
             SocketChannel       clientChannel       = serverSocketChannel.accept();
-            clientConfigurer.register(clientChannel);
+            clientConfigurer.register(clientChannel); 
         } else {
             System.err.println("Shouldn't happen");
 //            key.cancel();

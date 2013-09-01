@@ -27,7 +27,7 @@ public class ChunkedReaderWriter implements ReaderWriter {
     public void doWork(SelectionKey key) throws IOException {
         startTimer();
         try {
-            readWrite(key);
+            readWrite(key); // if more data comes in since our last call to select, we might not see it
         } finally {
             stopTimer();
         }
@@ -38,8 +38,11 @@ public class ChunkedReaderWriter implements ReaderWriter {
         if (reader.finished(key)) {
             finishedReading(key, selectableChannel);
         } else {
-            if (key.isReadable()) {
-                read(key, selectableChannel);
+            if (key.isReadable()) { // if the client has disconnected, this *may* be false
+                int read = read(key, selectableChannel);
+                if (read == -1) {
+                    close(key, selectableChannel);
+                }
             }
         }
     }
@@ -59,7 +62,7 @@ public class ChunkedReaderWriter implements ReaderWriter {
 
     protected void close(SelectionKey key, SocketChannel selectableChannel) throws IOException {
         key.cancel();
-        selectableChannel.close();
+        selectableChannel.close(); // this can force CLOSE_WAIT -> socket disappears from netstat
     }
     
     private void startTimer() {

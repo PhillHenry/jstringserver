@@ -63,25 +63,44 @@ public class BatchServerAndReadingSelectionStrategyTest extends AbstractMultiThr
         MyChunkedReaderWriter readerWriter = createToTest();
         startClients();
         clientTestSetup.awaitPostWrite(); // client is now waiting for a response
-        toTest.select(); // reads from client. state ready to write
-        toTest.select(); // triggers write to client
-        assertEquals(1, readerWriter.allSelectionKeysEver.size());
+        triggerReadTriggerWriteAndAssertKeySize(readerWriter);
     }
     
     @Test
-    public void clientPrematurelyCloses() throws InterruptedException, IOException {
+    public void clientPrematurelyClosesAfterWrite() throws InterruptedException, IOException {
         MyChunkedReaderWriter readerWriter = awaitClientsWrite();
         closeAllClients();
         assertEquals(PAYLOAD.getBytes().length, readerWriter.bytesRead);
+        checkNoneReadable(readerWriter);
+    }
+    
+    @Test
+    public void clientClosesAfterConnectButBeforeWrite() throws IOException, InterruptedException {
+        MyChunkedReaderWriter readerWriter = createToTest();
+        startClients();
+        clientTestSetup.awaitPreWrite();
+        closeAllClients();
+        triggerReadTriggerWriteAndAssertKeySize(readerWriter);
+        checkNoneReadable(readerWriter);
+    }
+    
+    private void checkNoneReadable(MyChunkedReaderWriter readerWriter) throws IOException {
         SelectionKey selectionKey = readerWriter.allSelectionKeysEver.iterator().next();
         SocketChannel channel = (SocketChannel) selectionKey.channel();
         checkNoLongerReadable(channel);
     }
     
-    private void closeAllClients() throws IOException {
+    private void triggerReadTriggerWriteAndAssertKeySize(MyChunkedReaderWriter readerWriter) throws IOException {
+        toTest.select(); // reads from client. state ready to write
+        toTest.select(); // triggers write to client
+        assertEquals(1, readerWriter.allSelectionKeysEver.size());
+    }
+    
+    private void closeAllClients() throws IOException, InterruptedException {
         for (LatchedWritingConnector client : clients) {
             client.close();
         }
+        clientTestSetup.awaitPostClose();
     }
     
     private MyChunkedReaderWriter awaitClientsWrite() throws IOException, InterruptedException {
@@ -177,9 +196,14 @@ public class BatchServerAndReadingSelectionStrategyTest extends AbstractMultiThr
     }
 
     private void checkNoLongerReadable(SocketChannel selectableChannel) throws IOException {
-        int lastRead = selectableChannel.read(ByteBuffer.allocateDirect(1024));
-        System.out.println("Server side: finished reading from client. Last read = " + lastRead);
-        assertEquals(-1, lastRead);
+        try {
+            // Non-deterministic! If you're quick, this is OK. Else
+            // if the other side's socket has totally finished, we get a:
+            // java.io.IOException: Connection reset by peer
+            int lastRead = selectableChannel.read(ByteBuffer.allocateDirect(1024)); 
+            System.out.println("Server side: finished reading from client. Last read = " + lastRead);
+            assertEquals(-1, lastRead);
+        } catch (Exception ignore) { }
     }
     
     private void everythingProcessed(MyChunkedReaderWriter readerWriter) throws IOException, InterruptedException {

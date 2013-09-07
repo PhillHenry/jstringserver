@@ -45,7 +45,8 @@ public class NioWriter implements AbstractNioWriter {
             ByteBuffer buffer = ByteBuffer.wrap(bytes); // TODO
                                                                          // optimize
             wrote = selectableChannel.write(buffer); // if the client side has closed, this can force its socket to go from CLOSED_WAIT -> finished
-            if (wrote == bytes.length) {
+            clientDataHandler.handleWrite(wrote, key);
+            if (clientDataHandler.isWritingComplete(key)) {
                 key.cancel();
             }
         }

@@ -62,9 +62,18 @@ public class AsynchClientDataHandler implements ClientDataHandler {
     public String end(Object key) {
         SelectionKey selectionKey = (SelectionKey)key;
         if (receivedAll((CurrentStats)selectionKey.attachment())) {
-            return TO_RETURN;
+            return messageToWriteNext(key);
         }
         return null;
+    }
+    
+    private String messageToWriteNext(Object key) {
+        int writtenSoFar = getBytesWrittenSoFar(key);
+        int length = TO_RETURN.length();
+        if (writtenSoFar == length) {
+            return null;
+        }
+        return TO_RETURN.substring(writtenSoFar, length - writtenSoFar);
     }
 
     @Override
@@ -92,8 +101,14 @@ public class AsynchClientDataHandler implements ClientDataHandler {
 
     @Override
     public boolean isWritingComplete(Object key) {
+        int writtenSoFar = getBytesWrittenSoFar(key);
+        return !(writtenSoFar == TO_RETURN.length());
+    }
+
+    private int getBytesWrittenSoFar(Object key) {
         CurrentStats attachment = getCurrentStats(key);
-        return !(attachment.bytesWritten.get() == TO_RETURN.length());
+        int writtenSoFar = attachment.bytesWritten.get();
+        return writtenSoFar;
     }
 
 }

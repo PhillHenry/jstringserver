@@ -38,7 +38,7 @@ public class NioWriter implements AbstractNioWriter {
     }
 
     private int doWrite(SelectionKey key, SocketChannel selectableChannel) throws IOException {
-        int wrote = -1;
+        int wrote = 0;
         byte[] bytes = clientDataHandler.end(key);
         if (bytes != null) {
             ByteBuffer buffer = ByteBuffer.wrap(bytes); // TODO - optimize
@@ -48,12 +48,13 @@ public class NioWriter implements AbstractNioWriter {
         return wrote;
     }
 
-    private void afterWrite(SelectionKey key, int wrote) {
+    private void afterWrite(SelectionKey key, int wrote) throws IOException {
         if (wrote > 0) {
             clientDataHandler.handleWrite(wrote, key);
         }
         if (wrote == -1 || clientDataHandler.isWritingComplete(key)) {
             key.cancel();
+            key.channel().close();
         }
     }
 

@@ -6,7 +6,7 @@ import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 
 class ThreadLocalClientDataHandler implements ClientDataHandler {
     
-    private static final String TO_RETURN = "OK";
+    private final ReturnMessage returnMessage = new ReturnMessage();
 
     private final String payload;
 
@@ -61,7 +61,8 @@ class ThreadLocalClientDataHandler implements ClientDataHandler {
         
         totalStats.incrementNumOfCallsEnded();
         
-        return TO_RETURN;
+        int writtenSoFar = currentWrittenSize.get();
+        return returnMessage.messageToWriteNext(writtenSoFar);
     }
 
     private void checkReceivedPayloadAndRest() {
@@ -92,7 +93,8 @@ class ThreadLocalClientDataHandler implements ClientDataHandler {
 
     @Override
     public boolean isWritingComplete(Object key) {
-        return !(currentWrittenSize.get() == TO_RETURN.length());
+        int writtenSoFar = currentWrittenSize.get();
+        return returnMessage.isWritingComplete(writtenSoFar);
     }
     
 }

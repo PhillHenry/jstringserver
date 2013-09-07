@@ -8,7 +8,7 @@ import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 
 public class AsynchClientDataHandler implements ClientDataHandler {
     
-    private static final String TO_RETURN = "OK";
+    private final ReturnMessage returnMessage = new ReturnMessage();
 
     private final String payload;
     
@@ -62,19 +62,13 @@ public class AsynchClientDataHandler implements ClientDataHandler {
     public String end(Object key) {
         SelectionKey selectionKey = (SelectionKey)key;
         if (receivedAll((CurrentStats)selectionKey.attachment())) {
-            return messageToWriteNext(key);
+            int writtenSoFar = getBytesWrittenSoFar(key);
+            return returnMessage.messageToWriteNext(writtenSoFar);
         }
         return null;
     }
     
-    private String messageToWriteNext(Object key) {
-        int writtenSoFar = getBytesWrittenSoFar(key);
-        int length = TO_RETURN.length();
-        if (writtenSoFar == length) {
-            return null;
-        }
-        return TO_RETURN.substring(writtenSoFar, length - writtenSoFar);
-    }
+
 
     @Override
     public boolean isReadingComplete(Object key) {
@@ -102,7 +96,7 @@ public class AsynchClientDataHandler implements ClientDataHandler {
     @Override
     public boolean isWritingComplete(Object key) {
         int writtenSoFar = getBytesWrittenSoFar(key);
-        return !(writtenSoFar == TO_RETURN.length());
+        return returnMessage.isWritingComplete(writtenSoFar);
     }
 
     private int getBytesWrittenSoFar(Object key) {

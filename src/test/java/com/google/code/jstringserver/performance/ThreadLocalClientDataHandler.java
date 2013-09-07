@@ -55,7 +55,7 @@ class ThreadLocalClientDataHandler implements ClientDataHandler {
     }
 
     @Override
-    public String end(Object key) {
+    public byte[] end(Object key) {
         currentBatchSize.set(0);
         checkReceivedPayloadAndRest();
         

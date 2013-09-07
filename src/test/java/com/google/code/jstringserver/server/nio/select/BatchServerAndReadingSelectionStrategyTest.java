@@ -124,7 +124,7 @@ public class BatchServerAndReadingSelectionStrategyTest extends AbstractMultiThr
     private MyChunkedReaderWriter createToTest() {
         mockClientDataHandler = mock(ClientDataHandler.class);
         when(mockClientDataHandler.isReadingComplete(Mockito.any())).thenReturn(false);
-        when(mockClientDataHandler.end(Mockito.any())).thenReturn("OK");
+        when(mockClientDataHandler.end(Mockito.any())).thenReturn("OK".getBytes());
         return createToTest(mockClientDataHandler);
     }
 

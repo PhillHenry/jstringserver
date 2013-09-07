@@ -39,18 +39,22 @@ public class NioWriter implements AbstractNioWriter {
 
     private int doWrite(SelectionKey key, SocketChannel selectableChannel) throws IOException {
         int wrote = -1;
-        String messageBack = clientDataHandler.end(key);
-        if (messageBack != null) {
-            byte[] bytes = messageBack.getBytes();
-            ByteBuffer buffer = ByteBuffer.wrap(bytes); // TODO
-                                                                         // optimize
+        byte[] bytes = clientDataHandler.end(key);
+        if (bytes != null) {
+            ByteBuffer buffer = ByteBuffer.wrap(bytes); // TODO - optimize
             wrote = selectableChannel.write(buffer); // if the client side has closed, this can force its socket to go from CLOSED_WAIT -> finished
-            clientDataHandler.handleWrite(wrote, key);
-            if (clientDataHandler.isWritingComplete(key)) {
-                key.cancel();
-            }
+            afterWrite(key, wrote);
         }
         return wrote;
+    }
+
+    private void afterWrite(SelectionKey key, int wrote) {
+        if (wrote > 0) {
+            clientDataHandler.handleWrite(wrote, key);
+        }
+        if (wrote == -1 || clientDataHandler.isWritingComplete(key)) {
+            key.cancel();
+        }
     }
 
     private void startTimer() {

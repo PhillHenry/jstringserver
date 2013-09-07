@@ -59,7 +59,7 @@ public class AsynchClientDataHandler implements ClientDataHandler {
     }
 
     @Override
-    public String end(Object key) {
+    public byte[] end(Object key) {
         SelectionKey selectionKey = (SelectionKey)key;
         if (receivedAll((CurrentStats)selectionKey.attachment())) {
             int writtenSoFar = getBytesWrittenSoFar(key);

@@ -8,7 +8,7 @@ public interface ClientDataHandler {
     
     public void handleWrite(int wrote, Object key);
 
-    public String end(Object key);
+    public byte[] end(Object key);
 
     public boolean isReadingComplete(Object key);
     

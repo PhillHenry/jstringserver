@@ -13,6 +13,6 @@ public class ReturnMessage {
     }
     
     boolean isWritingComplete(int writtenSoFar) {
-        return !(writtenSoFar == TO_RETURN.length());
+        return (writtenSoFar == TO_RETURN.length());
     }
 }

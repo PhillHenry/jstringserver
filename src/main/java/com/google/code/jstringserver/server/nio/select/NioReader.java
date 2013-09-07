@@ -52,6 +52,6 @@ public class NioReader implements AbstractNioReader {
     }
 
     protected boolean finished(SelectionKey key) {
-        return !clientDataHandler.isNotComplete(key);
+        return clientDataHandler.isReadingComplete(key);
     }
 }

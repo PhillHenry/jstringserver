@@ -123,7 +123,7 @@ public class BatchServerAndReadingSelectionStrategyTest extends AbstractMultiThr
    
     private MyChunkedReaderWriter createToTest() {
         mockClientDataHandler = mock(ClientDataHandler.class);
-        when(mockClientDataHandler.isNotComplete(Mockito.any())).thenReturn(true);
+        when(mockClientDataHandler.isReadingComplete(Mockito.any())).thenReturn(false);
         when(mockClientDataHandler.end(Mockito.any())).thenReturn("OK");
         return createToTest(mockClientDataHandler);
     }
@@ -181,7 +181,7 @@ public class BatchServerAndReadingSelectionStrategyTest extends AbstractMultiThr
             int read = super.read(key, selectableChannel);
             bytesRead += read;
             if (bytesRead == PAYLOAD.getBytes().length) {
-                when(mockClientDataHandler.isNotComplete(Mockito.any())).thenReturn(false);
+                when(mockClientDataHandler.isReadingComplete(Mockito.any())).thenReturn(true);
             }
             return read;
         }

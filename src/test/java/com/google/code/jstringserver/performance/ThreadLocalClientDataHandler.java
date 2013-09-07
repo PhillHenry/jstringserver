@@ -6,6 +6,8 @@ import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 
 class ThreadLocalClientDataHandler implements ClientDataHandler {
     
+    private static final String TO_RETURN = "OK";
+
     private final String payload;
 
     private final TotalStats totalStats = new TotalStats();
@@ -13,6 +15,15 @@ class ThreadLocalClientDataHandler implements ClientDataHandler {
     public ThreadLocalClientDataHandler(String payload) {
         this.payload = payload;
     }
+    
+    private final ThreadLocal<Integer> currentWrittenSize = new ThreadLocal<Integer>() {
+
+        @Override
+        protected Integer initialValue() {
+            return 0;
+        }
+        
+    };
     
     private final ThreadLocal<Integer> currentBatchSize = new ThreadLocal<Integer>() {
 
@@ -50,7 +61,7 @@ class ThreadLocalClientDataHandler implements ClientDataHandler {
         
         totalStats.incrementNumOfCallsEnded();
         
-        return "OK";
+        return TO_RETURN;
     }
 
     private void checkReceivedPayloadAndRest() {
@@ -65,14 +76,23 @@ class ThreadLocalClientDataHandler implements ClientDataHandler {
     }
 
     @Override
-    public boolean isNotComplete(Object key) {
-        //System.out.println("current size = " + currentBatchSize.get() + ", payload = " + payloadSize);
-        return currentBatchSize.get() < payload.length();
+    public boolean isReadingComplete(Object key) {
+        return !(currentBatchSize.get() < payload.length());
     }
     
     @Override
     public int getNumEndCalls() {
         return totalStats.getNumEndCalls();
+    }
+
+    @Override
+    public void handleWrite(int wrote, Object key) {
+        currentWrittenSize.set(currentWrittenSize.get() + wrote);
+    }
+
+    @Override
+    public boolean isWritingComplete(Object key) {
+        return !(currentWrittenSize.get() == TO_RETURN.length());
     }
     
 }

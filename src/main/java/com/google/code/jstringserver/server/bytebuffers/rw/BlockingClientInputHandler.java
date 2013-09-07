@@ -22,7 +22,7 @@ public class BlockingClientInputHandler {
     public ByteBuffer read(ReadableByteChannel socketChannel) throws IOException {
         ByteBuffer byteBuffer = byteBufferStore.getByteBuffer();
         int read = 0;
-        while (clientDataHandler.isNotComplete(null) && (read = socketChannel.read(byteBuffer)) != -1) {
+        while (!clientDataHandler.isReadingComplete(null) && (read = socketChannel.read(byteBuffer)) != -1) {
             byteBuffer.flip();
             clientDataHandler.handleRead(byteBuffer, null);
             byteBuffer.flip();

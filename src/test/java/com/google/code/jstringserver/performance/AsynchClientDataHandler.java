@@ -8,12 +8,15 @@ import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 
 public class AsynchClientDataHandler implements ClientDataHandler {
     
+    private static final String TO_RETURN = "OK";
+
     private final String payload;
     
     private final TotalStats totalStats = new TotalStats();
     
     class CurrentStats {
         final AtomicInteger bytesRead = new AtomicInteger();
+        final AtomicInteger bytesWritten = new AtomicInteger();
         final StringBuffer read = new StringBuffer();
     }
 
@@ -25,7 +28,7 @@ public class AsynchClientDataHandler implements ClientDataHandler {
     @Override
     public int handleRead(ByteBuffer byteBuffer, Object key) {
         SelectionKey selectionKey = (SelectionKey)key;
-        CurrentStats attachment = getAttachment(selectionKey);
+        CurrentStats attachment = getCurrentStats(key);
         byte[] bytes = new byte[byteBuffer.limit()];
         int filled = totalStats.handleRead(byteBuffer, selectionKey, bytes);
         if (filled > 0) {
@@ -59,20 +62,38 @@ public class AsynchClientDataHandler implements ClientDataHandler {
     public String end(Object key) {
         SelectionKey selectionKey = (SelectionKey)key;
         if (receivedAll((CurrentStats)selectionKey.attachment())) {
-            return "OK";
+            return TO_RETURN;
         }
         return null;
     }
 
     @Override
-    public boolean isNotComplete(Object key) {
+    public boolean isReadingComplete(Object key) {
         SelectionKey selectionKey = (SelectionKey)key;
-        return !receivedAll((CurrentStats)selectionKey.attachment());
+        return receivedAll((CurrentStats)selectionKey.attachment());
     }
 
     @Override
     public int getNumEndCalls() {
         return totalStats.getNumEndCalls();
+    }
+
+    @Override
+    public void handleWrite(int wrote, Object key) {
+        CurrentStats attachment = getCurrentStats(key);
+        attachment.bytesWritten.addAndGet(wrote);
+    }
+
+    private CurrentStats getCurrentStats(Object key) {
+        SelectionKey selectionKey = (SelectionKey)key;
+        CurrentStats attachment = getAttachment(selectionKey);
+        return attachment;
+    }
+
+    @Override
+    public boolean isWritingComplete(Object key) {
+        CurrentStats attachment = getCurrentStats(key);
+        return !(attachment.bytesWritten.get() == TO_RETURN.length());
     }
 
 }

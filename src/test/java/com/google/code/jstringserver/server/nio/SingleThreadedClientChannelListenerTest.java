@@ -77,7 +77,7 @@ public class SingleThreadedClientChannelListenerTest {
     public void shouldProcessConnection() throws IOException, InterruptedException {
         Thread.sleep(100);
 
-        verify(mockClientDataHandler).handle(Mockito.eq(byteBuffer), Mockito.any(SelectionKey.class));
+        verify(mockClientDataHandler).handleRead(Mockito.eq(byteBuffer), Mockito.any(SelectionKey.class));
     }
 
     private void initNetwork() throws IOException, InterruptedException {

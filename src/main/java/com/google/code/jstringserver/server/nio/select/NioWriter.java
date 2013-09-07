@@ -22,10 +22,10 @@ public class NioWriter implements AbstractNioWriter {
     }
 
     @Override
-    public void write(SelectionKey key, SocketChannel selectableChannel) throws IOException {
+    public int write(SelectionKey key, SocketChannel selectableChannel) throws IOException {
         startTimer();
         try {
-            doWrite(key, selectableChannel);
+            return doWrite(key, selectableChannel);
         } finally {
             stopTimer();
         }
@@ -37,14 +37,19 @@ public class NioWriter implements AbstractNioWriter {
         }
     }
 
-    private void doWrite(SelectionKey key, SocketChannel selectableChannel) throws IOException {
+    private int doWrite(SelectionKey key, SocketChannel selectableChannel) throws IOException {
+        int wrote = -1;
         String messageBack = clientDataHandler.end(key);
         if (messageBack != null) {
-            ByteBuffer buffer = ByteBuffer.wrap(messageBack.getBytes()); // TODO
+            byte[] bytes = messageBack.getBytes();
+            ByteBuffer buffer = ByteBuffer.wrap(bytes); // TODO
                                                                          // optimize
-            selectableChannel.write(buffer); // if the client side has closed, this can force its socket to go from CLOSED_WAIT -> finished
-            key.cancel();
+            wrote = selectableChannel.write(buffer); // if the client side has closed, this can force its socket to go from CLOSED_WAIT -> finished
+            if (wrote == bytes.length) {
+                key.cancel();
+            }
         }
+        return wrote;
     }
 
     private void startTimer() {

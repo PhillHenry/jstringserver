@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 public interface ClientDataHandler {
 
-    public int handle(ByteBuffer byteBuffer, Object key);
+    public int handleRead(ByteBuffer byteBuffer, Object key);
 
     public String end(Object key);
 

@@ -33,9 +33,9 @@ class ThreadLocalClientDataHandler implements ClientDataHandler {
     };
 
     @Override
-    public int handle(ByteBuffer byteBuffer, Object key) {
+    public int handleRead(ByteBuffer byteBuffer, Object key) {
         byte[] bytes = new byte[byteBuffer.limit()];
-        int filled = totalStats.handle(byteBuffer, key, bytes);
+        int filled = totalStats.handleRead(byteBuffer, key, bytes);
         
         // thread locals
         currentBatchSize.set(currentBatchSize.get() +  byteBuffer.limit());

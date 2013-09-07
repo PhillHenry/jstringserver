@@ -32,7 +32,7 @@ public class NioReader implements AbstractNioReader {
             byteBuffer.clear();
             int read = selectableChannel.read(byteBuffer); // can be -1 if the client has disconnected. However, if the client has disconnected, we can still have >0 as we drain the buffers
             byteBuffer.flip();
-            clientDataHandler.handle(byteBuffer, key);
+            clientDataHandler.handleRead(byteBuffer, key);
             return read;
         } finally {
             stop();

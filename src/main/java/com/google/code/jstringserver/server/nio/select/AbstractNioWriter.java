@@ -6,6 +6,6 @@ import java.nio.channels.SocketChannel;
 
 public interface AbstractNioWriter {
 
-    public abstract void write(SelectionKey key, SocketChannel selectableChannel) throws IOException;
+    public abstract int write(SelectionKey key, SocketChannel selectableChannel) throws IOException;
 
 }

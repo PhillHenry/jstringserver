@@ -9,7 +9,7 @@ public class TotalStats {
     
     private final AtomicLong numBytesData = new AtomicLong();
     
-    public int handle(ByteBuffer byteBuffer, Object key, byte[] bytes) {
+    public int handleRead(ByteBuffer byteBuffer, Object key, byte[] bytes) {
         byteBuffer.get(bytes);
         int filled = byteBuffer.limit(); //A buffer's limit is the index of the first element that should *not* be read or written - http://docs.oracle.com/javase/6/docs/api/java/nio/Buffer.html
         numBytesData.addAndGet(filled);

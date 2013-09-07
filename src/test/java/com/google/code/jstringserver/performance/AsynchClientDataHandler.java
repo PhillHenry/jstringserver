@@ -23,11 +23,11 @@ public class AsynchClientDataHandler implements ClientDataHandler {
     }
 
     @Override
-    public int handle(ByteBuffer byteBuffer, Object key) {
+    public int handleRead(ByteBuffer byteBuffer, Object key) {
         SelectionKey selectionKey = (SelectionKey)key;
         CurrentStats attachment = getAttachment(selectionKey);
         byte[] bytes = new byte[byteBuffer.limit()];
-        int filled = totalStats.handle(byteBuffer, selectionKey, bytes);
+        int filled = totalStats.handleRead(byteBuffer, selectionKey, bytes);
         if (filled > 0) {
             updateCurrentStats(attachment, bytes);
         }

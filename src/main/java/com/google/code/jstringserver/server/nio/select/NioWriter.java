@@ -54,6 +54,7 @@ public class NioWriter implements AbstractNioWriter {
         }
         if (wrote == -1 || clientDataHandler.isWritingComplete(key)) {
             key.cancel();
+            ((SocketChannel)key.channel()).close();
             key.channel().close();
         }
     }

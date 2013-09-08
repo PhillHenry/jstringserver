@@ -36,7 +36,10 @@ public class ChunkedReaderWriter implements ReaderWriter {
     private void readWrite(SelectionKey key) throws IOException {
         SocketChannel selectableChannel = (SocketChannel) key.channel();
         if (reader.finished(key)) {
-            writer.write(key, selectableChannel);
+            int wrote = writer.write(key, selectableChannel);
+            if (wrote == -1) {
+                close(key, selectableChannel);
+            }
         } else {
             if (key.isReadable()) { // if the client has disconnected, this *may* be false
                 int read = read(key, selectableChannel);

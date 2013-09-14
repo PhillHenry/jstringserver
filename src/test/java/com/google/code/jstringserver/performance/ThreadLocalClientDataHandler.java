@@ -78,6 +78,10 @@ class ThreadLocalClientDataHandler implements ClientDataHandler {
 
     @Override
     public boolean isReadingComplete(Object key) {
+        return isFinishedReading();
+    }
+
+    private boolean isFinishedReading() {
         return !(currentBatchSize.get() < payload.length());
     }
     

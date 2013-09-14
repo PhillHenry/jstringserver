@@ -1,5 +1,7 @@
 package com.google.code.jstringserver.performance;
 
+import static java.lang.System.currentTimeMillis;
+
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -13,16 +15,30 @@ public class AsynchClientDataHandler implements ClientDataHandler {
     private final String payload;
     
     private final TotalStats totalStats = new TotalStats();
+
+    private final long timeoutMs;
     
     class CurrentStats {
         final AtomicInteger bytesRead = new AtomicInteger();
         final AtomicInteger bytesWritten = new AtomicInteger();
         final StringBuffer read = new StringBuffer();
+        final long createdTimeMs = currentTimeMillis();
+        
+        boolean isTimedOut() {
+            boolean timeout = createdTimeMs < (currentTimeMillis() - timeoutMs);
+            return timeout;
+        }
     }
 
-    public AsynchClientDataHandler(String payload) {
+    public AsynchClientDataHandler(
+        String payload) {
+        this(payload, 30000L);
+    }
+
+    public AsynchClientDataHandler(String payload, long timeoutMs) {
         super();
         this.payload = payload;
+        this.timeoutMs = timeoutMs;
     }
 
     @Override
@@ -73,7 +89,12 @@ public class AsynchClientDataHandler implements ClientDataHandler {
     @Override
     public boolean isReadingComplete(Object key) {
         SelectionKey selectionKey = (SelectionKey)key;
-        return receivedAll((CurrentStats)selectionKey.attachment());
+        CurrentStats currentStats = (CurrentStats)selectionKey.attachment();
+        return receivedAll(currentStats) || isTimedOut(currentStats);
+    }
+
+    private boolean isTimedOut(CurrentStats currentStats) {
+        return currentStats != null && currentStats.isTimedOut();
     }
 
     @Override

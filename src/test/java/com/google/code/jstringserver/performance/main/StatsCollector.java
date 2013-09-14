@@ -27,7 +27,7 @@ public class StatsCollector {
                 System.out.println(stopwatch);
             }
             System.out.println();
-            Thread.sleep(10000);
+            Thread.sleep(2000);
         }
     }
 

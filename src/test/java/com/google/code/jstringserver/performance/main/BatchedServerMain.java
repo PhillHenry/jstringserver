@@ -47,11 +47,11 @@ public class BatchedServerMain {
         String              ipInterface         = args.length < 1 ? "localhost" : args[0];
         server                                  = getConnectedServer(ipInterface);
 
-        ClientDataHandler   clientDataHandler   = new AsynchClientDataHandler(EXPECTED_PAYLOAD);
+        ClientDataHandler   clientDataHandler   = new AsynchClientDataHandler(EXPECTED_PAYLOAD, 5000L);
         AbstractNioReader   reader              = createReader(clientDataHandler);
         AbstractNioWriter   writer              = createWriter(clientDataHandler);
         
-        ThreadPoolFactory   threadPoolFactory   = new ThreadPoolFactory(AbstractThreadStrategyTest.availableProcessors());
+        ThreadPoolFactory   threadPoolFactory   = new ThreadPoolFactory(1);
         Stopwatch           stopwatch           = statsCollector.getStopWatchFor(BatchServerAndReadingSelectionStrategy.class.getSimpleName());
         Stopwatch           rwStopwatch         = statsCollector.getStopWatchFor(ReaderWriter.class.getSimpleName());
         threadStrategy                          = new BatchAcceptorAndReadingThreadStrategy(

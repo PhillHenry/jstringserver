@@ -28,6 +28,20 @@ public class AsynchClientDataHandler implements ClientDataHandler {
             boolean timeout = createdTimeMs < (currentTimeMillis() - timeoutMs);
             return timeout;
         }
+
+        @Override
+        public String toString() {
+            return "CurrentStats [bytesRead="
+                + bytesRead
+                + ", bytesWritten="
+                + bytesWritten
+//                + ", read="
+//                + read
+//                + ", createdTimeMs="
+//                + createdTimeMs
+                + ", Total time = " + (currentTimeMillis() - createdTimeMs) + "ms"
+                + "]";
+        }
     }
 
     public AsynchClientDataHandler(
@@ -83,8 +97,6 @@ public class AsynchClientDataHandler implements ClientDataHandler {
         }
         return null;
     }
-    
-
 
     @Override
     public boolean isReadingComplete(Object key) {
@@ -124,6 +136,17 @@ public class AsynchClientDataHandler implements ClientDataHandler {
         CurrentStats attachment = getCurrentStats(key);
         int writtenSoFar = attachment.bytesWritten.get();
         return writtenSoFar;
+    }
+
+    @Override
+    public boolean isTimedOut(Object key) {
+        CurrentStats attachment = getCurrentStats(key);
+        boolean timedOut = attachment.isTimedOut();
+        // TEST
+        if (timedOut) {
+            System.out.println("Timedout: " + attachment);
+        }
+        return timedOut;
     }
 
 }

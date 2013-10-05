@@ -13,6 +13,8 @@ public interface ClientDataHandler {
     public boolean isReadingComplete(Object key);
     
     public boolean isWritingComplete(Object key);
+    
+    public boolean isTimedOut(Object key);
 
     public abstract int getNumEndCalls();
     

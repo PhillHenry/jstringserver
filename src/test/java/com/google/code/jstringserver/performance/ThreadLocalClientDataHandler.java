@@ -100,5 +100,10 @@ class ThreadLocalClientDataHandler implements ClientDataHandler {
         int writtenSoFar = currentWrittenSize.get();
         return returnMessage.isWritingComplete(writtenSoFar);
     }
+
+    @Override
+    public boolean isTimedOut(Object key) {
+        throw new UnsupportedOperationException("TODO");
+    }
     
 }

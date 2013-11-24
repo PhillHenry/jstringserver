@@ -1,9 +1,12 @@
 package com.google.code.jstringserver.server;
 
+import static java.net.StandardSocketOptions.SO_RCVBUF;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.net.StandardSocketOptions;
 import java.net.UnknownHostException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -31,6 +34,13 @@ public class Server {
         serverSocketChannel = ServerSocketChannel.open();
         serverSocketChannel.configureBlocking(blocking);
         serverSocketChannel.socket().setReuseAddress(true);
+        serverSocketChannel.setOption(
+            SO_RCVBUF,
+            4096);
+        
+//        serverSocketChannel.setOption(
+//            StandardSocketOptions.IP_TOS,
+//            0x08 | 0x10);
         SocketAddress socketAddress = new InetSocketAddress(listeningAddress, port);
         serverSocketChannel.bind(socketAddress, backlog);
     }

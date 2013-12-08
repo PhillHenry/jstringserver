@@ -87,16 +87,20 @@ public class WritingConnector extends Connector {
         byteBuffer.clear();
         int read = socketChannel.read(byteBuffer);
         byteBuffer.flip();
-        byte[] bytes = new byte[byteBuffer.limit()];
+        byte[] bytes = getByteArray(byteBuffer);
         byteBuffer.get(bytes);
         // System.out.println("Client: " + new String(bytes) + " read " + read);
         return read;
     }
 
+    protected byte[] getByteArray(ByteBuffer byteBuffer) {
+        return new byte[byteBuffer.limit()];
+    }
+
     protected void write(SocketChannel socketChannel) throws IOException {
-        ByteBuffer byteBuffer = byteBufferStore.getByteBuffer();
-        int blockSize = byteBuffer.capacity();
-        byte[] bytes = payload.getBytes();
+        ByteBuffer  byteBuffer  = byteBufferStore.getByteBuffer();
+        int         blockSize   = byteBuffer.capacity();
+        byte[]      bytes       = payload.getBytes();
         byteBuffer.clear();
         for (int i = 0; i < payload.length(); i += blockSize) {
             int end = i + blockSize;
@@ -106,6 +110,7 @@ public class WritingConnector extends Connector {
             socketChannel.write(byteBuffer);
             byteBuffer.clear();
         }
+        socketChannel.socket().getOutputStream().flush();
     }
 
 }

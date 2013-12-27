@@ -10,16 +10,16 @@ import com.google.code.jstringserver.server.wait.WaitStrategy;
 
 public class ExchangingThreadStrategy implements ThreadStrategy {
 
-    private final SocketChannelExchanger socketChannelExchanger;
-    private final ClientChannelListener  clientChannelListener;
-    private final AcceptorDispatcher     selectorAcceptor;
+    private final SocketChannelExchanger    socketChannelExchanger;
+    private final ClientChannelListener[]   clientChannelListener;
+    private final AcceptorDispatcher        selectorAcceptor;
 
     public ExchangingThreadStrategy(
                             Server                      server,
                             SocketChannelExchanger      socketChannelExchanger,
                             WaitStrategy                waitStrategy,
-                            ClientChannelListener       clientChannelListener, 
-                            AbstractSelectionStrategy   acceptorStrategy) throws IOException {
+                            AbstractSelectionStrategy   acceptorStrategy, 
+                            ClientChannelListener...    clientChannelListener) throws IOException {
         this.socketChannelExchanger = socketChannelExchanger;
         this.clientChannelListener  = clientChannelListener;
         selectorAcceptor            = new AcceptorDispatcher(server, socketChannelExchanger, waitStrategy, acceptorStrategy);
@@ -30,7 +30,9 @@ public class ExchangingThreadStrategy implements ThreadStrategy {
         this.socketChannelExchanger.setReadyCallback(new SocketChannelExchanger.ReadyCallback() {
             @Override
             public void ready() {
-                clientChannelListener.getSelector().wakeup();
+                for (int i = 0 ; i < clientChannelListener.length ; i++) {
+                    clientChannelListener[i].getSelector().wakeup();
+                }
             }
         });
     }
@@ -42,8 +44,10 @@ public class ExchangingThreadStrategy implements ThreadStrategy {
     }
 
     private void startListenerThreads() {
-        Thread clientHandlingThread = new Thread(clientChannelListener);
-        clientHandlingThread.start();
+        for (int i = 0 ; i < clientChannelListener.length ; i++) {
+            Thread clientHandlingThread = new Thread(clientChannelListener[i], "client handler " + i);
+            clientHandlingThread.start();
+        }
     }
 
     private void startAcceptorThread() throws IOException {
@@ -53,7 +57,9 @@ public class ExchangingThreadStrategy implements ThreadStrategy {
 
     @Override
     public void shutdown() {
-        clientChannelListener.shutdown();
+        for (int i = 0 ; i < clientChannelListener.length ; i++) {
+            clientChannelListener[i].shutdown();
+        }
         selectorAcceptor.shutdown();
     }
 

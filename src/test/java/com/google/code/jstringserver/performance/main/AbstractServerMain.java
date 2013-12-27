@@ -56,8 +56,8 @@ public abstract class AbstractServerMain {
                 server, 
                 socketChannelExchanger, 
                 waitStrategy, 
-                clientChannelListener,
-                acceptorStrategy);
+                acceptorStrategy,
+                clientChannelListener);
         selectorStrategy.start();
         statsCollector.started();
     }

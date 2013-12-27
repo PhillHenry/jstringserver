@@ -40,8 +40,8 @@ public class SelectorStrategyTest extends AbstractThreadStrategyTest<ExchangingT
             server, 
             socketChannelExchanger, 
             new SleepWaitStrategy(10), 
-            clientChannelListener, 
-            acceptorStrategy);
+            acceptorStrategy, 
+            clientChannelListener);
     }
 
     protected ServerSocketDispatchingSelectionStrategy createAcceptorStrategy(BlockingSocketChannelExchanger socketChannelExchanger) throws IOException {

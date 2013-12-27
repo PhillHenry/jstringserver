@@ -10,7 +10,7 @@ import com.google.code.jstringserver.server.nio.select.SelectionStrategy;
 public class ReadWriteDispatcher implements ClientChannelListener {
 
     private final SocketChannelExchanger    socketChannelExchanger;
-    private final SelectionStrategy selectionStrategy;
+    private final SelectionStrategy         selectionStrategy;
     private final Selector                  selector;
     private final ClientConfigurer          clientConfigurer;
     
@@ -21,9 +21,9 @@ public class ReadWriteDispatcher implements ClientChannelListener {
                                Selector selector) {
         super();
         this.socketChannelExchanger = socketChannelExchanger;
-        this.selectionStrategy = selectionStrategy;
-        this.selector = selector;
-        this.clientConfigurer = new ClientConfigurer(new SimpleSelectorHolder(selector));
+        this.selectionStrategy      = selectionStrategy;
+        this.selector               = selector;
+        this.clientConfigurer       = new ClientConfigurer(new SimpleSelectorHolder(selector));
     }
 
     @Override

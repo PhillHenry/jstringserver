@@ -14,13 +14,13 @@ public class ChunkedReaderWriter implements ReaderWriter {
     private final Stopwatch         stopwatch;
 
     public ChunkedReaderWriter(
-        NioReader reader,
-        AbstractNioWriter writer,
-        Stopwatch stopwatch) {
+        NioReader           reader,
+        AbstractNioWriter   writer,
+        Stopwatch           stopwatch) {
         super();
-        this.reader = reader;
-        this.writer = writer;
-        this.stopwatch = stopwatch;
+        this.reader     = reader;
+        this.writer     = writer;
+        this.stopwatch  = stopwatch;
     }
 
     @Override

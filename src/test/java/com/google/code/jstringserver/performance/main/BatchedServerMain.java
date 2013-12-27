@@ -50,21 +50,9 @@ public class BatchedServerMain {
         server                                      = getConnectedServer(ipInterface);
 
         ClientDataHandler       clientDataHandler   = new AsynchClientDataHandler(EXPECTED_PAYLOAD, 5000L);
-        final AbstractNioReader reader              = createReader(clientDataHandler);
-        final AbstractNioWriter writer              = createWriter(clientDataHandler);
-        
         ThreadPoolFactory       threadPoolFactory   = new ThreadPoolFactory(1);
         Stopwatch               stopwatch           = statsCollector.getStopWatchFor(BatchServerAndReadingSelectionStrategy.class.getSimpleName());
-        final Stopwatch         rwStopwatch         = statsCollector.getStopWatchFor(ReaderWriter.class.getSimpleName());
-        
-        ReaderWriterFactory     readerWriterFactory = new ReaderWriterFactory() {
-
-            @Override
-            public ReaderWriter createReaderWriter() {
-                return new ChunkedReaderWriter((NioReader) reader, writer, rwStopwatch);
-            }
-            
-        };
+        ReaderWriterFactory     readerWriterFactory = createChunkedReaderWriterFactory(clientDataHandler);
         
         threadStrategy                              = new BatchAcceptorAndReadingThreadStrategy(
             server, 
@@ -72,6 +60,21 @@ public class BatchedServerMain {
             threadPoolFactory, 
             stopwatch);
         threadStrategy.start();
+    }
+
+    private ReaderWriterFactory createChunkedReaderWriterFactory(
+        ClientDataHandler       clientDataHandler) {
+        final Stopwatch         rwStopwatch         = statsCollector.getStopWatchFor(ReaderWriter.class.getSimpleName());
+        final AbstractNioReader reader              = createReader(clientDataHandler);
+        final AbstractNioWriter writer              = createWriter(clientDataHandler);
+        return new ReaderWriterFactory() {
+
+            @Override
+            public ReaderWriter createReaderWriter() {
+                return new ChunkedReaderWriter((NioReader) reader, writer, rwStopwatch);
+            }
+            
+        };
     }
     
     public void stop() throws IOException {

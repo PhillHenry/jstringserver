@@ -19,10 +19,12 @@ import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 import com.google.code.jstringserver.server.nio.select.AbstractNioReader;
 import com.google.code.jstringserver.server.nio.select.AbstractNioWriter;
 import com.google.code.jstringserver.server.nio.select.BatchServerAndReadingSelectionStrategy;
+import com.google.code.jstringserver.server.nio.select.ChunkedReaderWriter;
 import com.google.code.jstringserver.server.nio.select.NioReader;
 import com.google.code.jstringserver.server.nio.select.NioReaderLooping;
 import com.google.code.jstringserver.server.nio.select.NioWriter;
 import com.google.code.jstringserver.server.nio.select.ReaderWriter;
+import com.google.code.jstringserver.server.nio.select.ReaderWriterFactory;
 import com.google.code.jstringserver.server.wait.NoOpWaitStrategy;
 import com.google.code.jstringserver.server.wait.WaitStrategy;
 import com.google.code.jstringserver.stats.Stopwatch;
@@ -44,23 +46,31 @@ public class BatchedServerMain {
     }
 
     public void startServer(String[] args) throws UnknownHostException, IOException, Exception {
-        String              ipInterface         = args.length < 1 ? "localhost" : args[0];
-        server                                  = getConnectedServer(ipInterface);
+        String                  ipInterface         = args.length < 1 ? "localhost" : args[0];
+        server                                      = getConnectedServer(ipInterface);
 
-        ClientDataHandler   clientDataHandler   = new AsynchClientDataHandler(EXPECTED_PAYLOAD, 5000L);
-        AbstractNioReader   reader              = createReader(clientDataHandler);
-        AbstractNioWriter   writer              = createWriter(clientDataHandler);
+        ClientDataHandler       clientDataHandler   = new AsynchClientDataHandler(EXPECTED_PAYLOAD, 5000L);
+        final AbstractNioReader reader              = createReader(clientDataHandler);
+        final AbstractNioWriter writer              = createWriter(clientDataHandler);
         
-        ThreadPoolFactory   threadPoolFactory   = new ThreadPoolFactory(1);
-        Stopwatch           stopwatch           = statsCollector.getStopWatchFor(BatchServerAndReadingSelectionStrategy.class.getSimpleName());
-        Stopwatch           rwStopwatch         = statsCollector.getStopWatchFor(ReaderWriter.class.getSimpleName());
-        threadStrategy                          = new BatchAcceptorAndReadingThreadStrategy(
+        ThreadPoolFactory       threadPoolFactory   = new ThreadPoolFactory(1);
+        Stopwatch               stopwatch           = statsCollector.getStopWatchFor(BatchServerAndReadingSelectionStrategy.class.getSimpleName());
+        final Stopwatch         rwStopwatch         = statsCollector.getStopWatchFor(ReaderWriter.class.getSimpleName());
+        
+        ReaderWriterFactory     readerWriterFactory = new ReaderWriterFactory() {
+
+            @Override
+            public ReaderWriter createReaderWriter() {
+                return new ChunkedReaderWriter((NioReader) reader, writer, rwStopwatch);
+            }
+            
+        };
+        
+        threadStrategy                              = new BatchAcceptorAndReadingThreadStrategy(
             server, 
-            reader, 
+            readerWriterFactory, 
             threadPoolFactory, 
-            writer,
-            stopwatch, 
-            rwStopwatch);
+            stopwatch);
         threadStrategy.start();
     }
     

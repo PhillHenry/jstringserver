@@ -10,9 +10,12 @@ import com.google.code.jstringserver.server.ThreadPoolFactory;
 import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 import com.google.code.jstringserver.server.nio.select.AbstractNioReader;
 import com.google.code.jstringserver.server.nio.select.AbstractNioWriter;
+import com.google.code.jstringserver.server.nio.select.ChunkedReaderWriter;
 import com.google.code.jstringserver.server.nio.select.NioReader;
 import com.google.code.jstringserver.server.nio.select.NioReaderLooping;
 import com.google.code.jstringserver.server.nio.select.NioWriter;
+import com.google.code.jstringserver.server.nio.select.ReaderWriter;
+import com.google.code.jstringserver.server.nio.select.ReaderWriterFactory;
 import com.google.code.jstringserver.server.wait.SleepWaitStrategy;
 
 public class BatchingServerAndReadingStrategyTest extends AbstractThreadStrategyTest<BatchAcceptorAndReadingThreadStrategy> {
@@ -20,18 +23,26 @@ public class BatchingServerAndReadingStrategyTest extends AbstractThreadStrategy
     @Override
     protected BatchAcceptorAndReadingThreadStrategy threadingStrategy(Server server, ClientDataHandler clientDataHandler)
         throws IOException {
-        ThreadPoolFactory threadPoolFactory = new ThreadPoolFactory(availableProcessors());
-        AbstractNioReader reader            = new NioReader(
+        ThreadPoolFactory       threadPoolFactory   = new ThreadPoolFactory(availableProcessors());
+        final AbstractNioReader reader              = new NioReader(
             clientDataHandler, 
             getByteBufferStore(), 
             null);
-        AbstractNioWriter writer            = new NioWriter(clientDataHandler, null);
+        final AbstractNioWriter writer              = new NioWriter(clientDataHandler, null);
+        
+        ReaderWriterFactory     readerWriterFactory = new ReaderWriterFactory() {
+
+            @Override
+            public ReaderWriter createReaderWriter() {
+                return new ChunkedReaderWriter((NioReader) reader, writer, null);
+            }
+            
+        };
+        
         return new BatchAcceptorAndReadingThreadStrategy(
             server,
-            reader, 
+            readerWriterFactory, 
             threadPoolFactory, 
-            writer,
-            null, 
             null);
     }
 

@@ -24,24 +24,15 @@ public class BatchAcceptorAndReadingThreadStrategy implements ThreadStrategy {
     private volatile boolean isRunning = true;
 
     public BatchAcceptorAndReadingThreadStrategy(
-        final Server            server,
-        final AbstractNioReader reader, 
-        final ThreadPoolFactory threadPoolFactory, 
-        final AbstractNioWriter writer, 
-        final Stopwatch         stopWatch,
-        final Stopwatch         readerWriterStopwatch) throws IOException {
+        final Server                server,
+        final ReaderWriterFactory   readerWriterFactory,
+        final ThreadPoolFactory     threadPoolFactory, 
+        final Stopwatch             stopWatch) throws IOException {
         super();
         executor                    = threadPoolFactory.createThreadPoolExecutor();
         final Selector selector     = Selector.open();
         server.register(selector);
-        ReaderWriterFactory readerWriterFactory = new ReaderWriterFactory() {
 
-            @Override
-            public ReaderWriter createReaderWriter() {
-                return new ChunkedReaderWriter((NioReader) reader, writer, readerWriterStopwatch);
-            }
-            
-        };
         WaitStrategy waitStrategy   = new NoOpWaitStrategy(); // createWaitStrategy(selector);
         batchSelectionStrategy      = new BatchServerAndReadingSelectionStrategy(
             waitStrategy, 

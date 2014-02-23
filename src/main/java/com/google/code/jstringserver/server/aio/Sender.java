@@ -1,6 +1,6 @@
 package com.google.code.jstringserver.server.aio;
 
-import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
@@ -18,8 +18,9 @@ public class Sender {
         
         byte[] toSend = clientDataHandler.end(attachment);
         if (toSend != null) {
-            byteBuffer.rewind();
-            byteBuffer.put(toSend, 0, max(toSend.length, byteBuffer.capacity()));
+            int toWrite = min(toSend.length, byteBuffer.capacity());
+            clientDataHandler.handleWrite(toWrite, attachment);
+            byteBuffer.put(toSend, 0, toWrite);
             socketChannel.write(byteBuffer, attachment, writeCompletionHandler);
         } 
         return toSend;

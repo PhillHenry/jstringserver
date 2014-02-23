@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import com.google.code.jstringserver.server.handlers.ClientDataHandler;
 
@@ -25,11 +27,18 @@ class ReadCompletionHandler implements CompletionHandler<Integer, Object> {
 
     @Override
     public void completed(Integer bytesRead, Object attachment) {
-        clientDataHandler.handleRead(byteBuffer, attachment);
-        if (clientDataHandler.isReadingComplete(attachment)) {
+        if (!clientDataHandler.isReadingComplete(attachment)) {
+            byteBuffer.flip();
+            int read = clientDataHandler.handleRead(byteBuffer, attachment);
+            byteBuffer.flip();
+            if (!clientDataHandler.isReadingComplete(attachment)) {
+                socketChannel.read(byteBuffer, attachment, this);
+            }
+        }
+        
+        if (clientDataHandler.isReadingComplete(attachment) 
+                && !clientDataHandler.isWritingComplete(attachment)) {
             write(attachment);
-        } else {
-            socketChannel.read(byteBuffer, attachment, this);
         }
     }
 

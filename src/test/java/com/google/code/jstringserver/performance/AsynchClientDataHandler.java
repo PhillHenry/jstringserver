@@ -57,10 +57,9 @@ public class AsynchClientDataHandler implements ClientDataHandler {
 
     @Override
     public int handleRead(ByteBuffer byteBuffer, Object key) {
-        SelectionKey selectionKey = (SelectionKey)key;
-        CurrentStats attachment = getCurrentStats(key);
-        byte[] bytes = new byte[byteBuffer.limit()];
-        int filled = totalStats.handleRead(byteBuffer, selectionKey, bytes);
+        CurrentStats    attachment  = getCurrentStats(key);
+        byte[]          bytes       = new byte[byteBuffer.limit()];
+        int             filled      = totalStats.handleRead(byteBuffer, key, bytes);
         if (filled > 0) {
             updateCurrentStats(attachment, bytes);
         }
@@ -79,19 +78,9 @@ public class AsynchClientDataHandler implements ClientDataHandler {
         return attachment != null && attachment.bytesRead.get() == payload.length();
     }
 
-    private CurrentStats getAttachment(SelectionKey selectionKey) {
-        CurrentStats attachment = (CurrentStats) selectionKey.attachment();
-        if (attachment == null) {
-            attachment = new CurrentStats();
-            selectionKey.attach(attachment);
-        }
-        return attachment;
-    }
-
     @Override
     public byte[] end(Object key) {
-        SelectionKey selectionKey = (SelectionKey)key;
-        if (receivedAll((CurrentStats)selectionKey.attachment())) {
+        if (receivedAll(getCurrentStats(key))) {
             int writtenSoFar = getBytesWrittenSoFar(key);
             return returnMessage.messageToWriteNext(writtenSoFar);
         }
@@ -100,8 +89,7 @@ public class AsynchClientDataHandler implements ClientDataHandler {
 
     @Override
     public boolean isReadingComplete(Object key) {
-        SelectionKey selectionKey = (SelectionKey)key;
-        CurrentStats currentStats = (CurrentStats)selectionKey.attachment();
+        CurrentStats currentStats = getCurrentStats(key);
         return receivedAll(currentStats) || isTimedOut(currentStats);
     }
 
@@ -121,11 +109,27 @@ public class AsynchClientDataHandler implements ClientDataHandler {
     }
 
     private CurrentStats getCurrentStats(Object key) {
-        SelectionKey selectionKey = (SelectionKey)key;
-        CurrentStats attachment = getAttachment(selectionKey);
-        return attachment;
+        if (key instanceof SelectionKey) {
+            SelectionKey selectionKey = (SelectionKey)key;
+            CurrentStats attachment = getAttachment(selectionKey);
+            return attachment;
+        } else if (key instanceof CurrentStats) {
+            return (CurrentStats)key;
+        } else {
+            throw new RuntimeException("" + key);
+        }
     }
 
+
+    private CurrentStats getAttachment(SelectionKey selectionKey) {
+        CurrentStats attachment = (CurrentStats) selectionKey.attachment();
+        if (attachment == null) {
+            attachment = new CurrentStats();
+            selectionKey.attach(attachment);
+        }
+        return attachment;
+    }
+    
     @Override
     public boolean isWritingComplete(Object key) {
         int writtenSoFar = getBytesWrittenSoFar(key);
@@ -147,6 +151,11 @@ public class AsynchClientDataHandler implements ClientDataHandler {
             System.out.println("Timedout: " + attachment);
         }
         return timedOut;
+    }
+
+    @Override
+    public Object getKey() {
+        return new CurrentStats();
     }
 
 }

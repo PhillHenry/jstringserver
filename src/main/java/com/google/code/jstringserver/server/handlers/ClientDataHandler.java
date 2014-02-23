@@ -3,6 +3,8 @@ package com.google.code.jstringserver.server.handlers;
 import java.nio.ByteBuffer;
 
 public interface ClientDataHandler {
+    
+    public Object getKey();
 
     public int handleRead(ByteBuffer byteBuffer, Object key);
     

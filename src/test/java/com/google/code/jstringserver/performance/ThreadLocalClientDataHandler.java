@@ -105,5 +105,10 @@ class ThreadLocalClientDataHandler implements ClientDataHandler {
     public boolean isTimedOut(Object key) {
         throw new UnsupportedOperationException("TODO");
     }
+
+    @Override
+    public Object getKey() {
+        throw new UnsupportedOperationException("not needed");
+    }
     
 }

@@ -21,7 +21,7 @@ public class Nio2Server {
         this.listeningAddress   = InetAddress.getByName(address);
         this.port               = port;
         this.backlog            = backlog;
-        serverSocketChannel = AsynchronousServerSocketChannel.open();
+        serverSocketChannel     = AsynchronousServerSocketChannel.open();
     }
     
     public void connect() throws IOException {
@@ -31,10 +31,15 @@ public class Nio2Server {
     
     public void register(CompletionHandler<AsynchronousSocketChannel, Object> handler) throws IOException {
         Object attachment = null;
-        serverSocketChannel.accept(attachment , handler);
+        serverSocketChannel.accept(attachment, handler);
     }
 
     public void close() throws IOException {
         serverSocketChannel.close();
     }
+
+    public AsynchronousServerSocketChannel getServerSocketChannel() {
+        return serverSocketChannel;
+    }
+    
 }

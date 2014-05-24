@@ -39,7 +39,7 @@ public class AcceptCompletionHandler implements CompletionHandler<AsynchronousSo
     @Override
     public void failed(Throwable exc, Object attachment) {
         // TODO Auto-generated method stub
-
+        exc.printStackTrace(); // TODO
     }
 
 }

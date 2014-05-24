@@ -19,13 +19,14 @@ public class Nio2ServerRealTest extends AbstractNio2ServerTest  {
 
     @Test
     public void testReal() throws Exception {
-        ByteBufferFactory byteBufferFactory = new DirectByteBufferFactory(1024);
-        ClientDataHandler clientDataHandler = new AsynchClientDataHandler(getPayload());
-        Nio2Server server = nio2ServerBuilder.getServer();
-        AcceptCompletionHandler handler = new AcceptCompletionHandler(byteBufferFactory , clientDataHandler, server.getServerSocketChannel());
+        ByteBufferFactory       byteBufferFactory   = new DirectByteBufferFactory(1024);
+        ClientDataHandler       clientDataHandler   = new AsynchClientDataHandler(getPayload());
+        Nio2Server              server              = nio2ServerBuilder.getServer();
+        AcceptCompletionHandler handler 
+            = new AcceptCompletionHandler(byteBufferFactory , clientDataHandler, server.getServerSocketChannel());
         server.register(handler);
         
-        WritingConnector[] connectors          = createWritingConnectors(
+        WritingConnector[]      connectors          = createWritingConnectors(
             1, 
             nio2ServerBuilder.getAddress(), 
             nio2ServerBuilder.getPort(), 

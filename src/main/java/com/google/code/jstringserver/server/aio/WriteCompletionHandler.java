@@ -24,6 +24,7 @@ class WriteCompletionHandler implements CompletionHandler<Integer, Object> {
 
     @Override
     public void completed(Integer wrote, Object attachment) {
+        clientDataHandler.handleWrite(wrote, attachment);
         if (clientDataHandler.isWritingComplete(attachment)) {
             close();
         } else {

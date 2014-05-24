@@ -18,11 +18,21 @@ public class Sender {
         
         byte[] toSend = clientDataHandler.end(attachment);
         if (toSend != null) {
-            int toWrite = min(toSend.length, byteBuffer.capacity());
-            clientDataHandler.handleWrite(toWrite, attachment);
-            byteBuffer.put(toSend, 0, toWrite);
-            socketChannel.write(byteBuffer, attachment, writeCompletionHandler);
+            write(attachment, byteBuffer, writeCompletionHandler,
+                    socketChannel, toSend);
         } 
         return toSend;
+    }
+
+    private static void write(Object attachment, 
+            ByteBuffer                          byteBuffer,
+            CompletionHandler<Integer, Object>  writeCompletionHandler,
+            AsynchronousSocketChannel           socketChannel, 
+            byte[]                              toSend) {
+        int toWrite = min(toSend.length, byteBuffer.capacity());
+        byteBuffer.clear();
+        byteBuffer.put(toSend, 0, toWrite);
+        byteBuffer.flip();
+        socketChannel.write(byteBuffer, attachment, writeCompletionHandler);
     }
 }

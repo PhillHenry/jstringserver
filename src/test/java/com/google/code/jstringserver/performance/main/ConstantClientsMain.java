@@ -13,6 +13,8 @@ import java.util.concurrent.TimeUnit;
 import com.google.code.jstringserver.client.ConstantWritingConnector;
 import com.google.code.jstringserver.server.bytebuffers.factories.DirectByteBufferFactory;
 import com.google.code.jstringserver.server.bytebuffers.store.ThreadLocalByteBufferStore;
+import com.google.code.jstringserver.stats.HdrHistogramStats;
+import com.google.code.jstringserver.stats.Stats;
 import com.google.code.jstringserver.stats.Stopwatch;
 import com.google.code.jstringserver.stats.ThreadLocalStats;
 import com.google.code.jstringserver.stats.ThreadLocalStopWatch;
@@ -39,9 +41,9 @@ public class ConstantClientsMain {
         String address                              = getAddress(args);
         int numThreads                              = getNumberOfThreads(args);
         ThreadLocalByteBufferStore byteBufferStore  = createByteBufferStore();
-        readStopWatch                               = new ThreadLocalStopWatch("read", new ThreadLocalStats(sampleSizeHint));
-        writeStopWatch                              = new ThreadLocalStopWatch("write", new ThreadLocalStats(sampleSizeHint));
-        connectStopWatch                            = new ThreadLocalStopWatch("connect", new ThreadLocalStats(sampleSizeHint));
+        readStopWatch                               = new ThreadLocalStopWatch("read", newStats());
+        writeStopWatch                              = new ThreadLocalStopWatch("write", newStats());
+        connectStopWatch                            = new ThreadLocalStopWatch("connect", newStats());
         ConstantWritingConnector[] connectors       = createConnectors(
             address,
             numThreads,
@@ -53,6 +55,11 @@ public class ConstantClientsMain {
         run(numThreads,
             connectors);
         return connectors;
+    }
+
+    private Stats newStats() {
+//        return new ThreadLocalStats(sampleSizeHint);
+        return new HdrHistogramStats();
     }
 
     private static int getNumberOfThreads(String[] args) {

@@ -1,5 +1,7 @@
 package com.google.code.jstringserver.stats;
 
+import static com.google.code.jstringserver.stats.HistogramTimer.neverHistogramTimer;
+
 import org.HdrHistogram.AbstractHistogram.RecordedValues;
 import org.HdrHistogram.Histogram;
 import org.HdrHistogram.HistogramIterationValue;
@@ -11,6 +13,16 @@ public class HdrHistogramStats implements Stats {
     private final Histogram histogram = new Histogram(MAX_READING, 0);
 
     private final StringBuffer szb = new StringBuffer();
+    
+    private final HistogramTimer histogramTimer;
+
+    public HdrHistogramStats() {
+        this(neverHistogramTimer);
+    }
+    
+    public HdrHistogramStats(HistogramTimer histogramTimer) {
+        this.histogramTimer = histogramTimer;
+    }
 
     @Override
     public void start(long timeDeleteMe) {
@@ -37,7 +49,8 @@ public class HdrHistogramStats implements Stats {
     public String String() {
         return "Mean = " + histogram.getMean()
                 + ", Min = " +histogram.getMinValue()
-                + ", standard deviation " + histogram.getStdDeviation();
+                + ", standard deviation " + histogram.getStdDeviation()
+                + (histogramTimer.isTimeForHistogram() ? histogram() : "");
     }
     
     String histogram() {

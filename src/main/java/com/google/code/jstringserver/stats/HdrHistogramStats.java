@@ -1,27 +1,27 @@
 package com.google.code.jstringserver.stats;
 
+import static com.google.code.jstringserver.stats.HistogramFormatStrategy.noOpHistogramFormatStrategy;
 import static com.google.code.jstringserver.stats.HistogramTimer.neverHistogramTimer;
 
-import org.HdrHistogram.AbstractHistogram.RecordedValues;
 import org.HdrHistogram.Histogram;
-import org.HdrHistogram.HistogramIterationValue;
 
 public class HdrHistogramStats implements Stats {
     
     public static final int MAX_READING = 60000;
     
     private final Histogram histogram = new Histogram(MAX_READING, 0);
-
-    private final StringBuffer szb = new StringBuffer();
     
     private final HistogramTimer histogramTimer;
+    
+    private final HistogramFormatStrategy histogramFormatStrategy;
 
     public HdrHistogramStats() {
-        this(neverHistogramTimer);
+        this(neverHistogramTimer, noOpHistogramFormatStrategy);
     }
     
-    public HdrHistogramStats(HistogramTimer histogramTimer) {
-        this.histogramTimer = histogramTimer;
+    public HdrHistogramStats(HistogramTimer histogramTimer, HistogramFormatStrategy histogramFormatStrategy) {
+        this.histogramTimer             = histogramTimer;
+        this.histogramFormatStrategy    = histogramFormatStrategy;
     }
 
     @Override
@@ -50,25 +50,10 @@ public class HdrHistogramStats implements Stats {
         return "Mean = " + histogram.getMean()
                 + ", Min = " +histogram.getMinValue()
                 + ", standard deviation " + histogram.getStdDeviation()
-                + (histogramTimer.isTimeForHistogram() ? histogram() : "");
+                + (histogramTimer.isTimeForHistogram() ? histogramFormatStrategy.format(histogram) : "");
     }
     
-    String histogram() {
-        szb.delete(0, szb.length());
-        RecordedValues recordedValues = histogram.recordedValues();
-        
-        for (HistogramIterationValue value : recordedValues) {
-            szb.append(value.getPercentile()).append(": ")
-                .append(value.getCountAddedInThisIterationStep()).append("\n");
-        }
-        
-//        {
-//            szb.append(rangeStart).append(" : ").append(histogram.)
-//            power++;
-//        }
-        return szb.toString();
-        
-    }
+
 
     
 }

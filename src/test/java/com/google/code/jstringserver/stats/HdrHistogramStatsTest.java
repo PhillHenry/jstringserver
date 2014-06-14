@@ -33,21 +33,7 @@ public class HdrHistogramStatsTest {
         assertEquals(expectedMax, toTest.getMaxTime());
         assertEquals(max, toTest.getTotalCallsServiced());
     }
-    
-    @Test
-    public void testHistogram() {
-        int max = 10000;
-        
-        populateUniformallyTo(max);
-        String first = toTest.histogram();
-        String firstAgain = toTest.histogram();
-        assertEquals(first, firstAgain);
-        
-        populateUniformallyTo(max);
-        String second = toTest.histogram();
-        Assert.assertNotEquals(first, second);
-        System.out.println(first);
-    }
+
 
     private void populateUniformallyTo(int max) {
         for (int i = 0 ; i < max ; i++) {

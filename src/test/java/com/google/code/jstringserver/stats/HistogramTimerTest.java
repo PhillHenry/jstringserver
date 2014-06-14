@@ -13,7 +13,7 @@ public class HistogramTimerTest {
         for (int i = 0 ; i < 7 ; i ++) {
             assertFalse("" + i, threadLocalEvery8th.isTimeForHistogram());
         }
-        Assert.assertTrue(threadLocalEvery8th.isTimeForHistogram());
+        assertTrue(threadLocalEvery8th.isTimeForHistogram());
     }
 
 }

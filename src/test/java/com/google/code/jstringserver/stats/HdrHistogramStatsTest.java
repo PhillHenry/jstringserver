@@ -3,6 +3,7 @@ package com.google.code.jstringserver.stats;
 import static java.lang.Long.highestOneBit;
 import static org.junit.Assert.*;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,12 +28,31 @@ public class HdrHistogramStatsTest {
     @Test
     public void testMaxLargeRange() {
         int max = 10000;
-        for (int i = 0 ; i < max ; i++) {
-            toTest.stop(i);
-        }
+        populateUniformallyTo(max);
         long expectedMax = highestOneBit(max);
         assertEquals(expectedMax, toTest.getMaxTime());
         assertEquals(max, toTest.getTotalCallsServiced());
+    }
+    
+    @Test
+    public void testHistogram() {
+        int max = 10000;
+        
+        populateUniformallyTo(max);
+        String first = toTest.histogram();
+        String firstAgain = toTest.histogram();
+        assertEquals(first, firstAgain);
+        
+        populateUniformallyTo(max);
+        String second = toTest.histogram();
+        Assert.assertNotEquals(first, second);
+        System.out.println(first);
+    }
+
+    private void populateUniformallyTo(int max) {
+        for (int i = 0 ; i < max ; i++) {
+            toTest.stop(i);
+        }
     }
 
 }

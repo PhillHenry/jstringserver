@@ -3,7 +3,7 @@ package com.google.code.jstringserver.stats;
 
 public class ThreadLocalStopWatch implements Stopwatch {
 
-    private final ThreadLocalStats stats;
+    private final Stats  stats;
     private final String name;
     
     private final ThreadLocal<Long> startTime          = new ThreadLocal<>();
@@ -34,17 +34,14 @@ public class ThreadLocalStopWatch implements Stopwatch {
 
     @Override
     public String toString() {
-        long totalCallsServiced = stats.getTotalCallsServiced();
-        long totalTimeTaken = stats.getTotalTimeTaken();
         return "ThreadLocalStopWatch [" 
             + "name="
             + name
             + ", totalCallsServiced="
-            + totalCallsServiced
-            + ", totalTimeTaken="
-            + totalTimeTaken
+            + stats.getTotalCallsServiced()
+            + ", " + stats
             + ", max time = " + stats.getMaxTime() + timeUnit()
-            + ", Average time = " + (totalCallsServiced == 0 ? "NA" : calcAverage(totalCallsServiced, totalTimeTaken))
+            
             + "]";
     }
 
@@ -55,14 +52,5 @@ public class ThreadLocalStopWatch implements Stopwatch {
     public long getMaxTime() {
         return stats.getMaxTime();
     }
-    
-    public double getAverageInMicroSeconds() {
-        long totalCallsServiced = stats.getTotalCallsServiced();
-        long totalTimeTaken = stats.getTotalTimeTaken();
-        return (totalTimeTaken * 1000 / totalCallsServiced);
-    }
 
-    protected String calcAverage(long totalCallsServiced, long totalTimeTaken) {
-        return (totalTimeTaken * 1000 / totalCallsServiced) + "us";
-    }
 }

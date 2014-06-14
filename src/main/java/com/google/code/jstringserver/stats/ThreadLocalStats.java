@@ -4,7 +4,7 @@ import static java.lang.Integer.highestOneBit;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public class ThreadLocalStats {
+public class ThreadLocalStats implements Stats {
     private final AtomicLong        totalCallsServiced = new AtomicLong();
     private final AtomicLong        totalTimeTaken     = new AtomicLong();
     private final AtomicLong        overallMaxTime     = new AtomicLong();
@@ -37,6 +37,7 @@ public class ThreadLocalStats {
         this.sampleSize = (leftMost << 1) - 1;
     }
         
+    @Override
     public void start(long timeDeleteMe) {
         long calls = callsServiced.get().longValue();
         if ((calls & sampleSize) > 0) {
@@ -52,6 +53,7 @@ public class ThreadLocalStats {
         }
     }
 
+    @Override
     public void stop(long duration) {
         cumulativeTime.set(cumulativeTime.get() + duration);
         callsServiced.set(callsServiced.get() + 1);
@@ -76,4 +78,14 @@ public class ThreadLocalStats {
         return overallMaxTime.get();
     }
     
+    public String toString() {
+        return "totalTimeTaken = "
+                + totalTimeTaken
+                + ", Average time = " + (totalCallsServiced.get() == 0 ? "NA" : 
+                    calcAverage(totalCallsServiced.get(), totalTimeTaken.get()));
+    }
+    
+    protected String calcAverage(long totalCallsServiced, long totalTimeTaken) {
+        return (totalTimeTaken * 1000 / totalCallsServiced) + "us";
+    }
 }

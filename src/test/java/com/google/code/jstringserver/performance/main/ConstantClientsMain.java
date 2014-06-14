@@ -14,6 +14,7 @@ import com.google.code.jstringserver.client.ConstantWritingConnector;
 import com.google.code.jstringserver.server.bytebuffers.factories.DirectByteBufferFactory;
 import com.google.code.jstringserver.server.bytebuffers.store.ThreadLocalByteBufferStore;
 import com.google.code.jstringserver.stats.Stopwatch;
+import com.google.code.jstringserver.stats.ThreadLocalStats;
 import com.google.code.jstringserver.stats.ThreadLocalStopWatch;
 
 public class ConstantClientsMain {
@@ -38,9 +39,9 @@ public class ConstantClientsMain {
         String address                              = getAddress(args);
         int numThreads                              = getNumberOfThreads(args);
         ThreadLocalByteBufferStore byteBufferStore  = createByteBufferStore();
-        readStopWatch                               = new ThreadLocalStopWatch("read", sampleSizeHint);
-        writeStopWatch                              = new ThreadLocalStopWatch("write", sampleSizeHint);
-        connectStopWatch                            = new ThreadLocalStopWatch("connect", sampleSizeHint);
+        readStopWatch                               = new ThreadLocalStopWatch("read", new ThreadLocalStats(sampleSizeHint));
+        writeStopWatch                              = new ThreadLocalStopWatch("write", new ThreadLocalStats(sampleSizeHint));
+        connectStopWatch                            = new ThreadLocalStopWatch("connect", new ThreadLocalStats(sampleSizeHint));
         ConstantWritingConnector[] connectors       = createConnectors(
             address,
             numThreads,

@@ -9,11 +9,11 @@ public class ThreadLocalStopWatch implements Stopwatch {
     private final ThreadLocal<Long> startTime          = new ThreadLocal<>();
 
     public ThreadLocalStopWatch(
-        String name,
-        int sampleSizeHint) {
+            String name,
+            Stats  stats) {
         super();
         this.name = name;
-        this.stats = new ThreadLocalStats(sampleSizeHint);
+        this.stats = stats;
     }
 
     @Override

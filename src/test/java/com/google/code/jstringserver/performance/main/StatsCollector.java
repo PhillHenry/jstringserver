@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.google.code.jstringserver.stats.Stopwatch;
 import com.google.code.jstringserver.stats.ThreadLocalNanoStopWatch;
+import com.google.code.jstringserver.stats.ThreadLocalStats;
 import com.google.code.jstringserver.stats.ThreadLocalStopWatch;
 
 public class StatsCollector {
@@ -14,7 +15,7 @@ public class StatsCollector {
     public Stopwatch getStopWatchFor(String name) {
         Stopwatch stopwatch = nameToStopwatch.get(name);
         if (stopwatch == null) {
-            stopwatch = new ThreadLocalStopWatch(name, SAMPLE_SIZE_HINT);
+            stopwatch = new ThreadLocalStopWatch(name, new ThreadLocalStats(SAMPLE_SIZE_HINT));
             nameToStopwatch.put(name, stopwatch);
         }
         return stopwatch;
@@ -34,7 +35,7 @@ public class StatsCollector {
     public Stopwatch getNanoStopWatchFor(String name) {
         Stopwatch stopwatch = nameToStopwatch.get(name);
         if (stopwatch == null) {
-            stopwatch = new ThreadLocalNanoStopWatch(name, SAMPLE_SIZE_HINT);
+            stopwatch = new ThreadLocalNanoStopWatch(name, new ThreadLocalStats(SAMPLE_SIZE_HINT));
             nameToStopwatch.put(name, stopwatch);
         }
         return stopwatch;

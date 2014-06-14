@@ -4,8 +4,8 @@ public class ThreadLocalNanoStopWatch extends ThreadLocalStopWatch {
 
     public ThreadLocalNanoStopWatch(
         String name,
-        int sampleSizeHint) {
-        super(name, sampleSizeHint);
+        Stats stats) {
+        super(name, stats);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.google.code.jstringserver.client;
 
 import java.io.IOException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
@@ -94,7 +95,7 @@ public class WritingConnector extends Connector {
     }
 
     protected byte[] getByteArray(ByteBuffer byteBuffer) {
-        return new byte[byteBuffer.limit()];
+        return new byte[byteBuffer.remaining()];
     }
 
     protected void write(SocketChannel socketChannel) throws IOException {

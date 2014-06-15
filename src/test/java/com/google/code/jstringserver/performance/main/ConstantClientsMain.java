@@ -5,6 +5,8 @@ import static com.google.code.jstringserver.client.ConstantWritingConnector.getT
 import static com.google.code.jstringserver.client.ConstantWritingConnector.getTotalErrors;
 import static com.google.code.jstringserver.performance.main.AbstractServerMain.EXPECTED_PAYLOAD;
 import static com.google.code.jstringserver.performance.main.AbstractServerMain.PORT;
+import static com.google.code.jstringserver.stats.HdrHistogramStats.MAX_READING;
+import static com.google.code.jstringserver.stats.HistogramTimer.alwaysHistogramTimer;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -14,8 +16,11 @@ import com.google.code.jstringserver.client.ConstantWritingConnector;
 import com.google.code.jstringserver.server.bytebuffers.factories.DirectByteBufferFactory;
 import com.google.code.jstringserver.server.bytebuffers.store.ThreadLocalByteBufferStore;
 import com.google.code.jstringserver.stats.HdrHistogramStats;
+import com.google.code.jstringserver.stats.HistogramTimer;
+import com.google.code.jstringserver.stats.LinearHistogramFormatStrategy;
 import com.google.code.jstringserver.stats.Stats;
 import com.google.code.jstringserver.stats.Stopwatch;
+import com.google.code.jstringserver.stats.SynchronizedStatsDecorator;
 import com.google.code.jstringserver.stats.ThreadLocalStats;
 import com.google.code.jstringserver.stats.ThreadLocalStopWatch;
 
@@ -59,7 +64,8 @@ public class ConstantClientsMain {
 
     private Stats newStats() {
 //        return new ThreadLocalStats(sampleSizeHint);
-        return new HdrHistogramStats();
+        return new SynchronizedStatsDecorator(
+        		new HdrHistogramStats(alwaysHistogramTimer, new LinearHistogramFormatStrategy(MAX_READING)));
     }
 
     private static int getNumberOfThreads(String[] args) {

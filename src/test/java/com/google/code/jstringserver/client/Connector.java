@@ -54,9 +54,9 @@ public class Connector extends Networker {
         Socket socket = socketChannel.socket();
         socket.setSoLinger(true, 1000);
         socket.setReuseAddress(true);
-        socketChannel.setOption(
-            SO_RCVBUF,
-            8192);
+//        socketChannel.setOption(
+//            SO_RCVBUF,
+//            8192);
         startConnectStopWatch();
         try {
             socketChannel.connect(inetSocketAddress);

@@ -38,7 +38,11 @@ public class HdrHistogramStats implements Stats {
 
     @Override
     public long getMaxTime() {
-        return histogram.getMaxValue();
+    	try {
+    		return histogram.getMaxValue();
+    	} catch (ArrayIndexOutOfBoundsException x) { 
+    		return -1;
+    	}
     }
 
     @Override
@@ -46,7 +50,7 @@ public class HdrHistogramStats implements Stats {
         return histogram.getTotalCount();
     }
     
-    public String String() {
+    public String toString() {
         return "Mean = " + histogram.getMean()
                 + ", Min = " +histogram.getMinValue()
                 + ", standard deviation " + histogram.getStdDeviation()

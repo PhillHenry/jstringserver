@@ -19,8 +19,10 @@ import com.google.code.jstringserver.server.bytebuffers.factories.DirectByteBuff
 import com.google.code.jstringserver.server.bytebuffers.store.ThreadLocalByteBufferStore;
 import com.google.code.jstringserver.stats.CsvLinearHistogramFormatStrategy;
 import com.google.code.jstringserver.stats.HdrHistogramStats;
+import com.google.code.jstringserver.stats.HistogramFormatStrategy;
 import com.google.code.jstringserver.stats.HistogramTimer;
 import com.google.code.jstringserver.stats.LinearHistogramFormatStrategy;
+import com.google.code.jstringserver.stats.PercentileHistogramFormatStrategy;
 import com.google.code.jstringserver.stats.Stats;
 import com.google.code.jstringserver.stats.Stopwatch;
 import com.google.code.jstringserver.stats.SynchronizedStatsDecorator;
@@ -69,17 +71,21 @@ public class ConstantClientsMain {
     }
 
     private Stats newStatsNanoSeconds() {
-        int maxReading = 20 * 1000 * 1000;
-		CsvLinearHistogramFormatStrategy formatter = new CsvLinearHistogramFormatStrategy(maxReading, 50);
+        int maxReading = 40 * 1000 * 1000;
+        HistogramFormatStrategy formatter = 
+                //new PercentileHistogramFormatStrategy(); 
+                new CsvLinearHistogramFormatStrategy(maxReading, 30);
         return new SynchronizedStatsDecorator(
-        		new HdrHistogramStats(alwaysHistogramTimer, formatter, new Histogram(maxReading, 0)));
+        		new HdrHistogramStats(alwaysHistogramTimer, formatter, new Histogram(maxReading, 5)));
     }
 
     private Stats newStats() {
 //        return new ThreadLocalStats(sampleSizeHint);
-        CsvLinearHistogramFormatStrategy formatter = new CsvLinearHistogramFormatStrategy(20);
+        HistogramFormatStrategy formatter = 
+                //new PercentileHistogramFormatStrategy(); 
+                new CsvLinearHistogramFormatStrategy(30);
 		return new SynchronizedStatsDecorator(
-        		new HdrHistogramStats(alwaysHistogramTimer, formatter, new Histogram(20, 0)));
+        		new HdrHistogramStats(alwaysHistogramTimer, formatter, new Histogram(40, 5)));
     }
 
     private static int getNumberOfThreads(String[] args) {

@@ -19,6 +19,7 @@ public class ConstantWritingConnector extends WritingConnector {
     
     private final int payloadSize;
     private byte[] byteArray;
+	private final Stopwatch totalStopWatch;
 
     public static void stop() {
         isRunning = false;
@@ -43,7 +44,8 @@ public class ConstantWritingConnector extends WritingConnector {
         ByteBufferStore byteBufferStore,
         Stopwatch readStopWatch, 
         Stopwatch writeStopWatch, 
-        Stopwatch connectTimer) {
+        Stopwatch connectTimer, 
+        Stopwatch totalStopWatch) {
         super(
             address,
             port,
@@ -52,6 +54,7 @@ public class ConstantWritingConnector extends WritingConnector {
             readStopWatch, 
             writeStopWatch, 
             connectTimer);
+		this.totalStopWatch = totalStopWatch;
         payloadSize = payload.length();
     }
 
@@ -61,7 +64,9 @@ public class ConstantWritingConnector extends WritingConnector {
             totalCalls.incrementAndGet();
             try {
                 long start = System.currentTimeMillis();
+                totalStopWatch.start();
                 super.doCall();
+                totalStopWatch.stop();
                 long duration = System.currentTimeMillis() - start;
                 totalCallingTime.addAndGet(duration);
             } catch (Exception x) {

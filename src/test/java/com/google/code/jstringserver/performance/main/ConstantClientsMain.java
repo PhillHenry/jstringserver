@@ -27,10 +27,10 @@ import com.google.code.jstringserver.stats.ThreadLocalStopWatch;
 
 public class ConstantClientsMain {
 
-    private static final int sampleSizeHint = 100;
     private ThreadLocalStopWatch readStopWatch;
     private ThreadLocalStopWatch writeStopWatch;
     private ThreadLocalStopWatch connectStopWatch;
+    private ThreadLocalStopWatch totalStopWatch;
 
     public static void main(
             String[] args) throws InterruptedException {
@@ -40,7 +40,7 @@ public class ConstantClientsMain {
     
     public void start(String[] args) throws InterruptedException {
         run(args);
-        doMetrics(readStopWatch, writeStopWatch, connectStopWatch);
+        doMetrics(readStopWatch, writeStopWatch, connectStopWatch, totalStopWatch);
     }
 
     public ConstantWritingConnector[] run(String[] args) throws InterruptedException {
@@ -50,6 +50,7 @@ public class ConstantClientsMain {
         readStopWatch                               = new ThreadLocalStopWatch("read", newStats());
         writeStopWatch                              = new ThreadLocalStopWatch("write", newStats());
         connectStopWatch                            = new ThreadLocalStopWatch("connect", newStats());
+        totalStopWatch                            	= new ThreadLocalStopWatch("total", newStats());
         ConstantWritingConnector[] connectors       = createConnectors(
             address,
             numThreads,
@@ -57,7 +58,8 @@ public class ConstantClientsMain {
             byteBufferStore, 
             readStopWatch, 
             writeStopWatch, 
-            connectStopWatch);
+            connectStopWatch, 
+            totalStopWatch);
         run(numThreads,
             connectors);
         return connectors;
@@ -84,7 +86,7 @@ public class ConstantClientsMain {
         return host;
     }
 
-    private static void doMetrics(Stopwatch readStopWatch, Stopwatch writeStopWatch, Stopwatch connectStopWatch) throws InterruptedException {
+    private static void doMetrics(Stopwatch readStopWatch, Stopwatch writeStopWatch, Stopwatch connectStopWatch, Stopwatch totalStopWatch) throws InterruptedException {
         int oldTotalCalls = 0;
         int sleepTime = 2000;
         while (true) {
@@ -96,6 +98,7 @@ public class ConstantClientsMain {
             System.out.println(readStopWatch);
             System.out.println(writeStopWatch);
             System.out.println(connectStopWatch);
+            System.out.println(totalStopWatch);
             System.out.println();
             
             Thread.sleep(sleepTime);
@@ -131,7 +134,8 @@ public class ConstantClientsMain {
             ThreadLocalByteBufferStore byteBufferStore,
             Stopwatch readStopWatch, 
             Stopwatch writeStopWatch, 
-            Stopwatch connectTimer) {
+            Stopwatch connectTimer, 
+            Stopwatch totalStopWatch) {
         ConstantWritingConnector[] constantWritingConnectors    = new ConstantWritingConnector[num];
         for (int i = 0; i < numThreads; i++) {
             constantWritingConnectors[i] = new ConstantWritingConnector(
@@ -141,7 +145,8 @@ public class ConstantClientsMain {
                     byteBufferStore, 
                     readStopWatch, 
                     writeStopWatch, 
-                    connectTimer);
+                    connectTimer,
+                    totalStopWatch);
         }
         return constantWritingConnectors;
     }

@@ -24,4 +24,9 @@ public class PercentileHistogramFormatStrategy implements
         
     }
 
+	@Override
+	public String metadata() {
+		return "Percentiles";
+	}
+
 }

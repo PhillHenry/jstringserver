@@ -52,9 +52,11 @@ public class HdrHistogramStats implements Stats {
     
     public String toString() {
         return "Mean = " + histogram.getMean()
-                + ", Min = " +histogram.getMinValue()
+                + ", Min = " + histogram.getMinValue()
                 + ", standard deviation " + histogram.getStdDeviation()
-                + (histogramTimer.isTimeForHistogram() ? histogramFormatStrategy.format(histogram) : "");
+                + (histogramTimer.isTimeForHistogram() ? 
+                		"\n" + histogramFormatStrategy.metadata() + ": " + 
+                		histogramFormatStrategy.format(histogram) : "");
     }
     
 

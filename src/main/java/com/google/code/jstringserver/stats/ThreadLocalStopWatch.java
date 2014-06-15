@@ -39,8 +39,8 @@ public class ThreadLocalStopWatch implements Stopwatch {
             + name
             + ", totalCallsServiced="
             + stats.getTotalCallsServiced()
-            + ", " + stats
             + ", max time = " + stats.getMaxTime() + timeUnit()
+            + ", " + stats
             
             + "]";
     }

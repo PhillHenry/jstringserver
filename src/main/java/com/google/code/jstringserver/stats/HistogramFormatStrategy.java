@@ -10,8 +10,15 @@ public interface HistogramFormatStrategy {
         public String format(Histogram histogram) {
             return "";
         }
+
+		@Override
+		public String metadata() {
+			return "";
+		}
         
     };
+    
+    public String metadata();
     
     public String format(Histogram histogram);
 }

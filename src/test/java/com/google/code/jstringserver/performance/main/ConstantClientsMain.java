@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import com.google.code.jstringserver.client.ConstantWritingConnector;
 import com.google.code.jstringserver.server.bytebuffers.factories.DirectByteBufferFactory;
 import com.google.code.jstringserver.server.bytebuffers.store.ThreadLocalByteBufferStore;
+import com.google.code.jstringserver.stats.CsvLinearHistogramFormatStrategy;
 import com.google.code.jstringserver.stats.HdrHistogramStats;
 import com.google.code.jstringserver.stats.HistogramTimer;
 import com.google.code.jstringserver.stats.LinearHistogramFormatStrategy;
@@ -64,8 +65,9 @@ public class ConstantClientsMain {
 
     private Stats newStats() {
 //        return new ThreadLocalStats(sampleSizeHint);
-        return new SynchronizedStatsDecorator(
-        		new HdrHistogramStats(alwaysHistogramTimer, new LinearHistogramFormatStrategy(MAX_READING)));
+        CsvLinearHistogramFormatStrategy formatter = new CsvLinearHistogramFormatStrategy(30);
+		return new SynchronizedStatsDecorator(
+        		new HdrHistogramStats(alwaysHistogramTimer, formatter));
     }
 
     private static int getNumberOfThreads(String[] args) {

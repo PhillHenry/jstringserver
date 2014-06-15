@@ -18,7 +18,7 @@ public class LinearHistogramFormatStrategy implements HistogramFormatStrategy {
     public LinearHistogramFormatStrategy(int maxReading, int numSteps) {
         super();
         this.maxReading = maxReading;
-        step = (maxReading) / numSteps;
+        this.step = numSteps;
     }
 
     @Override

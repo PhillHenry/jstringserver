@@ -15,7 +15,7 @@ public class HistogramFormatStrategyTest {
     
     @Before
     public void setUp() {
-        histogram = new Histogram(10000, 1);
+        histogram = new Histogram(max, 1);
     }
     
     @Test

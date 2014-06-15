@@ -69,7 +69,7 @@ public class ConstantClientsMain {
     }
 
     private Stats newStatsNanoSeconds() {
-        int maxReading = 30 * 1000 * 1000;
+        int maxReading = 20 * 1000 * 1000;
 		CsvLinearHistogramFormatStrategy formatter = new CsvLinearHistogramFormatStrategy(maxReading, 50);
         return new SynchronizedStatsDecorator(
         		new HdrHistogramStats(alwaysHistogramTimer, formatter, new Histogram(maxReading, 0)));
@@ -77,9 +77,9 @@ public class ConstantClientsMain {
 
     private Stats newStats() {
 //        return new ThreadLocalStats(sampleSizeHint);
-        CsvLinearHistogramFormatStrategy formatter = new CsvLinearHistogramFormatStrategy(30);
+        CsvLinearHistogramFormatStrategy formatter = new CsvLinearHistogramFormatStrategy(20);
 		return new SynchronizedStatsDecorator(
-        		new HdrHistogramStats(alwaysHistogramTimer, formatter));
+        		new HdrHistogramStats(alwaysHistogramTimer, formatter, new Histogram(20, 0)));
     }
 
     private static int getNumberOfThreads(String[] args) {

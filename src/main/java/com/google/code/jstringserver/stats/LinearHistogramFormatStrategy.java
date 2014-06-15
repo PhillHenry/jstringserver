@@ -11,7 +11,7 @@ public class LinearHistogramFormatStrategy implements HistogramFormatStrategy {
     private final int step;
 
     public LinearHistogramFormatStrategy(int maxReading) {
-        this(maxReading, (maxReading / 20));
+        this(maxReading, 20);
     }
 
     public LinearHistogramFormatStrategy(int maxReading, int numSteps) {

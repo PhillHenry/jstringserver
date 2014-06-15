@@ -12,6 +12,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.HdrHistogram.Histogram;
+
 import com.google.code.jstringserver.client.ConstantWritingConnector;
 import com.google.code.jstringserver.server.bytebuffers.factories.DirectByteBufferFactory;
 import com.google.code.jstringserver.server.bytebuffers.store.ThreadLocalByteBufferStore;
@@ -22,6 +24,7 @@ import com.google.code.jstringserver.stats.LinearHistogramFormatStrategy;
 import com.google.code.jstringserver.stats.Stats;
 import com.google.code.jstringserver.stats.Stopwatch;
 import com.google.code.jstringserver.stats.SynchronizedStatsDecorator;
+import com.google.code.jstringserver.stats.ThreadLocalNanoStopWatch;
 import com.google.code.jstringserver.stats.ThreadLocalStats;
 import com.google.code.jstringserver.stats.ThreadLocalStopWatch;
 
@@ -50,7 +53,7 @@ public class ConstantClientsMain {
         readStopWatch                               = new ThreadLocalStopWatch("read", newStats());
         writeStopWatch                              = new ThreadLocalStopWatch("write", newStats());
         connectStopWatch                            = new ThreadLocalStopWatch("connect", newStats());
-        totalStopWatch                            	= new ThreadLocalStopWatch("total", newStats());
+        totalStopWatch                              = new ThreadLocalNanoStopWatch("total", newStatsNanoSeconds());
         ConstantWritingConnector[] connectors       = createConnectors(
             address,
             numThreads,
@@ -63,6 +66,13 @@ public class ConstantClientsMain {
         run(numThreads,
             connectors);
         return connectors;
+    }
+
+    private Stats newStatsNanoSeconds() {
+        int maxReading = 30 * 1000 * 1000;
+		CsvLinearHistogramFormatStrategy formatter = new CsvLinearHistogramFormatStrategy(maxReading, 50);
+        return new SynchronizedStatsDecorator(
+        		new HdrHistogramStats(alwaysHistogramTimer, formatter, new Histogram(maxReading, 0)));
     }
 
     private Stats newStats() {

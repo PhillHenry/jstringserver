@@ -9,7 +9,7 @@ public class HdrHistogramStats implements Stats {
     
     public static final int MAX_READING = 60000;
     
-    private final Histogram histogram = new Histogram(MAX_READING, 0);
+    private final Histogram histogram;
     
     private final HistogramTimer histogramTimer;
     
@@ -20,8 +20,15 @@ public class HdrHistogramStats implements Stats {
     }
     
     public HdrHistogramStats(HistogramTimer histogramTimer, HistogramFormatStrategy histogramFormatStrategy) {
+        this(histogramTimer, histogramFormatStrategy, new Histogram(MAX_READING, 0));
+    }
+    
+    public HdrHistogramStats(HistogramTimer histogramTimer, 
+    		HistogramFormatStrategy histogramFormatStrategy, 
+    		Histogram histogram) {
         this.histogramTimer             = histogramTimer;
         this.histogramFormatStrategy    = histogramFormatStrategy;
+        this.histogram 					= histogram;
     }
 
     @Override
@@ -55,7 +62,7 @@ public class HdrHistogramStats implements Stats {
                 + ", Min = " + histogram.getMinValue()
                 + ", standard deviation " + histogram.getStdDeviation()
                 + (histogramTimer.isTimeForHistogram() ? 
-                		"\n" + histogramFormatStrategy.metadata() + ": " + 
+                		", " + histogramFormatStrategy.metadata() + ": " + 
                 		histogramFormatStrategy.format(histogram) : "");
     }
     

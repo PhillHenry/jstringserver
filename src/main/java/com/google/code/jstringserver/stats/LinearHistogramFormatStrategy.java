@@ -8,11 +8,14 @@ public class LinearHistogramFormatStrategy implements HistogramFormatStrategy {
     
     private final StringBuffer szb = new StringBuffer();
     
-    private final int numSteps = 20;
 
 	private final int step;
     
     public LinearHistogramFormatStrategy(int maxReading) {
+        this(maxReading, (maxReading / 20));
+    }
+    
+    public LinearHistogramFormatStrategy(int maxReading, int numSteps) {
         super();
         this.maxReading = maxReading;
         step = (maxReading) / numSteps;
